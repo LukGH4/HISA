@@ -1,0 +1,17 @@
+//
+//  StatsViewController.swift
+//  HISA
+//
+//  Created by Hoyeon Kang on 11/16/24.
+//
+
+import UIKit
+
+class StatsViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+
+        print("Stats Screen Loaded")
+    }
+}
