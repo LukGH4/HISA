@@ -17,6 +17,8 @@
 		5E6493552CE91ADD00E10A3A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E6493532CE91ADD00E10A3A /* Main.storyboard */; };
 		5E6493572CE91ADF00E10A3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E6493562CE91ADF00E10A3A /* Assets.xcassets */; };
 		5E64935A2CE91ADF00E10A3A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E6493582CE91ADF00E10A3A /* LaunchScreen.storyboard */; };
+		881317272D38E67B00A9E74C /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 881317262D38E67B00A9E74C /* FirebaseAnalytics */; };
+		8813172B2D38ED9300A9E74C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8813172A2D38ED9300A9E74C /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,7 @@
 		5E6493562CE91ADF00E10A3A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5E6493592CE91ADF00E10A3A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		5E64935B2CE91ADF00E10A3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8813172A2D38ED9300A9E74C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				881317272D38E67B00A9E74C /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +79,7 @@
 				5E6493562CE91ADF00E10A3A /* Assets.xcassets */,
 				5E6493582CE91ADF00E10A3A /* LaunchScreen.storyboard */,
 				5E64935B2CE91ADF00E10A3A /* Info.plist */,
+				8813172A2D38ED9300A9E74C /* GoogleService-Info.plist */,
 			);
 			path = HISA;
 			sourceTree = "<group>";
@@ -123,6 +128,9 @@
 				Base,
 			);
 			mainGroup = 5E6493412CE91ADD00E10A3A;
+			packageReferences = (
+				881317252D38E67B00A9E74C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 5E64934B2CE91ADD00E10A3A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -138,6 +146,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5E64935A2CE91ADF00E10A3A /* LaunchScreen.storyboard in Resources */,
+				8813172B2D38ED9300A9E74C /* GoogleService-Info.plist in Resources */,
 				5E6493572CE91ADF00E10A3A /* Assets.xcassets in Resources */,
 				5E6493552CE91ADD00E10A3A /* Main.storyboard in Resources */,
 			);
@@ -303,7 +312,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PNV8X3GWPF;
+				DEVELOPMENT_TEAM = 4V27VA4SQV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HISA/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app required camera usage to scan parts";
@@ -317,7 +326,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = lukehammond;
+				PRODUCT_BUNDLE_IDENTIFIER = barnabasli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -332,7 +341,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PNV8X3GWPF;
+				DEVELOPMENT_TEAM = 4V27VA4SQV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HISA/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app required camera usage to scan parts";
@@ -346,7 +355,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = lukehammond;
+				PRODUCT_BUNDLE_IDENTIFIER = barnabasli;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -376,6 +385,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		881317252D38E67B00A9E74C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		881317262D38E67B00A9E74C /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 881317252D38E67B00A9E74C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5E6493422CE91ADD00E10A3A /* Project object */;
 }
