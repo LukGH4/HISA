@@ -6,21 +6,45 @@
 //
 
 import UIKit
+import FirebaseDatabase
 
-class HomeViewController: UIViewController, UITextFieldDelegate {
-
-    @IBOutlet weak var textField: UITextField!
+class HomeViewController: UIViewController, UITextFieldDelegate{
+    @IBOutlet weak var uname: UITextField!
+    
+    var loggedInUsername: String?
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        textField.delegate = self
         print("Home Screen Loaded")
+        fetchUserName()
     }
+    
+    func fetchUserName() {
+            let ref = Database.database().reference()
+            ref.child("users/employees").queryOrdered(byChild: "username").queryEqual(toValue: loggedInUsername).observeSingleEvent(of: .value) { snapshot in
+                if let employee = snapshot.value as? [String: Any] {
+                    for (_, data) in employee {
+                        if let userData = data as? [String: Any],
+                           let name = userData["name"] as? String {
+                            self.uname.text = name
+                            return
+                        }
+                    }
+                }
 
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder() // keyboard goes away after pressing return
-        return true
-    }
+                ref.child("users/managers").queryOrdered(byChild: "username").queryEqual(toValue: self.loggedInUsername).observeSingleEvent(of: .value) { snapshot in
+                    if let manager = snapshot.value as? [String: Any] {
+                        for (_, data) in manager {
+                            if let userData = data as? [String: Any],
+                               let name = userData["name"] as? String {
+                                self.uname.text = name
+                                return
+                            }
+                        }
+                    }
+                    self.uname.text = "Employee Name"
+                }
+            }
+        }
 }
-
-
