@@ -50,7 +50,7 @@ Our goal for this demo was to establish the basic interaction pipeline and provi
   - `AVFoundation`: For camera access and handling
 - **Future Technology Plans**:
   - **Machine Learning**: CoreML and Vision Framework for part evaluation
-  - **Backend**: Flask server and MySQL database for storing user information and hosting the model
+  - **Backend**: Flask server and FireBase database for storing user information and hosting the model
 
 ---
 
