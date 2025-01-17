@@ -216,6 +216,9 @@
                                     <fontDescription key="titleFontDescription" type="boldSystem" pointSize="18"/>
                                     <color key="baseBackgroundColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </buttonConfiguration>
+                                <connections>
+                                    <action selector="loginButtonTapped:" destination="ynh-Qr-7Ad" eventType="touchUpInside" id="wC1-An-HQs"/>
+                                </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Don't have an account?" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5Zd-qy-PSU">
                                 <rect key="frame" x="60" y="656" width="179" height="21"/>
@@ -258,6 +261,11 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="KRu-3X-kyZ"/>
+                    <connections>
+                        <outlet property="loginButton" destination="v07-NO-j02" id="Zeq-tL-aiQ"/>
+                        <outlet property="passwordTextField" destination="4Af-ZI-Y1g" id="VeK-Bk-GBI"/>
+                        <outlet property="usernameTextField" destination="6DD-6u-Xd4" id="fKJ-0g-RDH"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NRv-of-uIR" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -288,7 +296,7 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="st0-l8-eet">
                                 <rect key="frame" x="51" y="201" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <accessibility key="accessibilityConfiguration" label="username_textfield"/>
+                                <accessibility key="accessibilityConfiguration" label="signup_name"/>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
                                 <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -304,7 +312,7 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="kdt-dG-Oc1">
                                 <rect key="frame" x="51" y="285" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <accessibility key="accessibilityConfiguration" label="username_textfield"/>
+                                <accessibility key="accessibilityConfiguration" label="signup_email"/>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
                                 <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -320,7 +328,7 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="YHf-jK-WmR">
                                 <rect key="frame" x="51" y="369" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <accessibility key="accessibilityConfiguration" label="username_textfield"/>
+                                <accessibility key="accessibilityConfiguration" label="signup_id"/>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
                                 <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -336,7 +344,7 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="XVm-jJ-f8m">
                                 <rect key="frame" x="51" y="497" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <accessibility key="accessibilityConfiguration" label="username_textfield"/>
+                                <accessibility key="accessibilityConfiguration" label="signup_username"/>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
                                 <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -359,7 +367,9 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="qjB-lK-Jxx">
                                 <rect key="frame" x="51" y="575" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <accessibility key="accessibilityConfiguration" label="username_textfield"/>
+                                <accessibility key="accessibilityConfiguration" label="signup_password">
+                                    <bool key="isElement" value="YES"/>
+                                </accessibility>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
                                 <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -383,12 +393,24 @@
                                 <buttonConfiguration key="configuration" style="gray" title="Create">
                                     <color key="baseForegroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </buttonConfiguration>
+                                <connections>
+                                    <action selector="createButtonTapped:" destination="D99-OU-E8z" eventType="touchUpInside" id="rZi-lK-wNF"/>
+                                </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="lsv-r1-JAj"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="OTX-3r-pM4"/>
+                    <connections>
+                        <outlet property="createButton" destination="Fup-vy-3ZN" id="OL6-wh-gPc"/>
+                        <outlet property="emailTextField" destination="kdt-dG-Oc1" id="Ly2-qy-UJ6"/>
+                        <outlet property="idTextField" destination="YHf-jK-WmR" id="anW-QH-BGh"/>
+                        <outlet property="managerSwitch" destination="MmA-54-aTc" id="aIC-R8-BKT"/>
+                        <outlet property="nameTextField" destination="st0-l8-eet" id="90d-6C-Im3"/>
+                        <outlet property="passwordTextField" destination="qjB-lK-Jxx" id="oCl-0H-aHe"/>
+                        <outlet property="usernameTextField" destination="XVm-jJ-f8m" id="Mug-yW-haF"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Apj-yh-5j9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -464,12 +486,21 @@
                                 <buttonConfiguration key="configuration" style="gray" title="Submit">
                                     <color key="baseForegroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </buttonConfiguration>
+                                <connections>
+                                    <action selector="submitButtonTapped:" destination="ctc-PT-beU" eventType="touchUpInside" id="bvL-2z-Xl2"/>
+                                </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="5Ue-5T-Lwa"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="Y13-MZ-oem"/>
+                    <connections>
+                        <outlet property="emailTextField" destination="uDY-wc-600" id="dMR-Bv-QYG"/>
+                        <outlet property="idTextField" destination="ehH-6P-584" id="Rjd-Wu-9cK"/>
+                        <outlet property="nameTextField" destination="IVc-Zl-rkh" id="HCF-ma-pdI"/>
+                        <outlet property="submitButton" destination="cS6-0H-YpV" id="LIG-Vm-1Wu"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ItS-eq-FKc" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
