@@ -22,5 +22,32 @@ class LoginViewController: UIViewController {
 
     @IBAction func loginButtonTapped(_ sender: Any) {
         // handle logic here
+        let alert = UIAlertController(title: "Login Failed", message: "Wrong Username or Password", preferredStyle: .alert)
+            
+        // Add an action (button) to the popup
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(okAction)
+            
+        // Present the popup
+        self.present(alert, animated: true, completion: nil)
+        
+        // Made for test to see if the button is clicked, it goes to the next screen.
+        if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
+            // Optionally set the selected tab (e.g., 1 for the second tab)
+            tabBarController.selectedIndex = 0
+                    
+            if let window = UIApplication.shared.windows.first {
+                 window.rootViewController = tabBarController
+                 window.makeKeyAndVisible()
+                 
+                 // Optionally, add a transition animation
+                 let transition = CATransition()
+                 transition.type = .fade
+                 transition.duration = 0.3
+                 window.layer.add(transition, forKey: kCATransition)
+             }
+        }
+        
+        
     }
 }
