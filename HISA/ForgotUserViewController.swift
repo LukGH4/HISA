@@ -21,6 +21,14 @@ class ForgotUserViewController: UIViewController {
 
     @IBAction func submitButtonTapped(_ sender: Any) {
         // handle logic here
+        let alert = UIAlertController(title: "Email Sent", message: "Please check your Honeywell email", preferredStyle: .alert)
+            
+        // Add an action (button) to the popup
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(okAction)
+            
+        // Present the popup
+        self.present(alert, animated: true, completion: nil)
     }
     
 }
