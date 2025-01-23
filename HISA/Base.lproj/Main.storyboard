@@ -52,6 +52,7 @@
                             <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Welcome" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="wJ7-Eb-GVv">
                                 <rect key="frame" x="76" y="412" width="240" height="57"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="40"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
@@ -101,7 +102,7 @@
                             <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EMU-Tq-gyt">
                                 <rect key="frame" x="0.0" y="59" width="393" height="596"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Ih-OU-dAa">
                                 <rect key="frame" x="216" y="672" width="78" height="35"/>
@@ -114,17 +115,26 @@
                                     <action selector="submitPhoto:" destination="pkp-5r-bcn" eventType="touchUpInside" id="dWq-FZ-CFo"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" adjustsImageWhenDisabled="NO" lineBreakMode="middleTruncation" id="1r0-lX-Qoo">
+                                <rect key="frame" x="300" y="80" width="59" height="49"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <rect key="contentStretch" x="1" y="1" width="1" height="1"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain">
+                                    <imageReference key="image" image="grid.circle" catalog="system" symbolScale="large" variableValue="1"/>
+                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="25" scale="large" weight="regular"/>
+                                </buttonConfiguration>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Bxj-e5-DLv">
                                 <rect key="frame" x="158" y="656" width="76" height="67"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <accessibility key="accessibilityConfiguration" label="Scan">
                                     <accessibilityTraits key="traits" button="YES"/>
                                 </accessibility>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain">
-                                    <imageReference key="image" image="camera" catalog="system" symbolScale="large"/>
-                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="29" scale="large"/>
-                                    <color key="baseForegroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <buttonConfiguration key="configuration" style="plain" image="camera" catalog="system">
+                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="27"/>
                                 </buttonConfiguration>
                                 <connections>
                                     <action selector="capturePhoto:" destination="pkp-5r-bcn" eventType="touchUpInside" id="ACT-Kl-18f"/>
@@ -140,6 +150,7 @@
                         <outlet property="captureButton" destination="Bxj-e5-DLv" id="eoe-DP-Phn"/>
                         <outlet property="capturedImageView" destination="4CS-oN-AZb" id="PVO-9w-Gxe"/>
                         <outlet property="discardButton" destination="bjp-8c-lkN" id="vqT-rG-0cM"/>
+                        <outlet property="gridToggleButton" destination="1r0-lX-Qoo" id="q18-FY-00Q"/>
                         <outlet property="submitButton" destination="0Ih-OU-dAa" id="aIm-tg-qqa"/>
                     </connections>
                 </viewController>
@@ -219,7 +230,7 @@
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" textContentType="password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v07-NO-j02">
                                 <rect key="frame" x="146" y="535" width="101" height="57"/>
@@ -262,10 +273,10 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3hC-98-X3k">
-                                <rect key="frame" x="76" y="685" width="241" height="35"/>
+                                <rect key="frame" x="117" y="685" width="160" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Forgot username/password?"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Forgot password?"/>
                                 <connections>
                                     <segue destination="ctc-PT-beU" kind="show" id="aSP-VI-mWR"/>
                                 </connections>
@@ -283,9 +294,9 @@
                     </view>
                     <navigationItem key="navigationItem" id="KRu-3X-kyZ"/>
                     <connections>
+                        <outlet property="emailTextField" destination="6DD-6u-Xd4" id="8Zp-JM-tY1"/>
                         <outlet property="loginButton" destination="v07-NO-j02" id="Zeq-tL-aiQ"/>
                         <outlet property="passwordTextField" destination="4Af-ZI-Y1g" id="VeK-Bk-GBI"/>
-                        <outlet property="usernameTextField" destination="6DD-6u-Xd4" id="fKJ-0g-RDH"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NRv-of-uIR" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -317,11 +328,12 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="st0-l8-eet">
                                 <rect key="frame" x="46" y="200" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="0.51812287410000002" colorSpace="custom" customColorSpace="sRGB"/>
                                 <accessibility key="accessibilityConfiguration" label="signup_name"/>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
-                                <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" textContentType="name"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Employee ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kqm-tQ-d01">
                                 <rect key="frame" x="46" y="255" width="95" height="21"/>
@@ -333,9 +345,10 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="YHf-jK-WmR">
                                 <rect key="frame" x="46" y="285" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="0.51812287410000002" colorSpace="custom" customColorSpace="sRGB"/>
                                 <accessibility key="accessibilityConfiguration" label="signup_id"/>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
-                                <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
@@ -349,11 +362,12 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="XVm-jJ-f8m">
                                 <rect key="frame" x="37" y="423" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="0.51812287410000002" colorSpace="custom" customColorSpace="sRGB"/>
                                 <accessibility key="accessibilityConfiguration" label="signup_username"/>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
-                                <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" textContentType="email"/>
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="x8K-g6-aQH">
                                 <rect key="frame" x="42" y="473" width="74" height="21"/>
@@ -365,13 +379,26 @@
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="qjB-lK-Jxx">
                                 <rect key="frame" x="37" y="502" width="300" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="0.51812287410000002" colorSpace="custom" customColorSpace="sRGB"/>
                                 <accessibility key="accessibilityConfiguration" label="signup_password">
                                     <bool key="isElement" value="YES"/>
                                 </accessibility>
                                 <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
-                                <color key="textColor" white="0.41999999999999998" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" textContentType="new-password"/>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="MyV-FA-cBl">
+                                <rect key="frame" x="37" y="588" width="300" height="34"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="0.51812287410000002" colorSpace="custom" customColorSpace="sRGB"/>
+                                <accessibility key="accessibilityConfiguration" label="signup_password">
+                                    <bool key="isElement" value="YES"/>
+                                </accessibility>
+                                <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
+                                <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" textContentType="new-password"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Creating an account" textAlignment="center" minimumFontSize="19" translatesAutoresizingMaskIntoConstraints="NO" id="AkE-T1-FOz">
                                 <rect key="frame" x="37" y="327" width="201" height="70"/>
@@ -381,7 +408,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fup-vy-3ZN">
-                                <rect key="frame" x="142" y="570" width="109" height="51"/>
+                                <rect key="frame" x="142" y="646" width="109" height="51"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="gray" title="Create">
@@ -391,17 +418,25 @@
                                     <action selector="createButtonTapped:" destination="D99-OU-E8z" eventType="touchUpInside" id="rZi-lK-wNF"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Confirm Password" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ytR-HS-Z72">
+                                <rect key="frame" x="37" y="559" width="139" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="lsv-r1-JAj"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <navigationItem key="navigationItem" id="OTX-3r-pM4"/>
                     <connections>
+                        <outlet property="confirmPasswordTextField" destination="MyV-FA-cBl" id="JlY-lC-4Ul"/>
                         <outlet property="createButton" destination="Fup-vy-3ZN" id="OL6-wh-gPc"/>
+                        <outlet property="emailTextField" destination="XVm-jJ-f8m" id="egb-b6-Xr3"/>
                         <outlet property="idTextField" destination="YHf-jK-WmR" id="anW-QH-BGh"/>
                         <outlet property="nameTextField" destination="st0-l8-eet" id="90d-6C-Im3"/>
                         <outlet property="passwordTextField" destination="qjB-lK-Jxx" id="oCl-0H-aHe"/>
-                        <outlet property="usernameTextField" destination="XVm-jJ-f8m" id="Mug-yW-haF"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Apj-yh-5j9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -448,7 +483,7 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Forgot username/password?" textAlignment="center" minimumFontSize="19" translatesAutoresizingMaskIntoConstraints="NO" id="fkV-Kw-oSl">
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" enabled="NO" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Forgot password?" textAlignment="center" minimumFontSize="19" translatesAutoresizingMaskIntoConstraints="NO" id="fkV-Kw-oSl">
                                 <rect key="frame" x="27" y="150" width="338" height="91"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -707,6 +742,7 @@
         <image name="doc" catalog="system" width="115" height="128"/>
         <image name="doc.viewfinder" catalog="system" width="128" height="115"/>
         <image name="gearshape" catalog="system" width="128" height="123"/>
+        <image name="grid.circle" catalog="system" width="128" height="123"/>
         <image name="house" catalog="system" width="32" height="32"/>
         <image name="person.2" catalog="system" width="128" height="87"/>
         <systemColor name="systemBackgroundColor">
