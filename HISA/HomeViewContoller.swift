@@ -20,6 +20,8 @@ class HomeViewController: UIViewController, UITextFieldDelegate{
         fetchUserName()
     }
     
+    
+    // this doesn't work at the moment since the backend isn't finished, but it displays the name of the employee on the welcome screen. will likely need to modify
     func fetchUserName() {
             let ref = Database.database().reference()
             ref.child("users/employees").queryOrdered(byChild: "username").queryEqual(toValue: loggedInUsername).observeSingleEvent(of: .value) { snapshot in
