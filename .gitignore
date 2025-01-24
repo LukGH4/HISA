@@ -4,3 +4,7 @@
 # Xcode user-specific files
 *.xcuserstate
 *.xcuserdata/
+
+*./HISA/GoogleService-Info.plist
+
+HISA.xcodeproj/project.pbxproj

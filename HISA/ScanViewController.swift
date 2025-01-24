@@ -17,21 +17,32 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var capturedImageView: UIImageView!
     @IBOutlet weak var scanListButton: UIButton!
+    @IBOutlet weak var gridToggleButton: UIButton!
     
     // Popup components
     var popupView: UIView!
     var activityIndicator: UIActivityIndicatorView!
     var popupLabel: UILabel!
     
+    var gridLines: [UIView] = []
+    var toggleGridState: Bool = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCamera()
+        
+        setupGridOverlay()
+        setupGridToggleButton()
+        
         setupPopupView()
         discardButton.isHidden = true
         captureButton.isEnabled = true
         captureButton.isHidden = false
         submitButton.isHidden = true
     
+        
+        // Ensure grid toggle is hidden initially and grid is off
+        gridToggleButton.isHidden = false
     }
     
     func setupCamera() {
@@ -107,6 +118,11 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     
     
     @IBAction func capturePhoto(_ sender: UIButton) {
+        
+        // Hide and remove grid before capturing photo
+        gridLines.forEach { x in x.isHidden = true }
+        gridToggleButton.isHidden = true
+        
         let settings = AVCapturePhotoSettings()
         capturePhotoOutput.capturePhoto(with: settings, delegate: self)
         captureButton.isEnabled = false
@@ -126,8 +142,6 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         submitButton.isHidden = false
         scanListButton.isHidden = false
         
-        // Show the popup
-        showValidationPopup()
     }
     
     @IBAction func discardPhoto(_ sender: UIButton) {
@@ -141,6 +155,10 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         discardButton.isHidden = true
         submitButton.isHidden = true
         popupView.isHidden = true
+
+        // Reset grid toggle and hide grid
+        gridToggleButton.isHidden = false
+        gridLines.forEach { x in x.isHidden = !toggleGridState }
     }
     
     func showValidationPopup() {
@@ -167,6 +185,8 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             print("No image to submit")
             return
         }
+        // Show the popup
+        showValidationPopup()
         
         guard let imageData = capturedImage.jpegData(compressionQuality: 0.8) else {
             print("Failed to convert image to data")
@@ -237,6 +257,66 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         self.present(alert, animated: true, completion: nil)
         
     }
+    
+    func setupGridToggleButton() {
+        gridToggleButton.addTarget(self, action: #selector(toggleGrid), for: .touchUpInside)
+        gridToggleButton.isEnabled = true
+    }
+    
+    func setupGridOverlay() {
+        // Clear any existing grid lines
+        gridLines.forEach { $0.removeFromSuperview() }
+        gridLines.removeAll()
+
+        let previewHeight = cameraPreviewView.bounds.height*1.2
+        let previewWidth = cameraPreviewView.bounds.width
+        let numLines = 3 // Number of grid divisions (e.g., 3x3 grid)
+
+        // Horizontal lines
+        for i in 1..<numLines {
+            let yPosition = CGFloat(i) * (previewHeight / CGFloat(numLines))
+            let line = UIView(frame: CGRect(x: 0, y: yPosition, width: previewWidth, height: 1))
+            line.backgroundColor = UIColor.white.withAlphaComponent(0.7)
+            gridLines.append(line)
+            self.view.addSubview(line)
+        }
+
+        // Vertical lines
+        for i in 1..<numLines {
+            let xPosition = CGFloat(i) * (previewWidth / CGFloat(numLines))
+            let line = UIView(frame: CGRect(x: xPosition, y: 0, width: 1, height: previewHeight))
+            line.backgroundColor = UIColor.white.withAlphaComponent(0.7)
+            gridLines.append(line)
+            self.view.addSubview(line)
+        }
+
+        // Ensure grid lines are above the camera preview
+        gridLines.forEach { x in
+            self.view.bringSubviewToFront(x)
+            x.isHidden = true
+        }
+    }
+    
+    @IBAction func toggleGrid(_ sender: UIButton) {
+        if (toggleGridState) {
+            toggleGridState = false
+        } else {
+            toggleGridState = true
+        }
+
+        // Update visibility
+        gridLines.forEach { x in x.isHidden = !toggleGridState }
+        
+        let newImage: UIImage? = !toggleGridState ? UIImage(systemName: "grid.circle") : UIImage(systemName: "grid.circle.fill")
+        sender.setImage(newImage, for: .normal)
+
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        setupGridOverlay()
+    }
+
     
     
     
