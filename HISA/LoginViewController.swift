@@ -65,7 +65,5 @@ class LoginViewController: UIViewController {
                  window.layer.add(transition, forKey: kCATransition)
              }
         }
-        
-        
     }
 }

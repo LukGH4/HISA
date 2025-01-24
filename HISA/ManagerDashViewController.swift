@@ -52,6 +52,5 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
             destinationVC.employee = selectedEmployee
         }
     }
-
 }
 
