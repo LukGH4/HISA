@@ -21,7 +21,34 @@ class LoginViewController: UIViewController {
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {
+
+        let username = usernameTextField.text ?? ""
+        let password = passwordTextField.text ?? ""
         
+        
+        // replace this when backend is done, makes it so if you type m and m you get manager login
+        if username == "m" && password == "m" {
+            if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "ManagerTabBarController") as? UITabBarController {
+                tabBarController.selectedIndex = 0
+                        
+                if let window = UIApplication.shared.windows.first {
+                    window.rootViewController = tabBarController
+                    window.makeKeyAndVisible()
+                        
+                    let transition = CATransition()
+                    transition.type = .fade
+                    transition.duration = 0.3
+                    window.layer.add(transition, forKey: kCATransition)
+                    
+                    return
+                }
+            }
+        }
+        // end replace
+        
+        
+        
+
         // Made for test to see if the button is clicked, it goes to the next screen.
         if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
             // Optionally set the selected tab (e.g., 1 for the second tab)
