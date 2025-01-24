@@ -18,6 +18,11 @@
 		5E64935A2CE91ADF00E10A3A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E6493582CE91ADF00E10A3A /* LaunchScreen.storyboard */; };
 		5E8A3E5A2D3B1701001D3C03 /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8A3E592D3B1701001D3C03 /* SignUpViewController.swift */; };
 		5E8A3E5C2D3B171D001D3C03 /* ForgotUserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8A3E5B2D3B171D001D3C03 /* ForgotUserViewController.swift */; };
+		5E9FB6112D41981200168ABB /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 5E9FB6102D41981200168ABB /* FirebaseAuth */; };
+		5E9FB6132D41981200168ABB /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5E9FB6122D41981200168ABB /* FirebaseStorage */; };
+		5E9FB6152D4198EE00168ABB /* GoogleService-Info 2.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5E9FB6142D4198EE00168ABB /* GoogleService-Info 2.plist */; };
+		5E9FB6172D41A6AA00168ABB /* ScanListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E9FB6162D41A6AA00168ABB /* ScanListViewController.swift */; };
+		5E9FB6192D41AC7000168ABB /* ScanListImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E9FB6182D41AC7000168ABB /* ScanListImageViewController.swift */; };
 		881317272D38E67B00A9E74C /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 881317262D38E67B00A9E74C /* FirebaseAnalytics */; };
 		8813172B2D38ED9300A9E74C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8813172A2D38ED9300A9E74C /* GoogleService-Info.plist */; };
 		8813172D2D38FE2E00A9E74C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8813172C2D38FE2E00A9E74C /* FirebaseDatabase */; };
@@ -39,6 +44,9 @@
 		5E64935B2CE91ADF00E10A3A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5E8A3E592D3B1701001D3C03 /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		5E8A3E5B2D3B171D001D3C03 /* ForgotUserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotUserViewController.swift; sourceTree = "<group>"; };
+		5E9FB6142D4198EE00168ABB /* GoogleService-Info 2.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info 2.plist"; sourceTree = "<group>"; };
+		5E9FB6162D41A6AA00168ABB /* ScanListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanListViewController.swift; sourceTree = "<group>"; };
+		5E9FB6182D41AC7000168ABB /* ScanListImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanListImageViewController.swift; sourceTree = "<group>"; };
 		8813172A2D38ED9300A9E74C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8813172E2D39051900A9E74C /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		883F9F912D390D9A0016650A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -50,6 +58,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				8813172D2D38FE2E00A9E74C /* FirebaseDatabase in Frameworks */,
+				5E9FB6132D41981200168ABB /* FirebaseStorage in Frameworks */,
+				5E9FB6112D41981200168ABB /* FirebaseAuth in Frameworks */,
 				881317272D38E67B00A9E74C /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -91,6 +101,9 @@
 				8813172A2D38ED9300A9E74C /* GoogleService-Info.plist */,
 				5E8A3E592D3B1701001D3C03 /* SignUpViewController.swift */,
 				5E8A3E5B2D3B171D001D3C03 /* ForgotUserViewController.swift */,
+				5E9FB6142D4198EE00168ABB /* GoogleService-Info 2.plist */,
+				5E9FB6162D41A6AA00168ABB /* ScanListViewController.swift */,
+				5E9FB6182D41AC7000168ABB /* ScanListImageViewController.swift */,
 			);
 			path = HISA;
 			sourceTree = "<group>";
@@ -157,6 +170,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5E64935A2CE91ADF00E10A3A /* LaunchScreen.storyboard in Resources */,
+				5E9FB6152D4198EE00168ABB /* GoogleService-Info 2.plist in Resources */,
 				8813172B2D38ED9300A9E74C /* GoogleService-Info.plist in Resources */,
 				5E6493572CE91ADF00E10A3A /* Assets.xcassets in Resources */,
 				5E6493552CE91ADD00E10A3A /* Main.storyboard in Resources */,
@@ -179,7 +193,9 @@
 				5E6493502CE91ADD00E10A3A /* SceneDelegate.swift in Sources */,
 				5E8A3E5A2D3B1701001D3C03 /* SignUpViewController.swift in Sources */,
 				883F9F922D390D9A0016650A /* ViewController.swift in Sources */,
+				5E9FB6192D41AC7000168ABB /* ScanListImageViewController.swift in Sources */,
 				1336526A2CE9413A0061D5B3 /* ScanViewController.swift in Sources */,
+				5E9FB6172D41A6AA00168ABB /* ScanListViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,6 +428,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5E9FB6102D41981200168ABB /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 881317252D38E67B00A9E74C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		5E9FB6122D41981200168ABB /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 881317252D38E67B00A9E74C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
 		881317262D38E67B00A9E74C /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 881317252D38E67B00A9E74C /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
