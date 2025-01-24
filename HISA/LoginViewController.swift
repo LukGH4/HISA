@@ -21,6 +21,7 @@ class LoginViewController: UIViewController {
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {
+
         let username = usernameTextField.text ?? ""
         let password = passwordTextField.text ?? ""
         
@@ -46,15 +47,6 @@ class LoginViewController: UIViewController {
         // end replace
         
         
-        // handle logic here
-        let alert = UIAlertController(title: "Login Failed", message: "Wrong Username or Password", preferredStyle: .alert)
-            
-        // Add an action (button) to the popup
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alert.addAction(okAction)
-            
-        // Present the popup
-        self.present(alert, animated: true, completion: nil)
         
 
         // Made for test to see if the button is clicked, it goes to the next screen.
@@ -73,7 +65,5 @@ class LoginViewController: UIViewController {
                  window.layer.add(transition, forKey: kCATransition)
              }
         }
-        
-        
     }
 }
