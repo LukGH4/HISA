@@ -88,7 +88,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bjp-8c-lkN">
-                                <rect key="frame" x="158" y="671" width="77" height="35"/>
+                                <rect key="frame" x="99" y="672" width="77" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Retake" titleAlignment="center">
@@ -104,7 +104,7 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Ih-OU-dAa">
-                                <rect key="frame" x="243" y="672" width="78" height="35"/>
+                                <rect key="frame" x="216" y="672" width="78" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" title="Submit">
@@ -130,16 +130,6 @@
                                     <action selector="capturePhoto:" destination="pkp-5r-bcn" eventType="touchUpInside" id="ACT-Kl-18f"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hOf-U3-SyF">
-                                <rect key="frame" x="56" y="672" width="94" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Scan List"/>
-                                <connections>
-                                    <segue destination="jdu-il-Y1q" kind="show" identifier="goToScanList" id="Fgd-SF-5yt"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Gg4-9a-nya"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -150,97 +140,12 @@
                         <outlet property="captureButton" destination="Bxj-e5-DLv" id="eoe-DP-Phn"/>
                         <outlet property="capturedImageView" destination="4CS-oN-AZb" id="PVO-9w-Gxe"/>
                         <outlet property="discardButton" destination="bjp-8c-lkN" id="vqT-rG-0cM"/>
-                        <outlet property="scanListButton" destination="hOf-U3-SyF" id="77H-Qb-1Br"/>
                         <outlet property="submitButton" destination="0Ih-OU-dAa" id="aIm-tg-qqa"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="TnB-Wk-I0o" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-192" y="250"/>
-        </scene>
-        <!--Scan List View Controller-->
-        <scene sceneID="2Jc-r3-8d9">
-            <objects>
-                <viewController storyboardIdentifier="ScanListViewController" id="jdu-il-Y1q" customClass="ScanListViewController" customModule="HISA" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="FtA-Pr-33r">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="tdG-KE-rYS">
-                                <rect key="frame" x="0.0" y="20" width="393" height="822"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                            </tableView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="EbV-5D-MMq"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="EbV-5D-MMq" firstAttribute="trailing" secondItem="tdG-KE-rYS" secondAttribute="trailing" id="KiS-G7-kbV"/>
-                            <constraint firstItem="EbV-5D-MMq" firstAttribute="bottom" secondItem="tdG-KE-rYS" secondAttribute="bottom" id="KkK-3A-qeh"/>
-                            <constraint firstItem="tdG-KE-rYS" firstAttribute="top" secondItem="EbV-5D-MMq" secondAttribute="top" constant="20" id="W67-Xq-9I9"/>
-                            <constraint firstItem="tdG-KE-rYS" firstAttribute="leading" secondItem="EbV-5D-MMq" secondAttribute="leading" id="t9i-KY-EtN"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" id="AyN-dn-I1I"/>
-                    <connections>
-                        <outlet property="tableView" destination="tdG-KE-rYS" id="S8r-J7-riK"/>
-                        <segue destination="TCJ-4f-SFT" kind="show" identifier="ScanListImageViewController" id="sUP-yn-sbf"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="V0J-HQ-GYe" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1066" y="227"/>
-        </scene>
-        <!--Scan List Image-->
-        <scene sceneID="bC9-Il-Yrl">
-            <objects>
-                <viewController storyboardIdentifier="ScanListImageViewController" title="Scan List Image" id="TCJ-4f-SFT" customClass="ScanListImageViewController" customModule="HISA" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="46h-yJ-EGi">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nR7-jI-jkJ">
-                                <rect key="frame" x="0.0" y="37" width="393" height="596"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="scanned by username" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pO4-ra-lut">
-                                <rect key="frame" x="16" y="649" width="361" height="27"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Date" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3PP-kv-ExK">
-                                <rect key="frame" x="16" y="684" width="361" height="27"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="74F-5z-Tqd">
-                                <rect key="frame" x="159" y="732" width="74" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="Delete"/>
-                                <connections>
-                                    <action selector="deletePhoto:" destination="TCJ-4f-SFT" eventType="touchUpInside" id="cMx-Ry-TlI"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="2Rt-gc-F0g"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="vv0-Ap-dsi"/>
-                    <connections>
-                        <outlet property="dateLabel" destination="3PP-kv-ExK" id="P3Q-K5-HBW"/>
-                        <outlet property="deleteButton" destination="74F-5z-Tqd" id="cS1-jC-DpT"/>
-                        <outlet property="imageView" destination="nR7-jI-jkJ" id="NmM-Bt-yOK"/>
-                        <outlet property="usernameLabel" destination="pO4-ra-lut" id="4RU-SC-3JD"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="N3O-Vh-kB4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2049.6183206106871" y="255.63380281690141"/>
+            <point key="canvasLocation" x="-194.6564885496183" y="240.84507042253523"/>
         </scene>
         <!--Stats-->
         <scene sceneID="Yop-Nw-F4X">
@@ -852,13 +757,13 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemYellowColor">
             <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tintColor">
-            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

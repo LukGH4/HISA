@@ -1,7 +1,5 @@
 import UIKit
 import AVFoundation
-import Firebase
-import FirebaseStorage
 
 class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     
@@ -16,7 +14,6 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     @IBOutlet weak var discardButton: UIButton!
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var capturedImageView: UIImageView!
-    @IBOutlet weak var scanListButton: UIButton!
     
     // Popup components
     var popupView: UIView!
@@ -31,7 +28,6 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         captureButton.isEnabled = true
         captureButton.isHidden = false
         submitButton.isHidden = true
-    
     }
     
     func setupCamera() {
@@ -124,7 +120,6 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         capturedImageView.isHidden = false
         discardButton.isHidden = false
         submitButton.isHidden = false
-        scanListButton.isHidden = false
         
         // Show the popup
         showValidationPopup()
@@ -163,81 +158,9 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     
     @IBAction func submitPhoto(_ sender: Any) {
         // codes for submitting a photo to ML and database
-        guard let capturedImage = capturedImageView.image else {
-            print("No image to submit")
-            return
-        }
         
-        guard let imageData = capturedImage.jpegData(compressionQuality: 0.8) else {
-            print("Failed to convert image to data")
-            return
-        }
-        
-        // Firebase Storage reference
-        let uniqueFileName = "image-\(UUID().uuidString).jpg"
-        let storageRef = Storage.storage().reference().child("images/\(uniqueFileName)")
-        
-        // Upload image data to Firebase Storage
-        let uploadTask = storageRef.putData(imageData, metadata: nil) { metadata, error in
-            if let error = error {
-                print("Error uploading image: \(error.localizedDescription)")
-                return
-            }
-            
-            // Get the download URL for the uploaded image
-            storageRef.downloadURL { url, error in
-                if let error = error {
-                    print("Error retrieving download URL: \(error.localizedDescription)")
-                    return
-                }
-                
-                guard let downloadURL = url else {
-                    print("No download URL found")
-                    return
-                }
-                
-                // Format the current date and time
-                let currentDate = Date()
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss" // Customize as needed
-                let formattedDate = dateFormatter.string(from: currentDate)
-                
-                // Save username and image URL to Firebase Realtime Database
-                let databaseRef = Database.database().reference()
-                let newDirectory = databaseRef.child("users/employees/employee1/images").childByAutoId() // Generate a unique ID for each user
-                
-                let newData: [String: Any] = [
-                    "url": downloadURL.absoluteString,
-                    "fileName": uniqueFileName,
-                    "date": formattedDate
-                ]
-                
-                newDirectory.setValue(newData) { error, _ in
-                    if let error = error {
-                        print("Error writing data to Firebase: \(error.localizedDescription)")
-                    } else {
-                        print("Username and image URL successfully saved to Firebase.")
-                    }
-                }
-            }
-        }
-        
-        // Monitor upload progress (optional)
-        uploadTask.observe(.progress) { snapshot in
-            let progress = Double(snapshot.progress?.completedUnitCount ?? 0) /
-                           Double(snapshot.progress?.totalUnitCount ?? 1)
-            print("Upload progress: \(progress * 100)%")
-        }
-        
-        let alert = UIAlertController(title: "", message: "The photo has been successfully submitted", preferredStyle: .alert)
-        
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alert.addAction(okAction)
-        
-        self.present(alert, animated: true, completion: nil)
         
     }
-    
     
     
 }
