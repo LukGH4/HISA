@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>936151374587-3k8rl71djhjg1hg02u2mdu38qoboch0q.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.936151374587-3k8rl71djhjg1hg02u2mdu38qoboch0q</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDKDr8y02MWE4FHK_dXZN2vlYE5PodwffY</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>barnabasli</string>
+	<string>honeywell.lhammond</string>
 	<key>PROJECT_ID</key>
 	<string>jib-4338-hisa</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +25,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:936151374587:ios:62e4d84ffc972a59e2ae5e</string>
+	<string>1:936151374587:ios:b857edafc2a674bae2ae5e</string>
 	<key>DATABASE_URL</key>
 	<string>https://jib-4338-hisa-default-rtdb.firebaseio.com</string>
 </dict>

@@ -1,69 +1,98 @@
-//
-//  LoginViewController.swift
-//  HISA
-//
-//  Created by Barnabas Li on 1/16/25.
-//
-
-
+// LoginViewController.swift
 import UIKit
-import FirebaseDatabase
+import FirebaseAuth
+import FirebaseDatabase // or FirebaseFirestore, depending on your setup
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, UITextFieldDelegate {
 
-    @IBOutlet weak var usernameTextField: UITextField!
+    @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
     @IBOutlet weak var loginButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        // Set the view controller as the delegate of the text fields
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTextField {
+            passwordTextField.becomeFirstResponder()
+        } else if textField == passwordTextField {
+            loginButtonTapped(self)
+        }
+        return true
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        view.endEditing(true)
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {
+        guard let email = emailTextField.text, !email.isEmpty else {
+            showAlert(title: "Error", message: "Please enter your email.")
+            return
+        }
 
-        let username = usernameTextField.text ?? ""
-        let password = passwordTextField.text ?? ""
-        
-        
-        // replace this when backend is done, makes it so if you type m and m you get manager login
-        if username == "m" && password == "m" {
-            if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "ManagerTabBarController") as? UITabBarController {
-                tabBarController.selectedIndex = 0
-                        
-                if let window = UIApplication.shared.windows.first {
-                    window.rootViewController = tabBarController
-                    window.makeKeyAndVisible()
-                        
-                    let transition = CATransition()
-                    transition.type = .fade
-                    transition.duration = 0.3
-                    window.layer.add(transition, forKey: kCATransition)
-                    
-                    return
+        guard let password = passwordTextField.text, !password.isEmpty else {
+            showAlert(title: "Error", message: "Please enter your password.")
+            return
+        }
+
+        // Firebase Authentication for email and password
+        Auth.auth().signIn(withEmail: email, password: password) { (authResult, error) in
+            if let error = error {
+                self.showAlert(title: "Login Failed", message: error.localizedDescription)
+            } else {
+                // Successful login, now check user role
+                if let user = authResult?.user {
+                    let ref = Database.database().reference() // or Firestore
+                    let userRef = ref.child("users").child(user.uid)
+
+                    userRef.observeSingleEvent(of: .value, with: { snapshot in
+                        if let role = snapshot.value as? [String: Any], let userRole = role["role"] as? String {
+                            if userRole == "manager" {
+                                // Navigate to the manager tab controller
+                                if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "ManagerTabBarController") as? UITabBarController {
+                                    tabBarController.selectedIndex = 0
+                                    
+                                    if let window = UIApplication.shared.windows.first {
+                                        window.rootViewController = tabBarController
+                                        window.makeKeyAndVisible()
+                                        let transition = CATransition()
+                                        transition.type = .fade
+                                        transition.duration = 0.3
+                                        window.layer.add(transition, forKey: kCATransition)
+                                    }
+                                }
+                            } else {
+                                // Navigate to regular user tab controller
+                                if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
+                                    tabBarController.selectedIndex = 0
+                                    
+                                    if let window = UIApplication.shared.windows.first {
+                                        window.rootViewController = tabBarController
+                                        window.makeKeyAndVisible()
+                                        let transition = CATransition()
+                                        transition.type = .fade
+                                        transition.duration = 0.3
+                                        window.layer.add(transition, forKey: kCATransition)
+                                    }
+                                }
+                            }
+                        }
+                    })
                 }
             }
         }
-        // end replace
-        
-        
-        
+    }
 
-        // Made for test to see if the button is clicked, it goes to the next screen.
-        if let tabBarController = storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
-            // Optionally set the selected tab (e.g., 1 for the second tab)
-            tabBarController.selectedIndex = 0
-                    
-            if let window = UIApplication.shared.windows.first {
-                 window.rootViewController = tabBarController
-                 window.makeKeyAndVisible()
-                 
-                 // Optionally, add a transition animation
-                 let transition = CATransition()
-                 transition.type = .fade
-                 transition.duration = 0.3
-                 window.layer.add(transition, forKey: kCATransition)
-             }
-        }
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(okAction)
+        self.present(alert, animated: true, completion: nil)
     }
 }
