@@ -7,15 +7,22 @@
 
 import UIKit
 import FirebaseCore
+import FirebaseAuth
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
         // Override point for customization after application launch.
+        if let currentUser = Auth.auth().currentUser {
+                    navigateToMainScreen(userId: currentUser.uid)
+                } else {
+                    navigateToLoginScreen()
+                }
+        
         return true
     }
 
@@ -32,6 +39,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
+    
+    func navigateToMainScreen(userId: String) {
+            if let tabBarController = UIStoryboard(name: "Main", bundle: nil)
+                .instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
+                tabBarController.selectedIndex = 0
+
+                if let window = self.window {
+                    window.rootViewController = tabBarController
+                    window.makeKeyAndVisible()
+                }
+            }
+        }
+
+        func navigateToLoginScreen() {
+            if let loginVC = UIStoryboard(name: "Main", bundle: nil)
+                .instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
+                if let window = self.window {
+                    window.rootViewController = loginVC
+                    window.makeKeyAndVisible()
+                }
+            }
+        }
     
     
 

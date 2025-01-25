@@ -12,5 +12,7 @@ class SettingsViewController: UIViewController {
         super.viewDidLoad()
 
         print("Settings Screen Loaded")
+        let currentUser = CurrentUser.shared
+        print("" + (currentUser.getName() ?? ""))
     }
 }

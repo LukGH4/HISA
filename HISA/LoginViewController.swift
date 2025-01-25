@@ -50,6 +50,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 if let user = authResult?.user {
                     let ref = Database.database().reference() // or Firestore
                     let userRef = ref.child("users").child(user.uid)
+                    UserService.shared.fetchUserInfoAndPersist(userId: user.uid)
 
                     userRef.observeSingleEvent(of: .value, with: { snapshot in
                         if let role = snapshot.value as? [String: Any], let userRole = role["role"] as? String {

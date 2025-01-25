@@ -109,6 +109,10 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                         self.showAlert(title: "Error", message: "Failed to save user data: \(error.localizedDescription)")
                     } else {
                         // Successful sign-up and role assignment, navigate to the next screen
+                        if let user = Auth.auth().currentUser {
+                                    UserService.shared.fetchUserInfoAndPersist(userId: user.uid)
+                                }
+                        
                         if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
                             tabBarController.selectedIndex = 0
                             
