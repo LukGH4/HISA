@@ -12,6 +12,7 @@ class CurrentUser {
     private var email: String?
     private var id: String?
     private var role: String?
+    private var firebaseKey: String?
 
     private init() {}
 
@@ -21,6 +22,7 @@ class CurrentUser {
         self.email = data["email"] as? String
         self.id = data["id"] as? String
         self.role = data["role"] as? String
+        self.firebaseKey = data["firebaseKey"] as? String
     }
 
     func clearUserData() {
@@ -28,6 +30,7 @@ class CurrentUser {
         self.email = nil
         self.id = nil
         self.role = nil
+        self.firebaseKey = nil
     }
 
     // MARK: - Getters
@@ -45,5 +48,9 @@ class CurrentUser {
 
     func getRole() -> String? {
         return role
+    }
+    
+    func getFirebaseKey() -> String? {
+            return firebaseKey
     }
 }
