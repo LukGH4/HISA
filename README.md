@@ -7,8 +7,8 @@
 ## Version 0.1.0
 
 ### Features
-- **User Account Creation**
-  Users can create accounts and log in through our authentication system hosted on `FireBase`. Accounts can be one of two types: Employee and Manager. "Forgot Password" feature implemented.
+- **User Account Creation**:
+  Users can create accounts and log in through our authentication system hosted on `FireBase`. Accounts can be one of two types (Employee, Manager). "Forgot Password" feature implemented.
 - **Separate Manager UI**:  
   The "scan" tab is replaced by an "employees" tab for Manager accounts, in which they can view basic employee info (Name, Last Accessed, Scan History) as well as change employee permissions.
 - **Improvements to Scanning Interface**:  
@@ -16,16 +16,14 @@
 - **Implementation of Settings Screen**:
   A basic implementation of the Settings tab, including profile management options integrated with our backend.
 - **General Improvements**:  
-  Better error handling for the Login page, as well as minor UI improvements in most screens.
+  Better error handling for the Login screen, as well as minor UI improvements in most screens.
 
 ### Bug Fixes
 - **N/A**
 
 ### Known Issues
-- **Scan History in Manager UI screen**:
-  Though the UI is finished and all functionality has been implemented, we made changes to our backend which have yet to be reflected in this screen.
-
----
+- **Scan History in Manager UI**:
+  We made changes to our backend which have yet to be reflected in this screen.
 
 ## Version 0.0.0
 
