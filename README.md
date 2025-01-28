@@ -4,6 +4,29 @@
 - Solution: Using Machine Learning (ML) Image Classification technology, an ML tech stack will be created and integrated with a Part Intake Scanning mobile app. The ML model will be trained using a good part and bad part image dataset. The good / bad part ML model produced will be integrated as part of the app to determine if the part is Good / Bad based on the image taken at the depot using the app in real-time. The app will also have an on-device self-learning mode that will be used as feedback into the ML training to fine tune and improve the results over time. 
 # Release Notes
 
+## Version 0.1.0
+
+### Features
+- **User Account Creation**
+  Users can create accounts and log in through our authentication system hosted on `FireBase`. Accounts can be one of two types: Employee and Manager. Forgot password feature implemented.
+- **Separate Manager UI**:  
+  The "scan" tab is replaced by an "employees" tab for Manager accounts, in which they can view basic employee info (Name, Last Accessed, Scan History) as well as change employee permissions.
+- **Improvements to Scanning Interface**:  
+  Scans are now stored in their corresponding employee accounts. Employee accounts also have access to their previous scans.
+- **Implementation of Settings Screen**:
+  A basic implementation of the Settings tab, including profile management options integrated with our backend.
+- **General Improvements**:  
+  Better error handling for the Login page, as well as minor UI improvements in most screens.
+
+### Bug Fixes
+- **N/A**:
+
+### Known Issues
+- **Scan History in Manager UI screen**
+  Though the UI is finished and all functionality has been implemented, we made changes to our backend which have yet to be reflected in this screen.
+
+---
+
 ## Version 0.0.0
 
 ### Features
