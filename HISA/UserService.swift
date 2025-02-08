@@ -13,7 +13,7 @@ class UserService {
     private init() {}
 
     func fetchUserInfoAndPersist(userId: String) {
-        let ref = Database.database().reference().child("users").child(userId)
+        let ref = Database.database().reference().child("users").child("employees").child(userId) //.child("employees") was added by Hoyeon Kang for testing the optimization.
         ref.observeSingleEvent(of: .value) { snapshot in
             if let userData = snapshot.value as? [String: Any] {
                 CurrentUser.shared.setUserData(userData)
@@ -22,14 +22,14 @@ class UserService {
     }
     
     func updateUserField(userId: String, updates: [String: Any], completion: @escaping (Error?) -> Void) {
-        let ref = Database.database().reference().child("users").child(userId)
+        let ref = Database.database().reference().child("users").child("employees").child(userId) //.child("employees") was added by Hoyeon Kang for testing the optimization.
         ref.updateChildValues(updates) { error, _ in
             completion(error)
         }
     }
     
     func fetchUserByEmployeeId(employeeId: String, completion: @escaping (Bool) -> Void) {
-            let ref = Database.database().reference().child("users")
+        let ref = Database.database().reference().child("users").child("employees") //.child("employees") was added by Hoyeon Kang for testing the optimization.
 
             ref.observeSingleEvent(of: .value) { snapshot in
                 var userFound = false

@@ -93,7 +93,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
             } else {
                 // After user is created, set the user role in Firebase
                 let userId = authResult?.user.uid
-                let ref = Database.database().reference().child("users").child(userId ?? "")
+                let ref = Database.database().reference().child("users").child("employees").child(userId ?? "") //.child("employees") added by Hoyeon Kang for testing
 
                 // You can adjust the role logic as needed (e.g., based on user input or default to "user")
                 let userRole = "user" // Default role, you can change this based on your requirement
@@ -101,7 +101,9 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                     "name": name,
                     "email": email,
                     "id": id,
-                    "role": userRole
+                    "role": userRole,
+                    "dataAccess": "True", // added by Hoyeon Kang for testing
+                    "lastAccessed": "1900-01-01" // added by Hoyeon Kang for testing
                 ]
 
                 ref.setValue(userValues) { error, _ in
