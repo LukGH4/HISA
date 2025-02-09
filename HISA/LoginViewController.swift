@@ -49,38 +49,35 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 // Successful login, now check user role
                 if let user = authResult?.user {
                     let ref = Database.database().reference() // or Firestore
-                    let userRef = ref.child("users").child(user.uid)
+                    let userRef = ref.child("users").child("managers").child(user.uid)
                     UserService.shared.fetchUserInfoAndPersist(userId: user.uid)
 
                     userRef.observeSingleEvent(of: .value, with: { snapshot in
-                        if let role = snapshot.value as? [String: Any], let userRole = role["role"] as? String {
-                            if userRole == "manager" {
-                                // Navigate to the manager tab controller
-                                if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "ManagerTabBarController") as? UITabBarController {
-                                    tabBarController.selectedIndex = 0
-                                    
-                                    if let window = UIApplication.shared.windows.first {
-                                        window.rootViewController = tabBarController
-                                        window.makeKeyAndVisible()
-                                        let transition = CATransition()
-                                        transition.type = .fade
-                                        transition.duration = 0.3
-                                        window.layer.add(transition, forKey: kCATransition)
-                                    }
+                        if snapshot.exists() {
+                            if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "ManagerTabBarController") as? UITabBarController {
+                                tabBarController.selectedIndex = 0
+                                
+                                if let window = UIApplication.shared.windows.first {
+                                    window.rootViewController = tabBarController
+                                    window.makeKeyAndVisible()
+                                    let transition = CATransition()
+                                    transition.type = .fade
+                                    transition.duration = 0.3
+                                    window.layer.add(transition, forKey: kCATransition)
                                 }
-                            } else {
-                                // Navigate to regular user tab controller
-                                if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
-                                    tabBarController.selectedIndex = 0
-                                    
-                                    if let window = UIApplication.shared.windows.first {
-                                        window.rootViewController = tabBarController
-                                        window.makeKeyAndVisible()
-                                        let transition = CATransition()
-                                        transition.type = .fade
-                                        transition.duration = 0.3
-                                        window.layer.add(transition, forKey: kCATransition)
-                                    }
+                            }
+                        } else {
+                            // Navigate to regular user tab controller
+                            if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
+                                tabBarController.selectedIndex = 0
+                                
+                                if let window = UIApplication.shared.windows.first {
+                                    window.rootViewController = tabBarController
+                                    window.makeKeyAndVisible()
+                                    let transition = CATransition()
+                                    transition.type = .fade
+                                    transition.duration = 0.3
+                                    window.layer.add(transition, forKey: kCATransition)
                                 }
                             }
                         }

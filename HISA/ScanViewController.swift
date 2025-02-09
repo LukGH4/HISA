@@ -2,6 +2,7 @@ import UIKit
 import AVFoundation
 import Firebase
 import FirebaseStorage
+import FirebaseAuth
 
 class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     
@@ -223,8 +224,15 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
                 let formattedDate = dateFormatter.string(from: currentDate)
                 
                 // Save username and image URL to Firebase Realtime Database
+                guard let user = Auth.auth().currentUser else {
+                    print("No user is singed in")
+                    return
+                }
+                let uid = user.uid
+                
+                
                 let databaseRef = Database.database().reference()
-                let newDirectory = databaseRef.child("users/employees/employee1/images").childByAutoId() // Generate a unique ID for each user
+                let newDirectory = databaseRef.child("users/employees/\(uid)/images").childByAutoId() // Generate a unique ID for each user // This line has been modified by Hoyeon Kang
                 
                 let newData: [String: Any] = [
                     "url": downloadURL.absoluteString,

@@ -8,6 +8,7 @@
 import UIKit
 import FirebaseDatabase
 import FirebaseStorage
+import FirebaseAuth
 
 class ScanListImageViewController: UIViewController {
     
@@ -20,6 +21,8 @@ class ScanListImageViewController: UIViewController {
     var username: String?
     var date: String?
     var folderKey: String?
+    
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,7 +52,15 @@ class ScanListImageViewController: UIViewController {
         }
 
         // Step 1: Reference Firebase Realtime Database and Storage
-        let databaseRef = Database.database().reference().child("users/employees/employee1/images/\(folderKey)")
+        var databaseRef: DatabaseReference?
+        guard let user = Auth.auth().currentUser else {
+            print("No user is signed in")
+            return
+        }
+        
+        let uid = user.uid
+        databaseRef = Database.database().reference().child("users/employees/\(uid)/images/\(folderKey)") //this line is modified for testing the uid by Hoyeon Kang
+        
         let storageRef = Storage.storage().reference(forURL: imageURL ?? "")
 
         // Step 2: Delete the file from Firebase Storage
@@ -60,7 +71,7 @@ class ScanListImageViewController: UIViewController {
                 print("File deleted successfully from Firebase Storage.")
 
                 // Step 3: Delete the folder from Firebase Realtime Database
-                databaseRef.removeValue { error, _ in
+                databaseRef!.removeValue { error, _ in
                     if let error = error {
                         print("Error deleting folder from Firebase Database: \(error.localizedDescription)")
                     } else {

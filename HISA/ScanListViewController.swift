@@ -7,6 +7,7 @@
 
 import UIKit
 import Firebase
+import FirebaseAuth
 
 class ScanListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
@@ -31,12 +32,20 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
     
     func fetchImagesFromFirebase() {
         // Reference to the Firebase Database
-        let databaseRef = Database.database().reference().child("users").child("employees").child("employee1")
+        var databaseRef: DatabaseReference?
+        guard let user = Auth.auth().currentUser else {
+            print("No user is signed in")
+            return
+        }
+        
+        let uid = user.uid
+        databaseRef = Database.database().reference().child("users").child("employees").child(uid) // This line has been modified by Hoyeon Kang for testing uid
+
 
         // Observe and fetch data
-        databaseRef.observeSingleEvent(of: .value) { snapshot in
+        databaseRef!.observeSingleEvent(of: .value) { snapshot in
             guard let employeeData = snapshot.value as? [String: Any],
-                  let username = employeeData["username"] as? String,
+                  let username = employeeData["name"] as? String,
                   let imagesData = employeeData["images"] as? [String: [String: Any]] else {
                 print("No data found or incorrect structure")
                 return
