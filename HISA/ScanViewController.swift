@@ -1,15 +1,17 @@
 import UIKit
+import AVKit
 import AVFoundation
 import Firebase
 import FirebaseStorage
 import FirebaseAuth
 
-class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
+class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCaptureFileOutputRecordingDelegate {
     
     // Camera components
     var captureSession: AVCaptureSession!
     var previewLayer: AVCaptureVideoPreviewLayer!
     var capturePhotoOutput: AVCapturePhotoOutput!
+    var videoOutput: AVCaptureMovieFileOutput!
     
     // UI Components
     @IBOutlet weak var cameraPreviewView: UIView!
@@ -20,6 +22,14 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     @IBOutlet weak var scanListButton: UIButton!
     @IBOutlet weak var gridToggleButton: UIButton!
     
+    @IBOutlet weak var recordToggleButton: UIButton!
+    @IBOutlet weak var captureToggleButton: UIButton!
+    
+    @IBOutlet weak var recordButton: UIButton!
+    @IBOutlet weak var submitButtonR: UIButton!
+    @IBOutlet weak var recordedVideoView: UIView!
+    
+    
     // Popup components
     var popupView: UIView!
     var activityIndicator: UIActivityIndicatorView!
@@ -27,6 +37,13 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     
     var gridLines: [UIView] = []
     var toggleGridState: Bool = false
+    
+    var isRecording = false
+    var videoURL: URL?
+    var isVideoMode: Bool = false
+    
+    var playerLayer: AVPlayerLayer?
+    var player: AVPlayer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,10 +53,19 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         setupGridToggleButton()
         
         setupPopupView()
+        recordedVideoView.isHidden = true
         discardButton.isHidden = true
         captureButton.isEnabled = true
         captureButton.isHidden = false
         submitButton.isHidden = true
+        submitButtonR.isHidden = true
+        submitButtonR.isEnabled = false
+        recordToggleButton.isHidden = false
+        recordToggleButton.isEnabled = true
+        captureToggleButton.isHidden = true
+        captureToggleButton.isEnabled = false
+        recordButton.isHidden = true
+        recordButton.isEnabled = false
     
         
         // Ensure grid toggle is hidden initially and grid is off
@@ -70,6 +96,14 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             captureSession.addOutput(capturePhotoOutput)
         } else {
             print("Unable to add output to capture session")
+            return
+        }
+        
+        videoOutput = AVCaptureMovieFileOutput()
+        if captureSession.canAddOutput(videoOutput) {
+            captureSession.addOutput(videoOutput)
+        } else {
+            print("Unable to add video output")
             return
         }
         
@@ -130,6 +164,44 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         captureButton.isHidden = true
     }
     
+    @IBAction func recordVideo(_ sender: UIButton) {
+        gridLines.forEach { x in x.isHidden = true }
+        gridToggleButton.isHidden = true
+        
+        if !isRecording {
+            startRecording()
+            recordButton.setImage(UIImage(systemName: "stop.circle"), for: .normal)
+            recordToggleButton.isHidden = true
+            recordToggleButton.isEnabled = false
+            captureToggleButton.isHidden = true
+            captureToggleButton.isEnabled = false
+        } else {
+            stopRecording()
+            recordButton.setImage(UIImage(systemName: "record.circle"), for: .normal)
+            recordToggleButton.isHidden = true
+            recordToggleButton.isEnabled = false
+            captureToggleButton.isHidden = false
+            captureToggleButton.isEnabled = true
+            recordButton.isHidden = true
+            discardButton.isHidden = false
+            discardButton.isEnabled = true
+        }
+        isRecording.toggle()
+        
+    }
+    
+    func startRecording() {
+        let outputFilePath = NSTemporaryDirectory() + "video-\(UUID().uuidString).mov"
+        let outputFileURL = URL(fileURLWithPath: outputFilePath)
+        videoOutput.startRecording(to: outputFileURL, recordingDelegate: self)
+        
+    }
+    
+    func stopRecording() {
+        videoOutput.stopRecording()
+    }
+    
+    
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         guard let imageData = photo.fileDataRepresentation() else {
             print("Error capturing photo: \(error?.localizedDescription ?? "Unknown error")")
@@ -141,8 +213,71 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         capturedImageView.isHidden = false
         discardButton.isHidden = false
         submitButton.isHidden = false
+        submitButton.isEnabled = true
+        submitButtonR.isHidden = true
+        submitButtonR.isEnabled = false
         scanListButton.isHidden = false
+        recordToggleButton.isHidden = true
+        captureToggleButton.isHidden = true
         
+    }
+    
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if let error = error {
+            print("Error recording video: \(error.localizedDescription)")
+            return
+        }
+        
+        videoURL = outputFileURL
+        print("Video saved to: \(videoURL!.absoluteString)")
+        
+        submitButton.isHidden = true
+        submitButton.isEnabled = false
+        submitButtonR.isHidden = false
+        submitButtonR.isEnabled = true
+        recordToggleButton.isHidden = true
+        captureToggleButton.isHidden = false
+        
+        cameraPreviewView.isHidden = true
+        recordedVideoView.isHidden = false
+        playVideoInSeparateView(url: videoURL!)
+        
+    }
+    
+    func playVideoInSeparateView(url: URL) {
+        DispatchQueue.main.async {
+            // Remove existing player if any
+            self.playerLayer?.removeFromSuperlayer()
+            
+            // Create a new AVPlayer
+            self.player = AVPlayer(url: url)
+            self.playerLayer = AVPlayerLayer(player: self.player)
+            self.playerLayer?.frame = self.recordedVideoView.bounds
+            self.playerLayer?.videoGravity = .resizeAspectFill
+            
+            // Add AVPlayerLayer to the separate video preview view
+            self.recordedVideoView.layer.addSublayer(self.playerLayer!)
+            
+            // Hide the captured image view and show the video preview
+            self.capturedImageView.isHidden = true
+            self.recordedVideoView.isHidden = false
+            
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(self.restartVideo),
+                name: .AVPlayerItemDidPlayToEndTime,
+                object: self.player?.currentItem
+            )
+
+            // Start playback
+            self.player?.play()
+        }
+    }
+    
+    @objc func restartVideo() {
+        // Restart the video from the beginning
+        self.player?.seek(to: .zero)
+        self.player?.play()
     }
     
     @IBAction func discardPhoto(_ sender: UIButton) {
@@ -150,12 +285,23 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         capturedImageView.isHidden = true
         previewLayer.isHidden = false
         captureSession.startRunning()
-        captureButton.isEnabled = true
-        captureButton.isHidden = false
+        
         cameraPreviewView.isHidden = false
         discardButton.isHidden = true
         submitButton.isHidden = true
+        submitButtonR.isHidden = true
         popupView.isHidden = true
+        
+        if isVideoMode {
+            recordedVideoView.isHidden = true
+            recordButton.isEnabled = true
+            recordButton.isHidden = false
+            captureToggleButton.isHidden = false
+        } else {
+            captureButton.isEnabled = true
+            captureButton.isHidden = false
+            recordToggleButton.isHidden = false
+        }
 
         // Reset grid toggle and hide grid
         gridToggleButton.isHidden = false
@@ -266,6 +412,76 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         
     }
     
+    @IBAction func submitVideo(_ sender: Any) {
+        guard let videoURL = self.videoURL else {
+            print("No video to upload")
+            return
+        }
+        
+        let uniqueFileName = "video-\(UUID().uuidString).mov"
+        let storageRef = Storage.storage().reference().child("videos/\(uniqueFileName)")
+        
+        let uploadTask = storageRef.putFile(from: videoURL, metadata: nil) { metadata, error in
+            if let error = error {
+                print("Error uploading video: \(error.localizedDescription)")
+                return
+            }
+            
+            storageRef.downloadURL { url, error in
+                if let error = error {
+                    print("Error retrieving video URL: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let downloadURL = url else {
+                    print("No download URL found")
+                    return
+                }
+                
+                guard let user = Auth.auth().currentUser else {
+                    print("No user signed in")
+                    return
+                }
+                
+                let uid = user.uid
+                let databaseRef = Database.database().reference()
+                let newVideoRef = databaseRef.child("users/employees/\(uid)/videos").childByAutoId()
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                let formattedDate = dateFormatter.string(from: Date())
+
+                let videoData: [String: Any] = [
+                    "url": downloadURL.absoluteString,
+                    "fileName": uniqueFileName,
+                    "date": formattedDate
+                ]
+                
+                newVideoRef.setValue(videoData) { error, _ in
+                    if let error = error {
+                        print("Error saving video to database: \(error.localizedDescription)")
+                    } else {
+                        print("Video successfully uploaded and saved.")
+                    }
+                }
+            }
+        }
+        
+        uploadTask.observe(.progress) { snapshot in
+            let progress = Double(snapshot.progress?.completedUnitCount ?? 0) /
+                           Double(snapshot.progress?.totalUnitCount ?? 1)
+            print("Upload progress: \(progress * 100)%")
+        }
+        
+        let alert = UIAlertController(title: "Success", message: "The video has been successfully submitted", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        self.present(alert, animated: true)
+        
+    }
+    
+    
+    
+    
     func setupGridToggleButton() {
         gridToggleButton.addTarget(self, action: #selector(toggleGrid), for: .touchUpInside)
         gridToggleButton.isEnabled = true
@@ -324,7 +540,43 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         super.viewDidLayoutSubviews()
         setupGridOverlay()
     }
-
+    
+    
+    @IBAction func RecordToggleClicked(_ sender: Any) {
+        isVideoMode = true
+        
+        recordToggleButton.isHidden = true
+        recordToggleButton.isEnabled = false
+        captureToggleButton.isHidden = false
+        captureToggleButton.isEnabled = true
+        
+        recordButton.isHidden = false
+        recordButton.isEnabled = true
+        discardButton.isHidden = true
+        captureButton.isEnabled = false
+        captureButton.isHidden = true
+        
+        
+    }
+    
+    @IBAction func captureToggleClicked(_ sender: Any) {
+        isVideoMode = false
+        
+        recordedVideoView.isHidden = true
+        cameraPreviewView.isHidden = false
+        
+        recordToggleButton.isHidden = false
+        recordToggleButton.isEnabled = true
+        captureToggleButton.isHidden = true
+        captureToggleButton.isEnabled = false
+        
+        recordButton.isHidden = true
+        recordButton.isEnabled = false
+        discardButton.isHidden = true
+        captureButton.isEnabled = true
+        captureButton.isHidden = false
+        
+    }
     
     
     
