@@ -331,61 +331,56 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             print("No image to submit")
             return
         }
-
+        
         guard let imageData = capturedImage.jpegData(compressionQuality: 0.8) else {
             print("Failed to convert image to data")
             return
         }
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
-
+        
         let url = URL(string: "http://143.215.59.191:3333/upload")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-
+        
         let boundary = UUID().uuidString
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-
+        
         var body = Data()
         // Append user ID
-           body.append("--\(boundary)\r\n".data(using: .utf8)!)
-           body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
-           body.append("\(userId)\r\n".data(using: .utf8)!)
-           
-           // Append image data
-           body.append("--\(boundary)\r\n".data(using: .utf8)!)
-           body.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
-           body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
-           body.append(imageData)
-           body.append("\r\n".data(using: .utf8)!)
-           body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(userId)\r\n".data(using: .utf8)!)
+        
+        // Append image data
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
         request.httpBody = body
-
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
-                print("Error uploading file: \(error?.localizedDescription ?? "Unknown error")")
+                print("Error uploading image: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
             
-            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-                do {
-                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                        DispatchQueue.main.async {
-                            if let prediction = jsonResponse["prediction"] as? String {
-                                print("Prediction: \(prediction)")
-                                self.showPopup(message: "Validation Result: \(prediction)")
-                            }
-                        }
-                    }
-                } catch {
-                    print("Failed to parse JSON response")
+            if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                print("Upload response:", jsonResponse)
+                
+                DispatchQueue.main.async {
+                    let alert = UIAlertController(title: "Upload Successful",
+                                                  message: "Classification: \(jsonResponse["classification"] ?? "Unknown")",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
                 }
-            } else {
-                print("Server returned an error")
             }
         }
-
+        
         task.resume()
     }
 
