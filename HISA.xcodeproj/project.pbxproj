@@ -362,7 +362,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 34LV94T9AP;
+				DEVELOPMENT_TEAM = PNV8X3GWPF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HISA/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app required camera usage to scan parts";
@@ -377,7 +377,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Hoyeon-Kang";
+				PRODUCT_BUNDLE_IDENTIFIER = honeywell.lhammond;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -392,7 +392,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 34LV94T9AP;
+				DEVELOPMENT_TEAM = PNV8X3GWPF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HISA/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app required camera usage to scan parts";
@@ -407,7 +407,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Hoyeon-Kang";
+				PRODUCT_BUNDLE_IDENTIFIER = honeywell.lhammond;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

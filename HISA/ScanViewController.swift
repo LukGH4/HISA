@@ -181,89 +181,73 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     }
     
     @IBAction func submitPhoto(_ sender: Any) {
-        // codes for submitting a photo to ML and database
         guard let capturedImage = capturedImageView.image else {
             print("No image to submit")
             return
         }
-        // Show the popup
-        showValidationPopup()
-        
+
         guard let imageData = capturedImage.jpegData(compressionQuality: 0.8) else {
             print("Failed to convert image to data")
             return
         }
         
-        // Firebase Storage reference
-        let uniqueFileName = "image-\(UUID().uuidString).jpg"
-        let storageRef = Storage.storage().reference().child("images/\(uniqueFileName)")
-        
-        // Upload image data to Firebase Storage
-        let uploadTask = storageRef.putData(imageData, metadata: nil) { metadata, error in
-            if let error = error {
-                print("Error uploading image: \(error.localizedDescription)")
+        let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
+
+        let url = URL(string: "http://143.215.59.191:3333/upload")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+
+        var body = Data()
+        // Append user ID
+           body.append("--\(boundary)\r\n".data(using: .utf8)!)
+           body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
+           body.append("\(userId)\r\n".data(using: .utf8)!)
+           
+           // Append image data
+           body.append("--\(boundary)\r\n".data(using: .utf8)!)
+           body.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
+           body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+           body.append(imageData)
+           body.append("\r\n".data(using: .utf8)!)
+           body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+
+        request.httpBody = body
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("Error uploading file: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
             
-            // Get the download URL for the uploaded image
-            storageRef.downloadURL { url, error in
-                if let error = error {
-                    print("Error retrieving download URL: \(error.localizedDescription)")
-                    return
-                }
-                
-                guard let downloadURL = url else {
-                    print("No download URL found")
-                    return
-                }
-                
-                // Format the current date and time
-                let currentDate = Date()
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss" // Customize as needed
-                let formattedDate = dateFormatter.string(from: currentDate)
-                
-                // Save username and image URL to Firebase Realtime Database
-                guard let user = Auth.auth().currentUser else {
-                    print("No user is singed in")
-                    return
-                }
-                let uid = user.uid
-                
-                
-                let databaseRef = Database.database().reference()
-                let newDirectory = databaseRef.child("users/employees/\(uid)/images").childByAutoId() // Generate a unique ID for each user // This line has been modified by Hoyeon Kang
-                
-                let newData: [String: Any] = [
-                    "url": downloadURL.absoluteString,
-                    "fileName": uniqueFileName,
-                    "date": formattedDate
-                ]
-                
-                newDirectory.setValue(newData) { error, _ in
-                    if let error = error {
-                        print("Error writing data to Firebase: \(error.localizedDescription)")
-                    } else {
-                        print("Username and image URL successfully saved to Firebase.")
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                do {
+                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                        DispatchQueue.main.async {
+                            if let prediction = jsonResponse["prediction"] as? String {
+                                print("Prediction: \(prediction)")
+                                self.showPopup(message: "Validation Result: \(prediction)")
+                            }
+                        }
                     }
+                } catch {
+                    print("Failed to parse JSON response")
                 }
+            } else {
+                print("Server returned an error")
             }
         }
-        
-        // Monitor upload progress (optional)
-        uploadTask.observe(.progress) { snapshot in
-            let progress = Double(snapshot.progress?.completedUnitCount ?? 0) /
-                           Double(snapshot.progress?.totalUnitCount ?? 1)
-            print("Upload progress: \(progress * 100)%")
+
+        task.resume()
+    }
+
+    func showPopup(message: String) {
+        DispatchQueue.main.async {
+            self.popupView.isHidden = false
+            self.popupLabel.text = message
         }
-        
-        let alert = UIAlertController(title: "", message: "The photo has been successfully submitted", preferredStyle: .alert)
-        
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alert.addAction(okAction)
-        
-        self.present(alert, animated: true, completion: nil)
-        
     }
     
     func setupGridToggleButton() {
