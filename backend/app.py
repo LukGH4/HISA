@@ -4,7 +4,7 @@ import firebase_admin
 from firebase_admin import credentials, storage, db
 from flask import Flask, request, jsonify
 from PIL import Image
-from datetime import date
+from datetime import date, timedelta
 import cv2
 
 app = Flask(__name__)
@@ -53,18 +53,33 @@ def upload_file():
     elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
         blob = bucket.blob(f"videos/{filename}")
     blob.upload_from_filename(file_path)
-    blob.make_public()
-    file_url = blob.public_url
+
+    # Generate a Firebase-compatible URL
+    bucket_name = "jib-4338-hisa.firebasestorage.app"  # Replace with your bucket name
+    file_type = "images" if file_path.lower().endswith(('.png', '.jpg', '.jpeg')) else "videos"
+    firebase_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket_name}/o/{file_type}%2F{filename}?alt=media"
+
+    # Generate a signed URL to get the token
+    expiration_time = timedelta(days=7)  # URL expires in 7 days
+    signed_url = blob.generate_signed_url(expiration=expiration_time)
+
+    # Extract the token from the signed URL
+    from urllib.parse import urlparse, parse_qs
+    parsed_url = urlparse(signed_url)
+    token = parse_qs(parsed_url.query).get('Signature', [''])[0]
+
+    # Append the token to the Firebase URL
+    firebase_url_with_token = f"{firebase_url}&token={token}"
 
     # Store metadata in Firebase Realtime Database
-    save_to_firebase(user_id, filename, file_url, classification)
+    save_to_firebase(user_id, filename, firebase_url_with_token, classification)
 
     # Cleanup local file
     os.remove(file_path)
 
     return jsonify({
         'message': 'File uploaded successfully',
-        'file_url': file_url,
+        'file_url': firebase_url_with_token,
         'classification': classification
     })
 
@@ -91,7 +106,10 @@ def run_mock_ml_model(file_path):
 
 def save_to_firebase(user_id, filename, file_url, classification):
     """Save metadata to Firebase Realtime Database."""
-    ref = db.reference(f"users/employees/{user_id}/images").push()
+    if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        ref = db.reference(f"users/employees/{user_id}/images").push()
+    elif filename.lower().endswith(('.mp4', '.avi', '.mov')):
+        ref = db.reference(f"users/employees/{user_id}/videos").push()
     ref.set({
         "fileName": filename,
         "url": file_url,
