@@ -378,6 +378,8 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                     self.present(alert, animated: true, completion: nil)
                 }
+            } else {
+                print("Server returned an error")
             }
         }
         
