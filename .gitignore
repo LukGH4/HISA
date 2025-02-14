@@ -12,3 +12,4 @@ HISA.xcodeproj/project.pbxproj
 HISA.xcodeproj/project.xcworkspace/xcuserdata/lukehammond.xcuserdatad
 MLTraining
 backend/model_weights.pth
+backend/uploads/*
