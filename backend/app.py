@@ -1,122 +1,168 @@
 import os
 import uuid
 import firebase_admin
+import torch
+import torch.nn as nn
 from firebase_admin import credentials, storage, db
 from flask import Flask, request, jsonify
-from PIL import Image
-from datetime import date, timedelta
+from datetime import date
 import cv2
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 app = Flask(__name__)
 
 # Initialize Firebase Admin SDK
-cred = credentials.Certificate("jib-4338-hisa-firebase-adminsdk-c9uu0-6b2a83c10a.json")  # Replace with your Firebase service account key
+cred = credentials.Certificate("jib-4338-hisa-firebase-adminsdk-c9uu0-6b2a83c10a.json")
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'jib-4338-hisa.firebasestorage.app',  # Replace with your Firebase Storage bucket
-    'databaseURL': 'https://jib-4338-hisa-default-rtdb.firebaseio.com/'  # Replace with your Firebase Realtime Database URL
+    'storageBucket': 'jib-4338-hisa.firebasestorage.app',
+    'databaseURL': 'https://jib-4338-hisa-default-rtdb.firebaseio.com/'
 })
 
-# Create an uploads directory
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+import torch
+import torchvision.models as models
+
+# Define device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# Load EfficientNet model
+model = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
+in_features=model.classifier[1].in_features
+model.classifier[1]=nn.Linear(in_features=in_features,out_features=6)
+model = model.to(device)
+# Load trained weights (ensure the checkpoint matches EfficientNet's architecture)
+model.load_state_dict(torch.load("model_weights.pth", map_location=device))
+model.to(device)
+model.eval()
+
+rain_transform = A.Compose([
+    A.HorizontalFlip(),
+    A.ShiftScaleRotate(rotate_limit=5, value=0, border_mode=cv2.BORDER_REFLECT),
+    A.OneOf([
+        A.CLAHE(),
+        A.RandomBrightnessContrast(),
+        A.HueSaturationValue()
+    ], p=1),
+    A.Normalize(),
+    A.Resize(600, 800),
+    ToTensorV2()
+])
+
+test_transform = A.Compose([
+    A.Normalize(),
+    A.Resize(600, 800),
+    ToTensorV2()
+])
+
+label_to_cls = {
+    1: "crack",
+    2: "scratch",
+    3: "tire flat",
+    4: "dent",
+    5: "glass shatter",
+    6: "lamp broken"
+}
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    """Handles file upload, ML classification, and Firebase storage."""
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
     file = request.files['file']
-    user_id = request.form.get('user_id', 'unknown_user')  # Get user ID from the request
+    user_id = request.form.get('user_id', 'unknown_user')
     file_ext = file.filename.split('.')[-1].lower()
     
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
-    # Generate a unique filename
     file_id = str(uuid.uuid4())
     filename = f"{file_id}.{file_ext}"
     file_path = os.path.join(UPLOAD_FOLDER, filename)
-
-    # Save the file locally
     file.save(file_path)
 
-    # Mock ML model classification
-    classification = run_mock_ml_model(file_path)
-
-    # Upload to Firebase Storage
-    bucket = storage.bucket()
-    blob = ""
+    classification, confidence = None, None
     if file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-        blob = bucket.blob(f"images/{filename}")
+        classification, confidence = classify_image(file_path)
+        storage_path = f"images/{filename}"
     elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
-        blob = bucket.blob(f"videos/{filename}")
+        classification, confidence = classify_video(file_path)
+        storage_path = f"videos/{filename}"
+    else:
+        return jsonify({'error': 'Unsupported file format'}), 400
+
+    bucket = storage.bucket()
+    blob = bucket.blob(storage_path)
     blob.upload_from_filename(file_path)
 
-    # Generate a Firebase-compatible URL
-    bucket_name = "jib-4338-hisa.firebasestorage.app"  # Replace with your bucket name
-    file_type = "images" if file_path.lower().endswith(('.png', '.jpg', '.jpeg')) else "videos"
-    firebase_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket_name}/o/{file_type}%2F{filename}?alt=media"
-
-    # Generate a signed URL to get the token
-    expiration_time = timedelta(days=7)  # URL expires in 7 days
-    signed_url = blob.generate_signed_url(expiration=expiration_time)
-
-    # Extract the token from the signed URL
-    from urllib.parse import urlparse, parse_qs
-    parsed_url = urlparse(signed_url)
-    token = parse_qs(parsed_url.query).get('Signature', [''])[0]
-
-    # Append the token to the Firebase URL
-    firebase_url_with_token = f"{firebase_url}&token={token}"
-
-    # Store metadata in Firebase Realtime Database
-    save_to_firebase(user_id, filename, firebase_url_with_token, classification)
-
-    # Cleanup local file
+    firebase_url = f"https://firebasestorage.googleapis.com/v0/b/jib-4338-hisa.firebasestorage.app/o/{storage_path.replace('/', '%2F')}?alt=media"
+    
+    save_to_firebase(user_id, filename, firebase_url, classification, confidence)
     os.remove(file_path)
 
     return jsonify({
         'message': 'File uploaded successfully',
-        'file_url': firebase_url_with_token,
+        'file_url': firebase_url,
         'classification': classification
     })
 
-
-def run_mock_ml_model(file_path):
-    """Replace this with your actual ML model inference."""
+def classify_image(file_path):
     try:
-        # Process image
-        if file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-            img = Image.open(file_path)
-            img.verify()
-            return "Good Part"  # Mock result (replace with real inference)
-        
-        # Process video
-        elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
-            cap = cv2.VideoCapture(file_path)
-            ret, _ = cap.read()
-            cap.release()
-            return "Bad Part" if not ret else "Good Part"
+        img = cv2.imread(file_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = rain_transform(image=img)['image'].unsqueeze(0).to(device)
 
+        with torch.no_grad():
+            outputs = model(img)
+            probabilities = torch.softmax(outputs, dim=1)
+            _, predicted = torch.max(outputs, 1)
+            confidence = probabilities[0, predicted.item()].item()
+
+        label = label_to_cls.get(predicted.item() + 1, "Unknown") if confidence > 0.6 else "Good Part"
+        return label, f"{confidence:.2f}"
     except Exception as e:
-        return f"Error processing file: {str(e)}"
+        return f"Error processing image: {str(e)}"
 
+def classify_video(video_path):
+    try:
+        cap = cv2.VideoCapture(video_path)
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        frame_interval = max(1, frame_count // 10)
+        classifications = []
 
-def save_to_firebase(user_id, filename, file_url, classification):
-    """Save metadata to Firebase Realtime Database."""
-    if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-        ref = db.reference(f"users/employees/{user_id}/images").push()
-    elif filename.lower().endswith(('.mp4', '.avi', '.mov')):
-        ref = db.reference(f"users/employees/{user_id}/videos").push()
+        for i in range(frame_count):
+            ret, frame = cap.read()
+            if not ret:
+                break
+            if i % frame_interval == 0:
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                img = rain_transform(image=frame_rgb)['image'].unsqueeze(0).to(device)
+
+                with torch.no_grad():
+                    outputs = model(img)
+                    probabilities = torch.softmax(outputs, dim=1)
+                    _, predicted = torch.max(outputs, 1)
+                    confidence = probabilities[0, predicted.item()].item()
+
+                label = label_to_cls.get(predicted.item() + 1, "Unknown") if confidence > 0.3 else "Good Part"
+                classifications.append(label)
+
+        cap.release()
+        return max(set(classifications), key=classifications.count), f"{confidence:.2f}"
+    except Exception as e:
+        return f"Error processing video: {str(e)}"
+
+def save_to_firebase(user_id, filename, file_url, classification, confidence):
+    ref_type = "images" if filename.lower().endswith(('.png', '.jpg', '.jpeg')) else "videos"
+    ref = db.reference(f"users/employees/{user_id}/{ref_type}").push()
     ref.set({
         "fileName": filename,
         "url": file_url,
         "classification": classification,
+        "confidence": confidence,
         "date": date.today().isoformat()
     })
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3333, debug=True)
