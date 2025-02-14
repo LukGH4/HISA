@@ -8,3 +8,9 @@
 *./HISA/GoogleService-Info.plist
 
 HISA.xcodeproj/project.pbxproj
+
+HISA.xcodeproj/project.xcworkspace/xcuserdata/lukehammond.xcuserdatad
+MLTraining
+backend/model_weights.pth
+backend/fault_detection.pth
+backend/uploads/*

@@ -327,89 +327,68 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     }
     
     @IBAction func submitPhoto(_ sender: Any) {
-        // codes for submitting a photo to ML and database
         guard let capturedImage = capturedImageView.image else {
             print("No image to submit")
             return
         }
-        // Show the popup
-        showValidationPopup()
         
         guard let imageData = capturedImage.jpegData(compressionQuality: 0.8) else {
             print("Failed to convert image to data")
             return
         }
         
-        // Firebase Storage reference
-        let uniqueFileName = "image-\(UUID().uuidString).jpg"
-        let storageRef = Storage.storage().reference().child("images/\(uniqueFileName)")
+        let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        // Upload image data to Firebase Storage
-        let uploadTask = storageRef.putData(imageData, metadata: nil) { metadata, error in
-            if let error = error {
-                print("Error uploading image: \(error.localizedDescription)")
+        let url = URL(string: "http://10.20.51.50:3333/upload")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        var body = Data()
+        // Append user ID
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(userId)\r\n".data(using: .utf8)!)
+        
+        // Append image data
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        request.httpBody = body
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("Error uploading image: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
             
-            // Get the download URL for the uploaded image
-            storageRef.downloadURL { url, error in
-                if let error = error {
-                    print("Error retrieving download URL: \(error.localizedDescription)")
-                    return
-                }
+            if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                print("Upload response:", jsonResponse)
                 
-                guard let downloadURL = url else {
-                    print("No download URL found")
-                    return
-                }
-                
-                // Format the current date and time
-                let currentDate = Date()
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss" // Customize as needed
-                let formattedDate = dateFormatter.string(from: currentDate)
-                
-                // Save username and image URL to Firebase Realtime Database
-                guard let user = Auth.auth().currentUser else {
-                    print("No user is singed in")
-                    return
-                }
-                let uid = user.uid
-                
-                
-                let databaseRef = Database.database().reference()
-                let newDirectory = databaseRef.child("users/employees/\(uid)/images").childByAutoId() // Generate a unique ID for each user // This line has been modified by Hoyeon Kang
-                
-                let newData: [String: Any] = [
-                    "url": downloadURL.absoluteString,
-                    "fileName": uniqueFileName,
-                    "date": formattedDate
-                ]
-                
-                newDirectory.setValue(newData) { error, _ in
-                    if let error = error {
-                        print("Error writing data to Firebase: \(error.localizedDescription)")
-                    } else {
-                        print("Username and image URL successfully saved to Firebase.")
-                    }
+                DispatchQueue.main.async {
+                    let alert = UIAlertController(title: "Upload Successful",
+                                                  message: "Classification: \(jsonResponse["classification"] ?? "Unknown")",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
                 }
             }
         }
         
-        // Monitor upload progress (optional)
-        uploadTask.observe(.progress) { snapshot in
-            let progress = Double(snapshot.progress?.completedUnitCount ?? 0) /
-                           Double(snapshot.progress?.totalUnitCount ?? 1)
-            print("Upload progress: \(progress * 100)%")
+        task.resume()
+    }
+
+    func showPopup(message: String) {
+        DispatchQueue.main.async {
+            self.popupView.isHidden = false
+            self.popupLabel.text = message
         }
-        
-        let alert = UIAlertController(title: "", message: "The photo has been successfully submitted", preferredStyle: .alert)
-        
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alert.addAction(okAction)
-        
-        self.present(alert, animated: true, completion: nil)
-        
     }
     
     @IBAction func submitVideo(_ sender: Any) {
@@ -418,65 +397,57 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             return
         }
         
-        let uniqueFileName = "video-\(UUID().uuidString).mov"
-        let storageRef = Storage.storage().reference().child("videos/\(uniqueFileName)")
+        let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let uploadTask = storageRef.putFile(from: videoURL, metadata: nil) { metadata, error in
-            if let error = error {
-                print("Error uploading video: \(error.localizedDescription)")
+        let url = URL(string: "http://10.20.51.50:3333/upload")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        var body = Data()
+        // Append user ID
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(userId)\r\n".data(using: .utf8)!)
+        
+        // Append video data
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"video.mov\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: video/quicktime\r\n\r\n".data(using: .utf8)!)
+        do {
+            let videoData = try Data(contentsOf: videoURL)
+            body.append(videoData)
+        } catch {
+            print("Error reading video data: \(error.localizedDescription)")
+            return
+        }
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        request.httpBody = body
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("Error uploading video: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
             
-            storageRef.downloadURL { url, error in
-                if let error = error {
-                    print("Error retrieving video URL: \(error.localizedDescription)")
-                    return
-                }
+            if let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                print("Upload response:", jsonResponse)
                 
-                guard let downloadURL = url else {
-                    print("No download URL found")
-                    return
-                }
-                
-                guard let user = Auth.auth().currentUser else {
-                    print("No user signed in")
-                    return
-                }
-                
-                let uid = user.uid
-                let databaseRef = Database.database().reference()
-                let newVideoRef = databaseRef.child("users/employees/\(uid)/videos").childByAutoId()
-                
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                let formattedDate = dateFormatter.string(from: Date())
-
-                let videoData: [String: Any] = [
-                    "url": downloadURL.absoluteString,
-                    "fileName": uniqueFileName,
-                    "date": formattedDate
-                ]
-                
-                newVideoRef.setValue(videoData) { error, _ in
-                    if let error = error {
-                        print("Error saving video to database: \(error.localizedDescription)")
-                    } else {
-                        print("Video successfully uploaded and saved.")
-                    }
+                DispatchQueue.main.async {
+                    let alert = UIAlertController(title: "Upload Successful",
+                                                  message: "Classification: \(jsonResponse["classification"] ?? "Unknown")",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
                 }
             }
         }
         
-        uploadTask.observe(.progress) { snapshot in
-            let progress = Double(snapshot.progress?.completedUnitCount ?? 0) /
-                           Double(snapshot.progress?.totalUnitCount ?? 1)
-            print("Upload progress: \(progress * 100)%")
-        }
-        
-        let alert = UIAlertController(title: "Success", message: "The video has been successfully submitted", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        self.present(alert, animated: true)
-        
+        task.resume()
     }
     
     
