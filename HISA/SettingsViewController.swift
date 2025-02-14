@@ -15,7 +15,7 @@ class SettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        overrideUserInterfaceStyle = .light
         // Fetch user data by employee ID and store Firebase key
         if let employeeId = CurrentUser.shared.getId() {
             UserService.shared.fetchUserByEmployeeId(employeeId: employeeId) { success in

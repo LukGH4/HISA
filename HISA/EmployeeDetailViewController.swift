@@ -2,9 +2,8 @@
 // HISA
 // Created by Barnabas Li on 1/23/25.
 
-//DATA IS HARDCODED AT THE MOMEMT, everything will be moved to database once it is fully set up
-
 import UIKit
+import FirebaseDatabase
 
 protocol EmployeeDetailDelegate: AnyObject {
     func deleteEmployee(_ employee: Employee)
@@ -19,24 +18,42 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
     @IBOutlet weak var scanHistoryTableView: UITableView!
 
     weak var delegate: EmployeeDetailDelegate?
-    var employee: Employee!
+    var employeeID: String!
+    private var employee: Employee?
+    private var databaseRef: DatabaseReference!
 
     override func viewDidLoad() {
+        overrideUserInterfaceStyle = .light
         super.viewDidLoad()
-
-        updateEmployeeDetails()
+        
         scanHistoryTableView.dataSource = self
         scanHistoryTableView.delegate = self
+        
+        databaseRef = Database.database().reference().child("users/employees").child(employeeID)
 
+        fetchEmployeeData()
         setupDeleteButton()
         setupEditButton()
     }
 
+    private func fetchEmployeeData() {
+        databaseRef.observeSingleEvent(of: .value) { [weak self] snapshot in
+            guard let self = self, let data = snapshot.value as? [String: Any] else { return }
+
+            if let fetchedEmployee = Employee(id: self.employeeID, data: data) {
+                self.employee = fetchedEmployee
+                self.updateEmployeeDetails()
+            }
+        }
+    }
+
     private func updateEmployeeDetails() {
+        guard let employee = employee else { return }
         nameLabel.text = employee.name
         dateLabel.text = employee.date
         scansLabel.text = "\(employee.scans)"
         dataAccessControl.isOn = employee.dataAccess
+        scanHistoryTableView.reloadData()
     }
 
     private func setupDeleteButton() {
@@ -70,68 +87,71 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
     @objc func deleteButtonTapped() {
         let alert = UIAlertController(
             title: "Confirm Deletion",
-            message: "Are you sure you want to delete \(employee.name)?",
+            message: "Are you sure you want to delete \(employee?.name ?? "this employee")?",
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
-            self.delegate?.deleteEmployee(self.employee)
-            self.navigationController?.popViewController(animated: true)
+            self.databaseRef.removeValue { error, _ in
+                if error == nil {
+                    self.delegate?.deleteEmployee(self.employee!)
+                    self.navigationController?.popViewController(animated: true)
+                }
+            }
         })
         present(alert, animated: true, completion: nil)
     }
 
     @objc func editButtonTapped() {
+        guard let employee = employee else { return }
+
         let alert = UIAlertController(title: "Edit Employee", message: "Update the employee's details.", preferredStyle: .alert)
 
         alert.addTextField { textField in
-            textField.text = self.employee.name
+            textField.text = employee.name
             textField.placeholder = "Name"
         }
         alert.addTextField { textField in
-            textField.text = self.employee.date
+            textField.text = employee.date
             textField.placeholder = "Date (YYYY-MM-DD)"
-        }
-        alert.addTextField { textField in
-            textField.text = "\(self.employee.scans)"
-            textField.placeholder = "Number of Scans"
-            textField.keyboardType = .numberPad
         }
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Save", style: .default) { [weak self] _ in
             guard let self = self,
                   let name = alert.textFields?[0].text, !name.isEmpty,
-                  let date = alert.textFields?[1].text, !date.isEmpty,
-                  let scansText = alert.textFields?[2].text, let scans = Int(scansText) else { return }
+                  let date = alert.textFields?[1].text, !date.isEmpty else { return }
 
-            self.employee.name = name
-            self.employee.date = date
-            self.employee.scans = scans
-            self.updateEmployeeDetails()
-            self.delegate?.updateEmployee(self.employee)
+
+            let updates: [String: Any] = ["name": name, "lastAccessed": date]
+            self.databaseRef.updateChildValues(updates) { error, _ in
+                if error == nil {
+                    self.employee?.name = name
+                    self.employee?.date = date
+                    self.updateEmployeeDetails()
+                    self.delegate?.updateEmployee(self.employee!)
+                }
+            }
         })
 
         present(alert, animated: true, completion: nil)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return employee.scanHistory.count
+        return employee?.scanHistory.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ScanHistoryCell", for: indexPath)
-        cell.textLabel?.text = employee.scanHistory[indexPath.row]
+        cell.textLabel?.text = employee?.scanHistory[indexPath.row]
         cell.textLabel?.textColor = .blue
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedLink = employee.scanHistory[indexPath.row]
-        if let url = URL(string: selectedLink) {
-            UIApplication.shared.open(url)
-        }
+        guard let selectedLink = employee?.scanHistory[indexPath.row], let url = URL(string: selectedLink) else { return }
+        UIApplication.shared.open(url)
         tableView.deselectRow(at: indexPath, animated: true)
     }
 }
