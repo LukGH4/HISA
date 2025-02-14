@@ -9,8 +9,19 @@ from datetime import date
 import cv2
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+import gdown
 
 app = Flask(__name__)
+
+file_id = "1dTQ0WzjO-periO7_cu9Bw72_pP0sK4qC"  # Replace with your actual file ID
+output_path = "model_weights.pth"
+
+if not os.path.exists(output_path):
+    print("Model file not found. Downloading...")
+    gdrive_url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(gdrive_url, output_path, quiet=False)
+else:
+    print("Model file already exists. Skipping download.")
 
 # Initialize Firebase Admin SDK
 cred = credentials.Certificate("jib-4338-hisa-firebase-adminsdk-c9uu0-6b2a83c10a.json")
@@ -33,7 +44,7 @@ in_features=model.classifier[1].in_features
 model.classifier[1]=nn.Linear(in_features=in_features,out_features=6)
 model = model.to(device)
 # Load trained weights (ensure the checkpoint matches EfficientNet's architecture)
-model.load_state_dict(torch.load("model_weights.pth", map_location=device))
+model.load_state_dict(torch.load(output_path, map_location=device))
 model.to(device)
 model.eval()
 
