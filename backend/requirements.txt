@@ -8,3 +8,6 @@ torch
 torchvision
 requests
 gunicorn
+firebase-admin
+albumentations
+gdown
