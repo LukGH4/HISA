@@ -64,12 +64,12 @@ def upload_file():
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
 
-    classification, confidence = None, None
+    status, classification, confidence = None, None, None
     if file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-        classification, confidence = classify_image(file_path)
+        status, classification, confidence = classify_image(file_path)
         storage_path = f"images/{filename}"
     elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
-        classification, confidence = classify_video(file_path)
+        status, classification, confidence = classify_video(file_path)
         storage_path = f"videos/{filename}"
     else:
         return jsonify({'error': 'Unsupported file format'}), 400
@@ -80,13 +80,13 @@ def upload_file():
 
     firebase_url = f"https://firebasestorage.googleapis.com/v0/b/jib-4338-hisa.firebasestorage.app/o/{storage_path.replace('/', '%2F')}?alt=media"
     
-    save_to_firebase(user_id, filename, firebase_url, classification, confidence)
+    save_to_firebase(user_id, filename, firebase_url, status, classification, confidence)
     os.remove(file_path)
 
     return jsonify({
         'message': 'File uploaded successfully',
         'file_url': firebase_url,
-        'classification': classification
+        'classification': status
     })
 
 def classify_image(file_path):
@@ -102,13 +102,15 @@ def classify_image(file_path):
 
             if confidence > 0.2:  # Threshold
                 classifications.append((label, confidence))
+        status = "Good Part"
 
         if classifications:
-            best_label, best_conf = max(classifications, key=lambda x: x[1])  # Get highest confidence label
+            best_label, best_conf = max(classifications, key=lambda x: x[1]) # Get highest confidence label
+            status = "Bad Part" 
         else:
             best_label, best_conf = "Good Part", 1.0  # Default case
 
-        return best_label, f"{best_conf:.2f}"
+        return status, best_label, f"{best_conf:.2f}"
     except Exception as e:
         return f"Error processing image: {str(e)}"
 
@@ -141,23 +143,26 @@ def classify_video(video_path):
 
         cap.release()
 
+        status = "Good Part"
         if classifications:
             best_label, best_conf = max(classifications, key=lambda x: x[1])  # Get highest confidence label
+            status = "Bad Part"
         else:
             best_label, best_conf = "Good Part", 1.0  # Default case
 
-        return best_label, f"{best_conf:.2f}"
+        return status, best_label, f"{best_conf:.2f}"
     
     except Exception as e:
         return f"Error processing video: {str(e)}"
 
 
-def save_to_firebase(user_id, filename, file_url, classification, confidence):
+def save_to_firebase(user_id, filename, file_url, status, classification, confidence):
     ref_type = "images" if filename.lower().endswith(('.png', '.jpg', '.jpeg')) else "videos"
     ref = db.reference(f"users/employees/{user_id}/{ref_type}").push()
     ref.set({
         "fileName": filename,
         "url": file_url,
+        "status": status,
         "classification": classification,
         "confidence": confidence,
         "date": date.today().isoformat()
