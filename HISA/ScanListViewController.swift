@@ -23,10 +23,12 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.delegate = self
         tableView.dataSource = self
         
+        // Do any additional setup after loading the view.
         fetchMediaFromFirebase()
     }
     
     func fetchMediaFromFirebase() {
+        // Reference to the Firebase Database
         guard let user = Auth.auth().currentUser else {
             print("No user is signed in")
             return
@@ -35,6 +37,7 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
         let uid = user.uid
         let databaseRef = Database.database().reference().child("users").child("employees").child(uid)
 
+        // Observe and fetch data
         databaseRef.observeSingleEvent(of: .value) { snapshot in
             guard let employeeData = snapshot.value as? [String: Any],
                   let username = employeeData["name"] as? String else {
@@ -48,6 +51,7 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
                     let date = imageDetails["date"] as? String ?? ""
                     let url = imageDetails["url"] as? String ?? ""
 
+                    // Add details to the mediaItems array
                     self.mediaItems.append([
                         "type": "image",
                         "folderKey": folderKey,
@@ -64,6 +68,7 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
                     let date = videoDetails["date"] as? String ?? ""
                     let url = videoDetails["url"] as? String ?? ""
 
+                    // Add details to the mediaItems array
                     self.mediaItems.append([
                         "type": "video",
                         "folderKey": folderKey,
@@ -74,6 +79,7 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
                 }
             }
 
+            // Reload table view after data fetch
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
@@ -96,14 +102,17 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedItem = mediaItems[indexPath.row]
         if let mediaURLString = selectedItem["url"], let mediaURL = URL(string: mediaURLString) {
+            // Check if the media is a video
             if selectedItem["type"] == "video" {
                 let player = AVPlayer(url: mediaURL)
                 let playerViewController = AVPlayerViewController()
                 playerViewController.player = player
+                // Present the video player
                 present(playerViewController, animated: true) {
                     player.play()
                 }
             } else if selectedItem["type"] == "image" {
+                // Navigate to the image detail view
                 performSegue(withIdentifier: "ScanListImageViewController", sender: selectedItem)
             }
         } else {
@@ -115,6 +124,7 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
         if segue.identifier == "ScanListImageViewController",
            let detailVC = segue.destination as? ScanListImageViewController,
            let selectedItem = sender as? [String: String] {
+            // Pass media details to the detail view controller
             detailVC.username = selectedItem["username"]
             detailVC.date = selectedItem["date"]
             detailVC.imageURL = selectedItem["url"]
@@ -126,14 +136,17 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
         guard let index = sender.view?.tag else { return }
         let selectedItem = mediaItems[index]
         if let mediaURLString = selectedItem["url"], let mediaURL = URL(string: mediaURLString) {
+            // Check if the media is a video
             if selectedItem["type"] == "video" {
                 let player = AVPlayer(url: mediaURL)
                 let playerViewController = AVPlayerViewController()
                 playerViewController.player = player
+                // Present the video player
                 present(playerViewController, animated: true) {
                     player.play()
                 }
             } else if selectedItem["type"] == "image" {
+                // Navigate to the image detail view
                 performSegue(withIdentifier: "ScanListImageViewController", sender: selectedItem)
             }
         }
