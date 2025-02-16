@@ -1,20 +1,21 @@
 import UIKit
+import FirebaseAuth
 
 class SettingsViewController: UIViewController, UITextFieldDelegate {
 
-    @IBOutlet weak var currentNameLabel: UITextField!
     @IBOutlet weak var currentEmployeeIdLabel: UITextField!
-    @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var employeeIdTextField: UITextField!
+    @IBOutlet weak var newNameTextField: UITextField!
+    @IBOutlet weak var changeNameButton: UIButton!
+    
+    @IBOutlet weak var newPasswordTextField: UITextField!
+    @IBOutlet weak var confirmPasswordTextField: UITextField!
+    @IBOutlet weak var changePasswordButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         overrideUserInterfaceStyle = .light
-        currentNameLabel.isUserInteractionEnabled = false
         currentEmployeeIdLabel.isUserInteractionEnabled = false
-        
-        nameTextField.delegate = self
-        employeeIdTextField.delegate = self
 
         if let employeeId = CurrentUser.shared.getId() {
             UserService.shared.fetchUserByEmployeeId(employeeId: employeeId) { success in
@@ -31,69 +32,83 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
 
     private func loadCurrentUserData() {
         let currentUser = CurrentUser.shared
-        currentNameLabel.text = currentUser.getName()
         currentEmployeeIdLabel.text = currentUser.getId()
     }
     
-    private func validateInputFields() -> Bool {
-        guard let updatedName = nameTextField.text, !updatedName.isEmpty else {
-            showAlert(title: "Input Error", message: "Name cannot be empty.")
-            return false
-        }
-
-        guard let updatedEmployeeId = employeeIdTextField.text, !updatedEmployeeId.isEmpty else {
-            showAlert(title: "Input Error", message: "Employee ID cannot be empty.")
-            return false
-        }
-
-        let employeeIdPattern = "^[0-9]{4,10}$" // Example: 4 to 10 digits
-        let employeeIdPredicate = NSPredicate(format: "SELF MATCHES %@", employeeIdPattern)
-        if !employeeIdPredicate.evaluate(with: updatedEmployeeId) {
-            showAlert(title: "Input Error", message: "Employee ID must be numeric and between 4-10 digits.")
-            return false
-        }
-
-        return true
-    }
-
-    @IBAction func submitButtonTapped(_ sender: UIButton) {
-        if validateInputFields() {
-                updateUserData()
-        }
-    }
-    
-    private func clearInputFields() {
-        nameTextField.text = ""
-        employeeIdTextField.text = ""
-    }
-    
-    private func updateUserData() {
-        guard let firebaseKey = CurrentUser.shared.getFirebaseKey() else {
-            print("Error: Firebase key not found")
-            showAlert(title: "Error", message: "Unable to update user profile.")
+    @IBAction func changeNameButtonTapped(_ sender: Any) {
+        guard let newName = newNameTextField.text, !newName.isEmpty else {
+            showAlert(title: "Error", message: "Please enter a new name.")
             return
         }
 
-        let updatedName = nameTextField.text ?? ""
-        let updatedEmployeeId = employeeIdTextField.text ?? ""
+        showChangeNameConfirmationAlert(newName: newName)
+    }
 
+    private func showChangeNameConfirmationAlert(newName: String) {
+        let alert = UIAlertController(title: "Change Name", message: "Are you sure you want to change your name?", preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Change Name", style: .destructive, handler: { _ in
+            self.changeName(newName: newName)
+        }))
+
+        present(alert, animated: true, completion: nil)
+    }
+
+    private func changeName(newName: String) {
+        guard let firebaseKey = CurrentUser.shared.getFirebaseKey() else {
+            showAlert(title: "Error", message: "Unable to update user profile.")
+            return
+        }
+        
         let updates: [String: Any] = [
-            "name": updatedName,
-            "id": updatedEmployeeId
+            "name": newName,
         ]
 
         UserService.shared.updateUserField(userId: firebaseKey, updates: updates) { error in
             if let error = error {
-                print("Failed to update user data: \(error.localizedDescription)")
                 self.showAlert(title: "Error", message: "Failed to update your profile.")
             } else {
-                print("User data successfully updated for Firebase key: \(firebaseKey)")
-                self.showAlert(title: "Success", message: "Profile updated successfully.")
-                
-                self.clearInputFields()
-                
+                self.showAlert(title: "Success", message: "Profile updated, please log back to view changes.")
                 CurrentUser.shared.setUserData(updates)
                 self.loadCurrentUserData()
+            }
+        }
+    }
+    
+
+    @IBAction func changePasswordButtonTapped(_ sender: Any) {
+        guard let newPassword = newPasswordTextField.text, !newPassword.isEmpty,
+              let confirmPassword = confirmPasswordTextField.text, !confirmPassword.isEmpty else {
+            showAlert(title: "Error", message: "Please enter both new password and confirm password.")
+            return
+        }
+
+        if newPassword != confirmPassword {
+            showAlert(title: "Error", message: "Passwords do not match.")
+            return
+        }
+        let alert = UIAlertController(title: "Change Password", message: "Are you sure you want to change your password?", preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Change Password", style: .destructive, handler: { _ in
+            self.changePassword(newPassword: newPassword)
+        }))
+
+        present(alert, animated: true, completion: nil)
+    }
+    
+    private func changePassword(newPassword: String) {
+        guard let currentUser = Auth.auth().currentUser else {
+            showAlert(title: "Error", message: "User not authenticated.")
+            return
+        }
+        currentUser.updatePassword(to: newPassword) { error in
+            if let error = error {
+                self.showAlert(title: "Error", message: error.localizedDescription)
+            } else {
+                self.showAlert(title: "Success", message: "Password changed successfully.")
+                self.navigationController?.popViewController(animated: true)
             }
         }
     }
@@ -109,5 +124,39 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
             textField.resignFirstResponder() // Dismiss keyboard
         }
         return true
+    }
+    
+    @IBAction func logoutButtonTapped(_ sender: UIButton) {
+        showLogoutConfirmationAlert()
+    }
+    
+    private func showLogoutConfirmationAlert() {
+        let alert = UIAlertController(title: "Logout", message: "Are you sure you want to log out?", preferredStyle: .alert)
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Logout", style: .destructive, handler: { _ in
+            self.logoutUser()
+        }))
+
+        present(alert, animated: true, completion: nil)
+    }
+
+    private func logoutUser() {
+        CurrentUser.shared.clearUserData()
+        do {
+            try Auth.auth().signOut()
+            print("User signed out successfully")
+        } catch let signOutError as NSError {
+            print("Error signing out: \(signOutError.localizedDescription)")
+        }
+        navigateToLoginScreen()
+    }
+
+    private func navigateToLoginScreen() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let loginViewController = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
+            loginViewController.modalPresentationStyle = .fullScreen
+            present(loginViewController, animated: true, completion: nil)
+        }
     }
 }
