@@ -46,7 +46,7 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
             return false
         }
 
-        let employeeIdPattern = "^[0-9]{4,10}$"
+        let employeeIdPattern = "^[0-9]{4,10}$" // Example: 4 to 10 digits
         let employeeIdPredicate = NSPredicate(format: "SELF MATCHES %@", employeeIdPattern)
         if !employeeIdPredicate.evaluate(with: updatedEmployeeId) {
             showAlert(title: "Input Error", message: "Employee ID must be numeric and between 4-10 digits.")
@@ -106,7 +106,7 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField.text?.isEmpty ?? true {
-            textField.resignFirstResponder()
+            textField.resignFirstResponder() // Dismiss keyboard
         }
         return true
     }

@@ -12,9 +12,10 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Set the view controller as the delegate of the text fields
         emailTextField.delegate = self
         passwordTextField.delegate = self
-        passwordTextField.isSecureTextEntry = true //hides password entry
+        passwordTextField.isSecureTextEntry = true
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

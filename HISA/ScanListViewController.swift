@@ -8,61 +8,76 @@
 import UIKit
 import Firebase
 import FirebaseAuth
+import AVKit
+import FirebaseDatabaseInternal
 
 class ScanListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    
     @IBOutlet weak var tableView: UITableView!
     
-    
-    var images: [[String: String]] = []
+    var mediaItems: [[String: String]] = []
     var username: String = ""
-        
-        
-        
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         tableView.delegate = self
         tableView.dataSource = self
+        
         // Do any additional setup after loading the view.
-        fetchImagesFromFirebase()
+        fetchMediaFromFirebase()
     }
     
-    func fetchImagesFromFirebase() {
+    func fetchMediaFromFirebase() {
         // Reference to the Firebase Database
-        var databaseRef: DatabaseReference?
         guard let user = Auth.auth().currentUser else {
             print("No user is signed in")
             return
         }
-        
-        let uid = user.uid
-        databaseRef = Database.database().reference().child("users").child("employees").child(uid) // This line has been modified by Hoyeon Kang for testing uid
 
+        let uid = user.uid
+        let databaseRef = Database.database().reference().child("users").child("employees").child(uid)
 
         // Observe and fetch data
-        databaseRef!.observeSingleEvent(of: .value) { snapshot in
+        databaseRef.observeSingleEvent(of: .value) { snapshot in
             guard let employeeData = snapshot.value as? [String: Any],
-                  let username = employeeData["name"] as? String,
-                  let imagesData = employeeData["images"] as? [String: [String: Any]] else {
+                  let username = employeeData["name"] as? String else {
                 print("No data found or incorrect structure")
                 return
             }
 
-            // Iterate through each folder and fetch details
-            for (folderKey, imageDetails) in imagesData {
-                let date = imageDetails["date"] as? String ?? ""
-                let url = imageDetails["url"] as? String ?? ""
+            // Fetch images
+            if let imagesData = employeeData["images"] as? [String: [String: Any]] {
+                for (folderKey, imageDetails) in imagesData {
+                    let date = imageDetails["date"] as? String ?? ""
+                    let url = imageDetails["url"] as? String ?? ""
 
-                // Add details to the images array
-                self.images.append([
-                    "folderKey": folderKey,
-                    "username": username, // Include the username
-                    "date": date,
-                    "url": url
-                ])
+                    // Add details to the mediaItems array
+                    self.mediaItems.append([
+                        "type": "image",
+                        "folderKey": folderKey,
+                        "username": username,
+                        "date": date,
+                        "url": url
+                    ])
+                }
+            }
+
+            // Fetch videos
+            if let videosData = employeeData["videos"] as? [String: [String: Any]] {
+                for (folderKey, videoDetails) in videosData {
+                    let date = videoDetails["date"] as? String ?? ""
+                    let url = videoDetails["url"] as? String ?? ""
+
+                    // Add details to the mediaItems array
+                    self.mediaItems.append([
+                        "type": "video",
+                        "folderKey": folderKey,
+                        "username": username,
+                        "date": date,
+                        "url": url
+                    ])
+                }
             }
 
             // Reload table view after data fetch
@@ -71,48 +86,71 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
             }
         }
     }
-    
-    
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return images.count
+        return mediaItems.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        let image = images[indexPath.row]
-        cell.textLabel?.text = image["username"]
-        cell.detailTextLabel?.text = image["date"]
-        cell.backgroundColor = indexPath.row % 2 == 0 ? .gray : .darkGray
+        let item = mediaItems[indexPath.row]
+        cell.textLabel?.text = item["username"]
+        cell.detailTextLabel?.text = "Date: \(item["date"] ?? "") | Type: \(item["type"] ?? "")"
+        cell.backgroundColor = indexPath.row % 2 == 0 ? .lightGray : .darkGray
         return cell
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedImage = images[indexPath.row]
-        performSegue(withIdentifier: "ScanListImageViewController", sender: selectedImage)
+        let selectedItem = mediaItems[indexPath.row]
+        if let mediaURLString = selectedItem["url"], let mediaURL = URL(string: mediaURLString) {
+            // Check if the media is a video
+            if selectedItem["type"] == "video" {
+                let player = AVPlayer(url: mediaURL)
+                let playerViewController = AVPlayerViewController()
+                playerViewController.player = player
+                // Present the video player
+                present(playerViewController, animated: true) {
+                    player.play()
+                }
+            } else if selectedItem["type"] == "image" {
+                // Navigate to the image detail view
+                performSegue(withIdentifier: "ScanListImageViewController", sender: selectedItem)
+            }
+        } else {
+            print("Invalid media URL")
+        }
     }
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ScanListImageViewController",
            let detailVC = segue.destination as? ScanListImageViewController,
-           let selectedImage = sender as? [String: String] {
-            detailVC.username = selectedImage["username"]
-            detailVC.date = selectedImage["date"]
-            detailVC.imageURL = selectedImage["url"]
-            detailVC.folderKey = selectedImage["folderKey"]
+           let selectedItem = sender as? [String: String] {
+            // Pass media details to the detail view controller
+            detailVC.username = selectedItem["username"]
+            detailVC.date = selectedItem["date"]
+            detailVC.imageURL = selectedItem["url"]
+            detailVC.folderKey = selectedItem["folderKey"]
         }
     }
-    
 
-    
     @objc func handleTap(_ sender: UITapGestureRecognizer) {
         guard let index = sender.view?.tag else { return }
-        print("Tapped on row at index: \(index)")
-        performSegue(withIdentifier: "ScanListImageViewController", sender: index)
-        
-    
+        let selectedItem = mediaItems[index]
+        if let mediaURLString = selectedItem["url"], let mediaURL = URL(string: mediaURLString) {
+            // Check if the media is a video
+            if selectedItem["type"] == "video" {
+                let player = AVPlayer(url: mediaURL)
+                let playerViewController = AVPlayerViewController()
+                playerViewController.player = player
+                // Present the video player
+                present(playerViewController, animated: true) {
+                    player.play()
+                }
+            } else if selectedItem["type"] == "image" {
+                // Navigate to the image detail view
+                performSegue(withIdentifier: "ScanListImageViewController", sender: selectedItem)
+            }
+        }
     }
 
-    
-    
 }

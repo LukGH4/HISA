@@ -21,6 +21,7 @@ class HomeViewController: UIViewController, UITextFieldDelegate{
         fetchUserName()
     }
     
+
     // This code is modified by Hoyeon Kang
     func fetchUserName() {
             let ref = Database.database().reference()
@@ -32,10 +33,12 @@ class HomeViewController: UIViewController, UITextFieldDelegate{
             
             
             uname.isUserInteractionEnabled = false
+
             employeesRef.observeSingleEvent(of: .value) { snapshot in
                 if snapshot.exists(), let data = snapshot.value as? [String: Any], let name = data["name"] as? String {
                     self.uname.text = name
                 } else {
+
                     managersRef.observeSingleEvent(of: .value) { snapshot in
                         if snapshot.exists(), let data = snapshot.value as? [String: Any], let name = data["name"] as? String {
                             self.uname.text = name
