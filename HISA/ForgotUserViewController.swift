@@ -39,7 +39,7 @@ class ForgotUserViewController: UIViewController {
                     if let employeeData = employeesData[id] as? [String: Any] {
                         if let dataEmail = employeeData["email"] as? String,
                            dataEmail == email {
-                            self.navigateToChangePassword(email: email)
+                            //self.navigateToChangePassword(email: email)
                         } else {
                             self.showAlert(title: "Error", message: "Invalid email or ID.")
                         }
@@ -53,11 +53,11 @@ class ForgotUserViewController: UIViewController {
         }
     }
 
-    private func navigateToChangePassword(email: String) {
+    /*private func navigateToChangePassword(email: String) {
         let changePasswordVC = storyboard?.instantiateViewController(withIdentifier: "ChangePasswordViewController") as! ChangePasswordViewController
         changePasswordVC.email = email
         navigationController?.pushViewController(changePasswordVC, animated: true)
-    }
+    }*/
 
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -66,4 +66,3 @@ class ForgotUserViewController: UIViewController {
         self.present(alert, animated: true, completion: nil)
     }
 }
-

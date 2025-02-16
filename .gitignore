@@ -8,10 +8,18 @@
 *./HISA/GoogleService-Info.plist
 
 HISA.xcodeproj/project.pbxproj
+<<<<<<< HEAD
+=======
 ./HISA.xcodeproj/project.pbxproj
+>>>>>>> 874fd0ce32d2ed9f60fcb488db6ccd731e04f529
 
 HISA.xcodeproj/project.xcworkspace/xcuserdata/lukehammond.xcuserdatad
 MLTraining
 backend/model_weights.pth
 backend/fault_detection.pth
+<<<<<<< HEAD
 backend/uploads/*
+backend/venv/
+=======
+backend/uploads/*
+>>>>>>> 874fd0ce32d2ed9f60fcb488db6ccd731e04f529

@@ -8,3 +8,9 @@ torch
 torchvision
 requests
 gunicorn
+<<<<<<< HEAD
+firebase-admin
+albumentations
+gdown
+=======
+>>>>>>> 874fd0ce32d2ed9f60fcb488db6ccd731e04f529

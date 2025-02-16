@@ -15,6 +15,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         // Set the view controller as the delegate of the text fields
         emailTextField.delegate = self
         passwordTextField.delegate = self
+        passwordTextField.isSecureTextEntry = true
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

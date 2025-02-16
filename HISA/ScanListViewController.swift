@@ -8,6 +8,8 @@
 import UIKit
 import Firebase
 import FirebaseAuth
+import AVKit
+import FirebaseDatabaseInternal
 
 class ScanListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
