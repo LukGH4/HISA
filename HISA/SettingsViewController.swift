@@ -1,12 +1,6 @@
-//  SettingsViewController.swift
-//  HISA
-//
-//  Created by Hoyeon Kang on 11/16/24.
-//
-
 import UIKit
 
-class SettingsViewController: UIViewController {
+class SettingsViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var currentNameLabel: UITextField!
     @IBOutlet weak var currentEmployeeIdLabel: UITextField!
@@ -16,7 +10,12 @@ class SettingsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         overrideUserInterfaceStyle = .light
-        // Fetch user data by employee ID and store Firebase key
+        currentNameLabel.isUserInteractionEnabled = false
+        currentEmployeeIdLabel.isUserInteractionEnabled = false
+        
+        nameTextField.delegate = self
+        employeeIdTextField.delegate = self
+
         if let employeeId = CurrentUser.shared.getId() {
             UserService.shared.fetchUserByEmployeeId(employeeId: employeeId) { success in
                 if success {
@@ -47,8 +46,7 @@ class SettingsViewController: UIViewController {
             return false
         }
 
-        // Check if employee ID contains only numbers and is a valid length
-        let employeeIdPattern = "^[0-9]{4,10}$" // Example: 4 to 10 digits
+        let employeeIdPattern = "^[0-9]{4,10}$"
         let employeeIdPredicate = NSPredicate(format: "SELF MATCHES %@", employeeIdPattern)
         if !employeeIdPredicate.evaluate(with: updatedEmployeeId) {
             showAlert(title: "Input Error", message: "Employee ID must be numeric and between 4-10 digits.")
@@ -104,5 +102,12 @@ class SettingsViewController: UIViewController {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField.text?.isEmpty ?? true {
+            textField.resignFirstResponder()
+        }
+        return true
     }
 }

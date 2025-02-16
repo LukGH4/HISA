@@ -14,13 +14,11 @@ class UserService {
 
     func fetchUserInfoAndPersist(userId: String) {
         let databaseRef = Database.database().reference()
-        
-        // Check employees first
+
         databaseRef.child("users/employees").child(userId).observeSingleEvent(of: .value) { snapshot in
             if let userData = snapshot.value as? [String: Any] {
                 CurrentUser.shared.setUserData(userData)
             } else {
-                // If not found, check managers
                 databaseRef.child("users/managers").child(userId).observeSingleEvent(of: .value) { snapshot in
                     if let userData = snapshot.value as? [String: Any] {
                         CurrentUser.shared.setUserData(userData)
@@ -73,7 +71,6 @@ class UserService {
             }
         }
 
-        // Search in employees first, then managers
         searchUser(in: "users/employees") { found in
             if found {
                 completion(true)

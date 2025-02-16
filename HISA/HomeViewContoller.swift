@@ -21,8 +21,6 @@ class HomeViewController: UIViewController, UITextFieldDelegate{
         fetchUserName()
     }
     
-    
-    // this doesn't work at the moment since the backend isn't finished, but it displays the name of the employee on the welcome screen. will likely need to modify
     // This code is modified by Hoyeon Kang
     func fetchUserName() {
             let ref = Database.database().reference()
@@ -32,11 +30,12 @@ class HomeViewController: UIViewController, UITextFieldDelegate{
             let employeesRef = ref.child("users/employees").child(uid)
             let managersRef = ref.child("users/managers").child(uid)
             
+            
+            uname.isUserInteractionEnabled = false
             employeesRef.observeSingleEvent(of: .value) { snapshot in
                 if snapshot.exists(), let data = snapshot.value as? [String: Any], let name = data["name"] as? String {
                     self.uname.text = name
                 } else {
-                    // If not found in employees, check in managers
                     managersRef.observeSingleEvent(of: .value) { snapshot in
                         if snapshot.exists(), let data = snapshot.value as? [String: Any], let name = data["name"] as? String {
                             self.uname.text = name
