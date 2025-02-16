@@ -28,6 +28,7 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
         tableView.dataSource = self
         // Do any additional setup after loading the view.
         fetchImagesFromFirebase()
+        fetchVideosFromFirebase()
     }
     
     func fetchImagesFromFirebase() {
@@ -55,13 +56,21 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
             for (folderKey, imageDetails) in imagesData {
                 let date = imageDetails["date"] as? String ?? ""
                 let url = imageDetails["url"] as? String ?? ""
+                let status = imageDetails["status"] as? String ?? ""
+                let classification = imageDetails["classification"] as? String ?? ""
+                let confidence = imageDetails["confidence"] as? String ?? ""
+                let fileName = imageDetails["fileName"] as? String ?? ""
 
                 // Add details to the images array
                 self.images.append([
                     "folderKey": folderKey,
                     "username": username, // Include the username
                     "date": date,
-                    "url": url
+                    "url": url,
+                    "status": status,
+                    "classification": classification,
+                    "confidence": confidence,
+                    "fileName": fileName
                 ])
             }
 
@@ -72,6 +81,56 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
+    func fetchVideosFromFirebase() {
+        // Reference to the Firebase Database
+        var databaseRef: DatabaseReference?
+        guard let user = Auth.auth().currentUser else {
+            print("No user is signed in")
+            return
+        }
+        
+        let uid = user.uid
+        databaseRef = Database.database().reference().child("users").child("employees").child(uid) // This line has been modified by Hoyeon Kang for testing uid
+
+
+        // Observe and fetch data
+        databaseRef!.observeSingleEvent(of: .value) { snapshot in
+            guard let employeeData = snapshot.value as? [String: Any],
+                  let username = employeeData["name"] as? String,
+                  let imagesData = employeeData["videos"] as? [String: [String: Any]] else {
+                print("No data found or incorrect structure")
+                return
+            }
+
+            // Iterate through each folder and fetch details
+            for (folderKey, imageDetails) in imagesData {
+                let date = imageDetails["date"] as? String ?? ""
+                let url = imageDetails["url"] as? String ?? ""
+                let status = imageDetails["status"] as? String ?? ""
+                let classification = imageDetails["classification"] as? String ?? ""
+                let confidence = imageDetails["confidence"] as? String ?? ""
+                let fileName = imageDetails["fileName"] as? String ?? ""
+
+                // Add details to the images array
+                self.images.append([
+                    "folderKey": folderKey,
+                    "username": username, // Include the username
+                    "date": date,
+                    "url": url,
+                    "status": status,
+                    "classification": classification,
+                    "confidence": confidence,
+                    "fileName": fileName
+                ])
+            }
+
+            // Reload table view after data fetch
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
+ 
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -100,6 +159,11 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
             detailVC.date = selectedImage["date"]
             detailVC.imageURL = selectedImage["url"]
             detailVC.folderKey = selectedImage["folderKey"]
+            detailVC.videoURL = selectedImage["videoURL"]
+            detailVC.status = selectedImage["status"]
+            detailVC.classification = selectedImage["classification"]
+            detailVC.confidence = selectedImage["confidence"]
+            detailVC.fileName = selectedImage["fileName"]
         }
     }
     
