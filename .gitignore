@@ -14,4 +14,4 @@ MLTraining
 backend/model_weights.pth
 backend/fault_detection.pth
 backend/uploads/*
-backend/venv/
+backend/venv/*
