@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import FirebaseAuth
+import FirebaseDatabase
 
 class ForgotUserViewController: UIViewController {
 
@@ -20,16 +22,48 @@ class ForgotUserViewController: UIViewController {
     }
 
     @IBAction func submitButtonTapped(_ sender: Any) {
-        // handle logic here
-        let alert = UIAlertController(title: "Email Sent", message: "Please check your Honeywell email", preferredStyle: .alert)
-            
-        // Add an action (button) to the popup
+        guard let email = emailTextField.text, !email.isEmpty,
+              let id = idTextField.text, !id.isEmpty else {
+            showAlert(title: "Error", message: "Please enter both email and ID.")
+                return
+        }
+
+        verifyUser(email: email, id: id)
+    }
+
+    private func verifyUser(email: String, id: String) {
+        let employeesRef = Database.database().reference().child("users").child("employees")
+        employeesRef.observeSingleEvent(of: .value) { snapshot in
+            if snapshot.exists() {
+                if let employeesData = snapshot.value as? [String: Any] {
+                    if let employeeData = employeesData[id] as? [String: Any] {
+                        if let dataEmail = employeeData["email"] as? String,
+                           dataEmail == email {
+                            self.navigateToChangePassword(email: email)
+                        } else {
+                            self.showAlert(title: "Error", message: "Invalid email or ID.")
+                        }
+                    } else {
+                        self.showAlert(title: "Error", message: "User not found.")
+                    }
+                }
+            } else {
+                self.showAlert(title: "Error", message: "No employees data found.")
+            }
+        }
+    }
+
+    private func navigateToChangePassword(email: String) {
+        let changePasswordVC = storyboard?.instantiateViewController(withIdentifier: "ChangePasswordViewController") as! ChangePasswordViewController
+        changePasswordVC.email = email
+        navigationController?.pushViewController(changePasswordVC, animated: true)
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
         alert.addAction(okAction)
-            
-        // Present the popup
         self.present(alert, animated: true, completion: nil)
     }
-    
 }
 
