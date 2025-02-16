@@ -52,9 +52,17 @@ class ChangePasswordViewController: UIViewController {
             } else {
                 self.showAlert(title: "Success", message: "Password changed successfully.")
                 self.navigationController?.popViewController(animated: true)
+                self.navigateToLoginPage()
             }
         }
     }
+    
+    private func navigateToLoginPage() {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
+                self.present(loginVC, animated: true, completion: nil)
+            }
+        }
 
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
