@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1336526A2CE9413A0061D5B3 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133652692CE9413A0061D5B3 /* ScanViewController.swift */; };
 		1336526E2CE941470061D5B3 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526C2CE941470061D5B3 /* SettingsViewController.swift */; };
 		1336526F2CE941470061D5B3 /* StatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526D2CE941470061D5B3 /* StatsViewController.swift */; };
 		133652702CE941470061D5B3 /* HomeViewContoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526B2CE941470061D5B3 /* HomeViewContoller.swift */; };
@@ -34,10 +33,10 @@
 		888E758B2D424B0F0028D518 /* EmployeeTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888E758A2D424B0F0028D518 /* EmployeeTableViewCell.swift */; };
 		888E758F2D425A020028D518 /* EmployeeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888E758E2D425A020028D518 /* EmployeeDetailViewController.swift */; };
 		888E75912D425F530028D518 /* Employee.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888E75902D425F530028D518 /* Employee.swift */; };
+		88E5A6C52D63D6A900DBF47C /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88E5A6C42D63D6A900DBF47C /* ScanViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		133652692CE9413A0061D5B3 /* ScanViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewController.swift; sourceTree = "<group>"; };
 		1336526B2CE941470061D5B3 /* HomeViewContoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewContoller.swift; sourceTree = "<group>"; };
 		1336526C2CE941470061D5B3 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		1336526D2CE941470061D5B3 /* StatsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewController.swift; sourceTree = "<group>"; };
@@ -62,6 +61,7 @@
 		888E758A2D424B0F0028D518 /* EmployeeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeTableViewCell.swift; sourceTree = "<group>"; };
 		888E758E2D425A020028D518 /* EmployeeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeDetailViewController.swift; sourceTree = "<group>"; };
 		888E75902D425F530028D518 /* Employee.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Employee.swift; sourceTree = "<group>"; };
+		88E5A6C42D63D6A900DBF47C /* ScanViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,9 +99,9 @@
 			isa = PBXGroup;
 			children = (
 				5E64934D2CE91ADD00E10A3A /* AppDelegate.swift */,
+				88E5A6C42D63D6A900DBF47C /* ScanViewController.swift */,
 				8813172E2D39051900A9E74C /* LoginViewController.swift */,
 				5E64934F2CE91ADD00E10A3A /* SceneDelegate.swift */,
-				133652692CE9413A0061D5B3 /* ScanViewController.swift */,
 				1336526B2CE941470061D5B3 /* HomeViewContoller.swift */,
 				1336526C2CE941470061D5B3 /* SettingsViewController.swift */,
 				1336526D2CE941470061D5B3 /* StatsViewController.swift */,
@@ -201,6 +201,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88E5A6C52D63D6A900DBF47C /* ScanViewController.swift in Sources */,
 				1336526E2CE941470061D5B3 /* SettingsViewController.swift in Sources */,
 				1336526F2CE941470061D5B3 /* StatsViewController.swift in Sources */,
 				13D1ECA22D457B3F00DB616F /* UserService.swift in Sources */,
@@ -217,7 +218,6 @@
 				13D1ECA02D457B3600DB616F /* CurrentUser.swift in Sources */,
 				883F9F922D390D9A0016650A /* ViewController.swift in Sources */,
 				5E9FB6192D41AC7000168ABB /* ScanListImageViewController.swift in Sources */,
-				1336526A2CE9413A0061D5B3 /* ScanViewController.swift in Sources */,
 				5E9FB6172D41A6AA00168ABB /* ScanListViewController.swift in Sources */,
 				888E75892D4249B20028D518 /* ManagerDashViewController.swift in Sources */,
 			);
