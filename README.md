@@ -13,7 +13,7 @@
 - **ML Model**:  
   Implemented a trained `YOLOv8` model that can process photo and video input and return a binary classification.
 - **Manager Screen Implementation**:  
-  Managers can now view and manage employee information and past scans. These scans are displayed as direct links to the image or video in Firebase. The UI also supports search and filtering for convenience.
+  Managers can now view and manage employee information and past scans. These scans are displayed as direct links to the image or video in `Firebase`. The UI also supports search and filtering for convenience.
 - **Improvements to Scanning Page**:  
   Users can now view and delete their past scans. Video recording functionality has been added, enabling users to scan parts through videos.
 - **Improvements to Settings Page**:  
