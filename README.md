@@ -2,28 +2,55 @@
  - Problem:  Need a consistent way to determine if a part is good or bad at a Maintenance Repair & Overhaul during part intake. Dependence on individuals to determine good and bad part is not a consistent way to perform the task on part intake. Inefficient use of part utilization. 
  
 - Solution: Using Machine Learning (ML) Image Classification technology, an ML tech stack will be created and integrated with a Part Intake Scanning mobile app. The ML model will be trained using a good part and bad part image dataset. The good / bad part ML model produced will be integrated as part of the app to determine if the part is Good / Bad based on the image taken at the depot using the app in real-time. The app will also have an on-device self-learning mode that will be used as feedback into the ML training to fine tune and improve the results over time. 
+
 # Release Notes
 
+## Version 0.2.0
+
+### Features
+- **Backend Setup**:
+  The backend has been set up using `Flask`, which handles user input, interacts with the ML model, and stores files in `Firebase Storage`. Metadata is saved in the `Firebase Realtime Database`.
+- **ML Model**:  
+  Implemented a trained `YOLOv8` model that can process photo and video input and return a binary classification.
+- **Manager Screen Implementation**:
+  Managers can now view and manage employee information and past scans. These scans are displayed as direct links to the image/video in `Firebase`. The UI also supports search and filtering for convenience.
+- **Improvements to Scanning Page**:  
+  Users can now view and delete their past scans. Video recording functionality has been added, enabling users to scan parts through videos.
+- **Improvements to Settings Page**:  
+  Settings page now includes options to change an employee's name and password, along with a logout feature.
+
+### Bug Fixes
+- Fixed various alignment issues on the Sign Up, Settings, and Forgot Password screens.
+- The keyboard now dismisses when pressing 'return' on empty inputs or tapping anywhere on the screen.
+- Fixed issues with text boxes that allowed input when they shouldn't.
+- Passwords are now hidden on the Login screen.
+
+### Known Issues
+- **ML Model Classification Accuracy**:
+  The model requires further training, and the weights need to be adjusted. Currently, the classification results are not very accurate due to low confidence thresholds.
+- **Data Access not functional**:
+  Restricting employee data access on the manager side is not yet functional, though the framework for this feature is in place.
+  
 ## Version 0.1.0
 
 ### Features
 - **User Account Creation**:
-  Users can create accounts and log in through our authentication system hosted on `FireBase`. Accounts can be one of two types (Employee, Manager). "Forgot Password" feature implemented.
+  Users can create accounts and log in through the `Firebase` authentication system. There are two types of accounts: Employee and Manager. A "Forgot Password" feature is also implemented.
 - **Separate Manager UI**:  
-  The "scan" tab is replaced by an "employees" tab for Manager accounts, in which they can view basic employee info (Name, Last Accessed, Scan History) as well as change employee permissions.
+  For Manager accounts, the "scan" tab is replaced by an "employees" tab, where they can view basic employee information (name, last accessed, scan history) and change employee permissions.
 - **Improvements to Scanning Interface**:  
-  Scans are now stored in their corresponding employee accounts. Employee accounts also have access to their previous scans.
+  Scans are now stored under the respective employee's account, and employees can view their previous scans.
 - **Implementation of Settings Screen**:
-  A basic implementation of the Settings tab, including profile management options integrated with our backend.
+  A basic implementation of the Settings screen has been added, allowing for profile management and integration with the backend.
 - **General Improvements**:  
-  Better error handling for the Login screen, as well as minor UI improvements in most screens.
+  Error handling on the Login screen has been enhanced, along with minor UI improvements across various screens.
 
 ### Bug Fixes
 - **N/A**
 
 ### Known Issues
 - **Scan History in Manager UI**:
-  We made changes to our backend which have yet to be reflected in this screen.
+  Changes made to the backend are not yet reflected in the Manager UI's Scan History section.
 
 ## Version 0.0.0
 
