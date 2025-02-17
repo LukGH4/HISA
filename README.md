@@ -8,12 +8,12 @@
 ## Version 0.2.0
 
 ### Features
-- **Backend Setup**:
+- **Backend Setup**:  
   The backend has been set up using `Flask`, which handles user input, interacts with the ML model, and stores files in `Firebase Storage`. Metadata is saved in the `Firebase Realtime Database`.
 - **ML Model**:  
   Implemented a trained `YOLOv8` model that can process photo and video input and return a binary classification.
-- **Manager Screen Implementation**:
-  Managers can now view and manage employee information and past scans. These scans are displayed as direct links to the image/video in `Firebase`. The UI also supports search and filtering for convenience.
+- **Manager Screen Implementation**:  
+  Managers can now view and manage employee information and past scans. These scans are displayed as direct links to the image or video in Firebase. The UI also supports search and filtering for convenience.
 - **Improvements to Scanning Page**:  
   Users can now view and delete their past scans. Video recording functionality has been added, enabling users to scan parts through videos.
 - **Improvements to Settings Page**:  
@@ -26,21 +26,21 @@
 - Passwords are now hidden on the Login screen.
 
 ### Known Issues
-- **ML Model Classification Accuracy**:
+- **ML Model Classification Accuracy**:  
   The model requires further training, and the weights need to be adjusted. Currently, the classification results are not very accurate due to low confidence thresholds.
-- **Data Access not functional**:
+- **Data Access not functional**:  
   Restricting employee data access on the manager side is not yet functional, though the framework for this feature is in place.
   
 ## Version 0.1.0
 
 ### Features
-- **User Account Creation**:
+- **User Account Creation**:  
   Users can create accounts and log in through the `Firebase` authentication system. There are two types of accounts: Employee and Manager. A "Forgot Password" feature is also implemented.
 - **Separate Manager UI**:  
   For Manager accounts, the "scan" tab is replaced by an "employees" tab, where they can view basic employee information (name, last accessed, scan history) and change employee permissions.
 - **Improvements to Scanning Interface**:  
   Scans are now stored under the respective employee's account, and employees can view their previous scans.
-- **Implementation of Settings Screen**:
+- **Implementation of Settings Screen**:  
   A basic implementation of the Settings screen has been added, allowing for profile management and integration with the backend.
 - **General Improvements**:  
   Error handling on the Login screen has been enhanced, along with minor UI improvements across various screens.
@@ -49,7 +49,7 @@
 - **N/A**
 
 ### Known Issues
-- **Scan History in Manager UI**:
+- **Scan History in Manager UI**:  
   Changes made to the backend are not yet reflected in the Manager UI's Scan History section.
 
 ## Version 0.0.0
