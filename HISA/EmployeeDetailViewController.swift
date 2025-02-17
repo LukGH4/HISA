@@ -22,6 +22,19 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
     private var employee: Employee?
     private var databaseRef: DatabaseReference!
 
+    @IBAction func restrictDataAccessToggled(_ sender: UISwitch) {
+        let isRestricted = sender.isOn
+        let updates = ["dataAccess": isRestricted ? "false" : "true"]
+
+        databaseRef.updateChildValues(updates) { error, _ in
+            if let error = error {
+                print("Failed to update restriction status: \(error.localizedDescription)")
+            } else {
+                print("Employee restriction status updated to \(isRestricted)")
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         overrideUserInterfaceStyle = .light
         super.viewDidLoad()
@@ -52,7 +65,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         nameLabel.text = employee.name
         dateLabel.text = employee.date
         scansLabel.text = "\(employee.scans)"
-        dataAccessControl.isOn = employee.dataAccess
+        dataAccessControl.isOn = !employee.dataAccess
         scanHistoryTableView.reloadData()
     }
 
