@@ -46,6 +46,11 @@ test_transform = A.Compose([
     ToTensorV2()
 ])
 
+#testing
+@app.route('/')
+def home():
+    return "Flask server is running!"
+#end testing
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

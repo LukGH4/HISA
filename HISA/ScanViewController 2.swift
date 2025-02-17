@@ -47,6 +47,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("Submit button:", submitButton as Any)
         setupCamera()
         
         setupGridOverlay()
@@ -327,7 +328,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     }
     
     @IBAction func submitPhoto(_ sender: Any) {
-        print("a")
+        print("Submit button pressed")
         guard let capturedImage = capturedImageView.image else {
             print("No image to submit")
             return
@@ -340,7 +341,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://10.8.17.11:3333/upload")!
+        let url = URL(string: "http://10.8.17.11:3333/upload")! // replace
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -393,7 +394,6 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     }
     
     @IBAction func submitVideo(_ sender: Any) {
-        print("video button clicked")
         guard let videoURL = self.videoURL else {
             print("No video to upload")
             return
@@ -401,7 +401,8 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://10.8.17.11:3333/upload")!
+        let url = URL(string: "http://10.8.17.11:3333/upload")! // replace
+
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         

@@ -9,23 +9,43 @@ import UIKit
 import FirebaseAuth
 import FirebaseDatabase
 
-class ForgotUserViewController: UIViewController {
+class ForgotUserViewController: UIViewController, UITextFieldDelegate {
 
-    @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var idTextField: UITextField!
     @IBOutlet weak var submitButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        emailTextField.delegate = self
+        idTextField.delegate = self
+
+        overrideUserInterfaceStyle = .light
+
+        // Fix text field appearance
+        configureTextField(emailTextField)
+        configureTextField(idTextField)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    private func configureTextField(_ textField: UITextField) {
+        textField.backgroundColor = .white
+        textField.textColor = .black
+    }
+
+
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     @IBAction func submitButtonTapped(_ sender: Any) {
         guard let email = emailTextField.text, !email.isEmpty,
               let id = idTextField.text, !id.isEmpty else {
             showAlert(title: "Error", message: "Please enter both email and ID.")
-                return
+            return
         }
 
         verifyUser(email: email, id: id)
@@ -39,7 +59,6 @@ class ForgotUserViewController: UIViewController {
                     if let employeeData = employeesData[id] as? [String: Any] {
                         if let dataEmail = employeeData["email"] as? String,
                            dataEmail == email {
-//                            self.navigateToChangePassword(email: email)
                             self.showAlert(title: "Error", message: "To be implemented...")
                         } else {
                             self.showAlert(title: "Error", message: "Invalid email or ID.")
@@ -53,17 +72,16 @@ class ForgotUserViewController: UIViewController {
             }
         }
     }
-//
-//    private func navigateToChangePassword(email: String) {
-//        let changePasswordVC = storyboard?.instantiateViewController(withIdentifier: "ChangePasswordViewController") as! ChangePasswordViewController
-//        changePasswordVC.email = email
-//        navigationController?.pushViewController(changePasswordVC, animated: true)
-//    }
 
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
         alert.addAction(okAction)
         self.present(alert, animated: true, completion: nil)
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
