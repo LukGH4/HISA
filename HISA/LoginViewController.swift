@@ -32,61 +32,82 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
 
     @IBAction func loginButtonTapped(_ sender: Any) {
-        guard let email = emailTextField.text, !email.isEmpty else {
-            showAlert(title: "Error", message: "Please enter your email.")
-            return
-        }
+            guard let email = emailTextField.text, !email.isEmpty else {
+                showAlert(title: "Error", message: "Please enter your email.")
+                return
+            }
 
-        guard let password = passwordTextField.text, !password.isEmpty else {
-            showAlert(title: "Error", message: "Please enter your password.")
-            return
-        }
+            guard let password = passwordTextField.text, !password.isEmpty else {
+                showAlert(title: "Error", message: "Please enter your password.")
+                return
+            }
 
-        // Firebase Authentication for email and password
-        Auth.auth().signIn(withEmail: email, password: password) { (authResult, error) in
-            if let error = error {
-                self.showAlert(title: "Login Failed", message: error.localizedDescription)
-            } else {
-                // Successful login, now check user role
-                if let user = authResult?.user {
-                    let ref = Database.database().reference() // or Firestore
-                    let userRef = ref.child("users").child("managers").child(user.uid)
-                    UserService.shared.fetchUserInfoAndPersist(userId: user.uid)
+            // Firebase Authentication for email and password
+            Auth.auth().signIn(withEmail: email, password: password) { (authResult, error) in
+                if let error = error {
+                    self.showAlert(title: "Login Failed", message: error.localizedDescription)
+                } else {
+                    // Successful login, now check user role
+                    if let user = authResult?.user {
+                        let ref = Database.database().reference() // or Firestore
+                        let userRef = ref.child("users").child("managers").child(user.uid)
+                        UserService.shared.fetchUserInfoAndPersist(userId: user.uid)
 
-                    userRef.observeSingleEvent(of: .value, with: { snapshot in
-                        if snapshot.exists() {
-                            if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "ManagerTabBarController") as? UITabBarController {
-                                tabBarController.selectedIndex = 0
-                                
-                                if let window = UIApplication.shared.windows.first {
-                                    window.rootViewController = tabBarController
-                                    window.makeKeyAndVisible()
-                                    let transition = CATransition()
-                                    transition.type = .fade
-                                    transition.duration = 0.3
-                                    window.layer.add(transition, forKey: kCATransition)
+                        userRef.observeSingleEvent(of: .value, with: { snapshot in
+                            if snapshot.exists() {
+                                if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "ManagerTabBarController") as? UITabBarController {
+                                    tabBarController.selectedIndex = 0
+
+                                    if let window = UIApplication.shared.windows.first {
+                                        window.rootViewController = tabBarController
+                                        window.makeKeyAndVisible()
+                                        let transition = CATransition()
+                                        transition.type = .fade
+                                        transition.duration = 0.3
+                                        window.layer.add(transition, forKey: kCATransition)
+                                    }
+                                }
+                            } else {
+                                // Check if employee is restricted
+                                let employeesRef = ref.child("users").child("employees")
+                                employeesRef.observeSingleEvent(of: .value) { snapshot in
+                                    for child in snapshot.children {
+                                        if let snap = child as? DataSnapshot,
+                                           let value = snap.value as? [String: Any],
+                                           let storedEmail = value["email"] as? String, storedEmail.caseInsensitiveCompare(email) == .orderedSame {
+
+                                            if let dataAccess = value["dataAccess"] as? String, dataAccess.lowercased() == "false" {
+                                                self.showAlert(title: "Access Denied", message: "Your access has been restricted by a manager.")
+                                                try? Auth.auth().signOut()
+                                                return
+                                            }
+
+                                            if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
+                                                tabBarController.selectedIndex = 0
+
+                                                if let window = UIApplication.shared.windows.first {
+                                                    window.rootViewController = tabBarController
+                                                    window.makeKeyAndVisible()
+                                                    let transition = CATransition()
+                                                    transition.type = .fade
+                                                    transition.duration = 0.3
+                                                    window.layer.add(transition, forKey: kCATransition)
+                                                }
+                                            }
+                                            return
+                                        }
+                                    }
+
+                                    // Fallback if employee not found
+                                    self.showAlert(title: "Error", message: "Failed to retrieve user data.")
                                 }
                             }
-                        } else {
-                            // Navigate to regular user tab controller
-                            if let tabBarController = self.storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
-                                tabBarController.selectedIndex = 0
-                                
-                                if let window = UIApplication.shared.windows.first {
-                                    window.rootViewController = tabBarController
-                                    window.makeKeyAndVisible()
-                                    let transition = CATransition()
-                                    transition.type = .fade
-                                    transition.duration = 0.3
-                                    window.layer.add(transition, forKey: kCATransition)
-                                }
-                            }
-                        }
-                    })
+                        })
+                    }
                 }
             }
         }
-    }
+
 
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
