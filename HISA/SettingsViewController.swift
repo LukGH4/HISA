@@ -16,7 +16,15 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         overrideUserInterfaceStyle = .light
         currentEmployeeIdLabel.isUserInteractionEnabled = false
+        
+        newNameTextField.delegate = self
+        newPasswordTextField.delegate = self
+        confirmPasswordTextField.delegate = self
+        newPasswordTextField.isSecureTextEntry = true
+        confirmPasswordTextField.isSecureTextEntry = true
 
+        setupTapGesture()
+        
         if let employeeId = CurrentUser.shared.getId() {
             UserService.shared.fetchUserByEmployeeId(employeeId: employeeId) { success in
                 if success {
@@ -30,9 +38,27 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         }
     }
 
+    private func setupTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
     private func loadCurrentUserData() {
         let currentUser = CurrentUser.shared
         currentEmployeeIdLabel.text = currentUser.getId()
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == newNameTextField || textField == newPasswordTextField || textField == confirmPasswordTextField {
+            if textField.text?.isEmpty ?? true {
+                textField.resignFirstResponder()
+            }
+        }
+        return true
     }
     
     @IBAction func changeNameButtonTapped(_ sender: Any) {
@@ -40,18 +66,15 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
             showAlert(title: "Error", message: "Please enter a new name.")
             return
         }
-
         showChangeNameConfirmationAlert(newName: newName)
     }
 
     private func showChangeNameConfirmationAlert(newName: String) {
         let alert = UIAlertController(title: "Change Name", message: "Are you sure you want to change your name?", preferredStyle: .alert)
-
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Change Name", style: .destructive, handler: { _ in
             self.changeName(newName: newName)
         }))
-
         present(alert, animated: true, completion: nil)
     }
 
@@ -61,9 +84,7 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
             return
         }
         
-        let updates: [String: Any] = [
-            "name": newName,
-        ]
+        let updates: [String: Any] = ["name": newName]
 
         UserService.shared.updateUserField(userId: firebaseKey, updates: updates) { error in
             if let error = error {
@@ -75,7 +96,6 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
             }
         }
     }
-    
 
     @IBAction func changePasswordButtonTapped(_ sender: Any) {
         guard let newPassword = newPasswordTextField.text, !newPassword.isEmpty,
@@ -119,25 +139,16 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         present(alert, animated: true)
     }
     
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField.text?.isEmpty ?? true {
-            textField.resignFirstResponder() // Dismiss keyboard
-        }
-        return true
-    }
-    
     @IBAction func logoutButtonTapped(_ sender: UIButton) {
         showLogoutConfirmationAlert()
     }
     
     private func showLogoutConfirmationAlert() {
         let alert = UIAlertController(title: "Logout", message: "Are you sure you want to log out?", preferredStyle: .alert)
-
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "Logout", style: .destructive, handler: { _ in
             self.logoutUser()
         }))
-
         present(alert, animated: true, completion: nil)
     }
 

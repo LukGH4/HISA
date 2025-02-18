@@ -23,7 +23,8 @@
 - Fixed various alignment issues on the Sign Up, Settings, and Forgot Password screens.
 - The keyboard now dismisses when pressing 'return' on empty inputs or tapping anywhere on the screen.
 - Fixed issues with text boxes that allowed input when they shouldn't.
-- Passwords are now hidden on the Login screen.
+- Passwords are now hidden on the Login screen and Settings screen.
+- Forced light mode consistency and fixed name not displaying in dark mode
 
 ### Known Issues
 - **ML Model Classification Accuracy**:  
