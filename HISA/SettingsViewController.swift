@@ -33,6 +33,9 @@ class SettingsViewController: UIViewController, UITextFieldDelegate, UIImagePick
             UserService.shared.fetchUserByEmployeeId(employeeId: employeeId) { success in
                 if success {
                     self.loadCurrentUserData()
+                    self.setupProfileImageView()
+                    self.profileImageView.image = UIImage(named: "defaultProfileImage")
+                    self.loadProfileImageIfAvailable()
                 } else {
                     self.showAlert(title: "Error", message: "User not found.")
                 }
@@ -40,9 +43,6 @@ class SettingsViewController: UIViewController, UITextFieldDelegate, UIImagePick
         } else {
             showAlert(title: "Error", message: "Employee ID not found.")
         }
-        profileImageView.image = UIImage(named: "defaultProfileImage")
-        setupProfileImageView()
-        loadProfileImageIfAvailable()
     }
     private func setupProfileImageView() {
         profileImageView.layer.cornerRadius = profileImageView.frame.width / 2
