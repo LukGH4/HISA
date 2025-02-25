@@ -1,6 +1,9 @@
-// EmployeeDetailViewController.swift
-// HISA
-// Created by Barnabas Li on 1/23/25.
+//
+//  EmployeeDetailViewController.swift
+//  HISA
+//
+//  Created by Barnabas Li on 1/23/25.
+//
 
 import UIKit
 import FirebaseDatabase
