@@ -1,7 +1,9 @@
 import UIKit
+import FirebaseDatabaseInternal
+import FirebaseStorage
 import FirebaseAuth
 
-class SettingsViewController: UIViewController, UITextFieldDelegate {
+class SettingsViewController: UIViewController, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     @IBOutlet weak var currentEmployeeIdLabel: UITextField!
     @IBOutlet weak var employeeIdTextField: UITextField!
@@ -11,6 +13,9 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var newPasswordTextField: UITextField!
     @IBOutlet weak var confirmPasswordTextField: UITextField!
     @IBOutlet weak var changePasswordButton: UIButton!
+    
+    @IBOutlet weak var profileImageView: UIImageView!
+    @IBOutlet weak var uploadProfilePictureButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,7 +27,6 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         confirmPasswordTextField.delegate = self
         newPasswordTextField.isSecureTextEntry = true
         confirmPasswordTextField.isSecureTextEntry = true
-
         setupTapGesture()
         
         if let employeeId = CurrentUser.shared.getId() {
@@ -36,7 +40,100 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         } else {
             showAlert(title: "Error", message: "Employee ID not found.")
         }
+        profileImageView.image = UIImage(named: "defaultProfileImage")
+        setupProfileImageView()
+        loadProfileImageIfAvailable()
     }
+    private func setupProfileImageView() {
+        profileImageView.layer.cornerRadius = profileImageView.frame.width / 2
+        profileImageView.clipsToBounds = true
+        profileImageView.contentMode = .scaleAspectFill
+        profileImageView.isUserInteractionEnabled = true
+        
+        uploadProfilePictureButton.layer.cornerRadius = uploadProfilePictureButton.frame.width / 2
+        uploadProfilePictureButton.clipsToBounds = true
+        uploadProfilePictureButton.backgroundColor = .clear
+        uploadProfilePictureButton.setTitle("", for: .normal)
+            
+        view.bringSubviewToFront(uploadProfilePictureButton)
+            
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(uploadProfilePictureButtonTapped))
+        profileImageView.addGestureRecognizer(tapGesture)
+    }
+    
+    @IBAction func uploadProfilePictureButtonTapped(_ sender: UIButton) {
+        print("tapped")
+        let imagePicker = UIImagePickerController()
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary
+        imagePicker.allowsEditing = true
+        present(imagePicker, animated: true, completion: nil)
+    }
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        guard let selectedImage = info[.editedImage] as? UIImage else { return }
+        profileImageView.image = selectedImage
+        uploadImageToFirebase(image: selectedImage)
+    }
+    
+    private func uploadImageToFirebase(image: UIImage) {
+        guard let imageData = image.jpegData(compressionQuality: 0.8),
+              let employeeId = CurrentUser.shared.getFirebaseKey() else { return }
+        
+        let storageRef = Storage.storage().reference().child("profile_pictures/\(employeeId).jpg")
+        storageRef.putData(imageData, metadata: nil) { metadata, error in
+            if let error = error {
+                print("Failed to upload image: \(error.localizedDescription)")
+                return
+            }
+            storageRef.downloadURL { url, error in
+                if let downloadURL = url?.absoluteString {
+                    self.saveImageURLToDatabase(downloadURL: downloadURL)
+                }
+            }
+        }
+        print("Image uploaded")
+        
+    }
+    private func saveImageURLToDatabase(downloadURL: String) {
+        guard let employeeId = CurrentUser.shared.getFirebaseKey() else { return }
+        let ref = Database.database().reference().child("users/employees/\(employeeId)")
+        
+        ref.updateChildValues(["profileImageUrl": downloadURL]) { error, _ in
+            if let error = error {
+                print("Failed to save image URL: \(error.localizedDescription)")
+            } else {
+                print("Image URL saved successfully!")
+            }
+        }
+        
+    }
+    private func loadProfileImageIfAvailable() {
+        guard let employeeId = CurrentUser.shared.getFirebaseKey() else { return }
+        let ref = Database.database().reference().child("users/employees/\(employeeId)/profileImageUrl")
+        
+        ref.observeSingleEvent(of: .value) { snapshot in
+            if let urlString = snapshot.value as? String, let url = URL(string: urlString) {
+                URLSession.shared.dataTask(with: url) { data, _, error in
+                    if let data = data, error == nil {
+                        DispatchQueue.main.async {
+                            self.profileImageView.image = UIImage(data: data)
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            self.profileImageView.image = UIImage(named: "defaultProfileImage")
+                        }
+                    }
+                }.resume()
+            } else {
+                DispatchQueue.main.async {
+                    self.profileImageView.image = UIImage(named: "defaultProfileImage")
+                }
+            }
+        }
+    }
+
 
     private func setupTapGesture() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
