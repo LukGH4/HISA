@@ -138,25 +138,25 @@ struct ActivityLog {
         let date = Date(timeIntervalSince1970: timestamp / 1000)
         let now = Date()
         let components = Calendar.current.dateComponents([.minute, .hour, .day, .weekOfYear], from: date, to: now)
-        
-        if let minutes = components.minute, minutes < 60 {
-            return minutes == 1 ? "1 min ago" : "\(minutes) mins ago"
+
+        if let minutes = components.minute, let hours = components.hour, let days = components.day, let weeks = components.weekOfYear {
+            if minutes < 60 && hours == 0 {
+                return minutes == 1 ? "1 min ago" : "\(minutes) mins ago"
+            }
+            if hours < 24 && days == 0 {
+                return hours == 1 ? "1 hr ago" : "\(hours) hrs ago"
+            }
+            if days < 7 && weeks == 0 {
+                return days == 1 ? "1d ago" : "\(days)d ago"
+            }
+            if weeks >= 1 {
+                return weeks == 1 ? "1w ago" : "\(weeks)w ago"
+            }
         }
-        if let hours = components.hour, hours < 24 {
-            return hours == 1 ? "1 hr ago" : "\(hours) hrs ago"
-        }
-        if let days = components.day, days < 7 {
-            return days == 1 ? "1d ago" : "\(days)d ago"
-        }
-        if let weeks = components.weekOfYear {
-            return weeks == 1 ? "1w ago" : "\(weeks)w ago"
-        }
-        
         let formatter = DateFormatter()
         formatter.dateFormat = "MM/dd/yyyy"
         return formatter.string(from: date)
     }
-
 }
 
 class ActivityLogTableViewCell: UITableViewCell {
