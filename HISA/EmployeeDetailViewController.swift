@@ -160,14 +160,42 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ScanHistoryCell", for: indexPath)
-        cell.textLabel?.text = employee?.scanHistory[indexPath.row]
-        cell.textLabel?.textColor = .blue
+        cell.textLabel?.text = employee?.scanHistory[indexPath.row].name
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let selectedLink = employee?.scanHistory[indexPath.row], let url = URL(string: selectedLink) else { return }
-        UIApplication.shared.open(url)
+        guard let scan = employee?.scanHistory[indexPath.row] else { return }
+
+        performSegue(withIdentifier: "ManagerToScanListImageViewController", sender: scan)
+
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ManagerToScanListImageViewController",
+           let scanVC = segue.destination as? ScanListImageViewController,
+           let scan = sender as? Scan {
+
+            scanVC.imageURL = scan.url
+            scanVC.videoURL = scan.url
+            scanVC.fileName = scan.fileName
+            scanVC.username = employee?.name
+            scanVC.date = scan.date
+            scanVC.folderKey = scan.folderKey
+            scanVC.date = scan.date
+            if let metadata = employee?.scanHistory.first(where: { $0.name == scan.name }) {
+                scanVC.status = metadata.status
+                scanVC.classification = metadata.classification
+                scanVC.confidence = metadata.confidence
+            }
+            scanVC.isFromEmployeeDetail = true
+        }
+    }
+
+
+
+
+
+
 }

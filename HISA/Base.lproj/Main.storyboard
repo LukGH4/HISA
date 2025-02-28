@@ -933,7 +933,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EmployeeCell" rowHeight="100" translatesAutoresizingMaskIntoConstraints="NO" id="hxX-EN-25l" customClass="EmployeeTableViewCell" customModule="HISA" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EmployeeCell" rowHeight="100" translatesAutoresizingMaskIntoConstraints="NO" id="hxX-EN-25l" customClass="EmployeeTableViewCell" customModule="HISA" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="360" height="100"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="hxX-EN-25l" id="aOB-YJ-Vce">
@@ -1098,11 +1098,12 @@
                         <outlet property="nameLabel" destination="eww-sr-OkL" id="me1-eU-JQs"/>
                         <outlet property="scanHistoryTableView" destination="rHf-hF-yw1" id="Ryi-dT-Tir"/>
                         <outlet property="scansLabel" destination="8ET-Xy-igb" id="qwq-VL-WdT"/>
+                        <segue destination="TCJ-4f-SFT" kind="presentation" identifier="ManagerToScanListImageViewController" id="XX6-6t-Wuk"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uJh-N9-Pil" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-3260.3053435114502" y="-1176.056338028169"/>
+            <point key="canvasLocation" x="2050" y="-1176"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="4Na-7O-ydG">
@@ -1128,6 +1129,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="NSQ-1W-tOU"/>
         <segue reference="jme-5K-Imw"/>
+        <segue reference="XX6-6t-Wuk"/>
         <segue reference="U7U-v2-ahu"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" systemColor="tintColor"/>
