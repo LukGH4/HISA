@@ -28,6 +28,7 @@
 		8813172D2D38FE2E00A9E74C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 8813172C2D38FE2E00A9E74C /* FirebaseDatabase */; };
 		8813172F2D39051900A9E74C /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8813172E2D39051900A9E74C /* LoginViewController.swift */; };
 		883F9F922D390D9A0016650A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 883F9F912D390D9A0016650A /* ViewController.swift */; };
+		8866184A2D71733C00B32D16 /* ActivityLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886618492D71733C00B32D16 /* ActivityLogViewController.swift */; };
 		8869D0FE2D6D3404001C8728 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8869D0FD2D6D3404001C8728 /* Assets.xcassets */; };
 		888E75892D4249B20028D518 /* ManagerDashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888E75882D4249B20028D518 /* ManagerDashViewController.swift */; };
 		888E758B2D424B0F0028D518 /* EmployeeTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888E758A2D424B0F0028D518 /* EmployeeTableViewCell.swift */; };
@@ -56,6 +57,7 @@
 		8813172A2D38ED9300A9E74C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		8813172E2D39051900A9E74C /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		883F9F912D390D9A0016650A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		886618492D71733C00B32D16 /* ActivityLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLogViewController.swift; sourceTree = "<group>"; };
 		8869D0FD2D6D3404001C8728 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		888E75882D4249B20028D518 /* ManagerDashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagerDashViewController.swift; sourceTree = "<group>"; };
 		888E758A2D424B0F0028D518 /* EmployeeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeTableViewCell.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 				1336526D2CE941470061D5B3 /* StatsViewController.swift */,
 				883F9F912D390D9A0016650A /* ViewController.swift */,
 				888E75882D4249B20028D518 /* ManagerDashViewController.swift */,
+				886618492D71733C00B32D16 /* ActivityLogViewController.swift */,
 				888E75902D425F530028D518 /* Employee.swift */,
 				888E758E2D425A020028D518 /* EmployeeDetailViewController.swift */,
 				888E758A2D424B0F0028D518 /* EmployeeTableViewCell.swift */,
@@ -201,6 +204,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8866184A2D71733C00B32D16 /* ActivityLogViewController.swift in Sources */,
 				88E5A6C52D63D6A900DBF47C /* ScanViewController.swift in Sources */,
 				1336526E2CE941470061D5B3 /* SettingsViewController.swift in Sources */,
 				1336526F2CE941470061D5B3 /* StatsViewController.swift in Sources */,

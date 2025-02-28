@@ -1,5 +1,6 @@
 import UIKit
 import FirebaseDatabaseInternal
+import FirebaseDatabase
 import FirebaseStorage
 import FirebaseAuth
 
@@ -44,6 +45,18 @@ class SettingsViewController: UIViewController, UITextFieldDelegate, UIImagePick
             showAlert(title: "Error", message: "Employee ID not found.")
         }
     }
+    
+    func logActivity(action: String) {
+        guard let userId = CurrentUser.shared.getFirebaseKey() else { return }
+        let ref = Database.database().reference().child("activity_log").childByAutoId()
+        let logEntry: [String: Any] = [
+            "userId": userId,
+            "action": action,
+            "timestamp": ServerValue.timestamp()
+        ]
+        ref.setValue(logEntry)
+    }
+    
     private func setupProfileImageView() {
         profileImageView.layer.cornerRadius = profileImageView.frame.width / 2
         profileImageView.clipsToBounds = true
@@ -75,6 +88,7 @@ class SettingsViewController: UIViewController, UITextFieldDelegate, UIImagePick
         guard let selectedImage = info[.editedImage] as? UIImage else { return }
         profileImageView.image = selectedImage
         uploadImageToFirebase(image: selectedImage)
+        logActivity(action: "uploaded a new profile picture")
     }
     
     private func uploadImageToFirebase(image: UIImage) {
@@ -188,6 +202,7 @@ class SettingsViewController: UIViewController, UITextFieldDelegate, UIImagePick
                 self.showAlert(title: "Error", message: "Failed to update your profile.")
             } else {
                 self.showAlert(title: "Success", message: "Profile updated, please log back to view changes.")
+                self.logActivity(action: "changed their name")
                 CurrentUser.shared.setUserData(updates)
                 self.loadCurrentUserData()
             }
@@ -225,6 +240,7 @@ class SettingsViewController: UIViewController, UITextFieldDelegate, UIImagePick
                 self.showAlert(title: "Error", message: error.localizedDescription)
             } else {
                 self.showAlert(title: "Success", message: "Password changed successfully.")
+                self.logActivity(action: "changed their password")
                 self.navigationController?.popViewController(animated: true)
             }
         }

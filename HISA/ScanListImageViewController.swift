@@ -52,15 +52,11 @@ class ScanListImageViewController: UIViewController {
                 deleteButton.isEnabled = false
                 deleteButton.alpha = 0.5
             }
-        // Set the username and date
         usernameLabel.text = username
         dateLabel.text = date
         statusLabel.text = status
         classificationLabel.text = classification
         confidenceLabel.text = confidence
-        
-        
-        print(fileName)
         if let fileName = fileName, !videoExtensions.contains(where: { fileName.hasSuffix(".\($0)") }) {
             imageView.isHidden = false
             videoView.isHidden = true
@@ -94,8 +90,16 @@ class ScanListImageViewController: UIViewController {
         
     }
     
-    
-    
+    func logActivity(action: String) {
+            guard let userId = Auth.auth().currentUser?.uid else { return }
+            let ref = Database.database().reference().child("activity_log").childByAutoId()
+            let logEntry: [String: Any] = [
+                "userId": userId,
+                "action": action,
+                "timestamp": ServerValue.timestamp()
+            ]
+            ref.setValue(logEntry)
+    }
     
     @IBAction func deletePhoto(_ sender: Any) {
         guard let folderKey = folderKey else {
@@ -138,6 +142,7 @@ class ScanListImageViewController: UIViewController {
             }
             
             let alert = UIAlertController(title: "", message: "The photo has been successfully deleted", preferredStyle: .alert)
+            self.logActivity(action: "deleted a scan")
             
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
@@ -172,6 +177,7 @@ class ScanListImageViewController: UIViewController {
             }
             
             let alert = UIAlertController(title: "", message: "The photo has been successfully deleted", preferredStyle: .alert)
+            self.logActivity(action: "deleted a scan")
             
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
@@ -182,7 +188,6 @@ class ScanListImageViewController: UIViewController {
         
 
     }
-    
     
     @IBAction func playVideo(_ sender: UIButton) {
         if player?.rate == 0 {

@@ -81,6 +81,17 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         gridToggleButton.isHidden = false
     }
     
+    func logActivity(action: String) {
+            guard let userId = Auth.auth().currentUser?.uid else { return }
+            let ref = Database.database().reference().child("activity_log").childByAutoId()
+            let logEntry: [String: Any] = [
+                "userId": userId,
+                "action": action,
+                "timestamp": ServerValue.timestamp()
+            ]
+            ref.setValue(logEntry)
+    }
+    
     func setupCamera() {
         captureSession = AVCaptureSession()
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
@@ -166,7 +177,6 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         // Hide and remove grid before capturing photo
         gridLines.forEach { x in x.isHidden = true }
         gridToggleButton.isHidden = true
-        
         let settings = AVCapturePhotoSettings()
         capturePhotoOutput.capturePhoto(with: settings, delegate: self)
         captureButton.isEnabled = false
@@ -341,7 +351,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             print("No image to submit")
             return
         }
-        
+        self.logActivity(action: "submitted a photo scan")
         guard let imageData = capturedImage.jpegData(compressionQuality: 0.8) else {
             print("Failed to convert image to data")
             return
@@ -406,6 +416,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             print("No video to upload")
             return
         }
+        self.logActivity(action: "submitted a video scan")
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
@@ -559,7 +570,4 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         captureButton.isHidden = false
         
     }
-    
-    
-    
 }
