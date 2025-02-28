@@ -23,8 +23,6 @@ class HomeViewController: UIViewController, UITextFieldDelegate{
         uname.textColor = .black
         fetchUserName()
     }
-    
-    
     // This code is modified by Hoyeon Kang
     func fetchUserName() {
         let ref = Database.database().reference()

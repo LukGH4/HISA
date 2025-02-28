@@ -1,15 +1,15 @@
 # Backend Setup Instructions
 
-- Open a terminal and navigate to the /backend directory.
+Open a terminal and navigate to the /backend directory
 
-- Set up the virtual environment by running: `python3 -m venv venv`
+Set up the virtual environment by running: `python3 -m venv venv`
 
-- Activate the virtual environment using `source venv/bin/activate` or `.\venv\Scripts\activate` depending on your platform
+Activate the virtual environment using `source venv/bin/activate` or `.\venv\Scripts\activate` depending on your platform
 
-- Install the required dependencies: `pip install -r requirements.txt`
+Install the required dependencies: `pip install -r requirements.txt`
 
-- Start the backend by running: `python app.py`
+Start the backend by running: `python app.py`
 
-- Update the URLs in ScanViewController to the URL in the terminal
+Update the URLs in ScanViewController to the URL in the terminal
 
 If you are sure everything is working but the upload functionality is giving errors, try changing your network to a public network (eduroam should work)

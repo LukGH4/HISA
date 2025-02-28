@@ -51,6 +51,6 @@ class CurrentUser {
     }
     
     func getFirebaseKey() -> String? {
-            return firebaseKey
+        return firebaseKey
     }
 }

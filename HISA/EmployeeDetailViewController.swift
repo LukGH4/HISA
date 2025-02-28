@@ -62,11 +62,25 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
             }
         }
     }
+    
+    private func formattedDate(from dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "MM/dd/yyyy HH:mm:ss"
+
+        if let date = inputFormatter.date(from: dateString) {
+            return outputFormatter.string(from: date)
+        } else {
+            return dateString
+        }
+    }
+
 
     private func updateEmployeeDetails() {
         guard let employee = employee else { return }
         nameLabel.text = employee.name
-        dateLabel.text = employee.date
+        dateLabel.text = formattedDate(from: employee.date)
         scansLabel.text = "\(employee.scans)"
         dataAccessControl.isOn = !employee.dataAccess
         scanHistoryTableView.reloadData()
@@ -176,7 +190,6 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         if segue.identifier == "ManagerToScanListImageViewController",
            let scanVC = segue.destination as? ScanListImageViewController,
            let scan = sender as? Scan {
-
             scanVC.imageURL = scan.url
             scanVC.videoURL = scan.url
             scanVC.fileName = scan.fileName
@@ -192,10 +205,4 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
             scanVC.isFromEmployeeDetail = true
         }
     }
-
-
-
-
-
-
 }
