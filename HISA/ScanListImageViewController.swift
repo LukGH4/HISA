@@ -142,7 +142,7 @@ class ScanListImageViewController: UIViewController {
             }
             
             let alert = UIAlertController(title: "", message: "The photo has been successfully deleted", preferredStyle: .alert)
-            self.logActivity(action: "Deleted a scan")
+            self.logActivity(action: "deleted a scan")
             
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
@@ -177,7 +177,7 @@ class ScanListImageViewController: UIViewController {
             }
             
             let alert = UIAlertController(title: "", message: "The photo has been successfully deleted", preferredStyle: .alert)
-            self.logActivity(action: "Deleted a scan")
+            self.logActivity(action: "deleted a scan")
             
             let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alert.addAction(okAction)
