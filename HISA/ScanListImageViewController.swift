@@ -26,6 +26,8 @@ class ScanListImageViewController: UIViewController {
     @IBOutlet weak var classificationLabel: UILabel!
     @IBOutlet weak var confidenceLabel: UILabel!
     
+    var isFromEmployeeDetail: Bool = false
+    
     
     var imageURL: String?
     var username: String?
@@ -46,8 +48,10 @@ class ScanListImageViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
+        if isFromEmployeeDetail {
+                deleteButton.isEnabled = false
+                deleteButton.alpha = 0.5
+            }
         // Set the username and date
         usernameLabel.text = username
         dateLabel.text = date

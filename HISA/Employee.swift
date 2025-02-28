@@ -1,21 +1,22 @@
+struct Scan {
+    let name: String
+    let url: String
+    let folderKey: String?
+    let status: String?
+    let classification: String?
+    let confidence: String?
+    let date: String?
+    let fileName : String?
+}
+
 struct Employee {
     var id: String
     var name: String
     var date: String
     var scans: Int
     var dataAccess: Bool
-    var scanHistory: [String]
+    var scanHistory: [Scan]
     var profileImageUrl: String?
-
-    init(id: String, name: String, date: String, scans: Int, dataAccess: Bool, scanHistory: [String], profileImageUrl: String? = nil) {
-        self.id = id
-        self.name = name
-        self.date = date
-        self.scans = scans
-        self.dataAccess = dataAccess
-        self.scanHistory = scanHistory
-        self.profileImageUrl = profileImageUrl
-    }
 
     init?(id: String, data: [String: Any]) {
         guard let name = data["name"] as? String,
@@ -28,16 +29,37 @@ struct Employee {
         self.name = name
         self.date = date
         self.dataAccess = dataAccess.lowercased() == "true"
-        
-        // Empty dictionaries if an employee doesn't have videos or images
+
         let videos = data["videos"] as? [String: [String: Any]] ?? [:]
         let images = data["images"] as? [String: [String: Any]] ?? [:]
         
         self.scans = videos.count + images.count
-        let videoUrls = videos.values.compactMap { $0["url"] as? String }
-        let imageUrls = images.values.compactMap { $0["url"] as? String }
-        
-        self.scanHistory = videoUrls + imageUrls
+
+        self.scanHistory = (videos.map { (key, value) in
+            Scan(
+                name: key,
+                url: value["url"] as? String ?? "",
+                folderKey: key,
+                status: value["status"] as? String,
+                classification: value["classification"] as? String,
+                confidence: value["confidence"] as? String,
+                date: value["date"] as? String,
+                fileName: value["fileName"] as? String
+            )
+        } + images.map { (key, value) in
+            Scan(
+                name: key,
+                url: value["url"] as? String ?? "",
+                folderKey: key,
+                status: value["status"] as? String,
+                classification: value["classification"] as? String,
+                confidence: value["confidence"] as? String,
+                date: value["date"] as? String,
+                fileName: value["fileName"] as? String
+            )
+        })
+
+
         
         self.profileImageUrl = data["profileImageUrl"] as? String
     }
