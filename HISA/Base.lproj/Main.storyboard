@@ -233,8 +233,21 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="tdG-KE-rYS">
-                                <rect key="frame" x="0.0" y="20" width="393" height="822"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NVJ-d9-DWx">
+                                <rect key="frame" x="163" y="9" width="69" height="50"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="">
+                                    <imageReference key="image" image="arrow.clockwise.circle" catalog="system" symbolScale="large"/>
+                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="30"/>
+                                    <color key="baseForegroundColor" systemColor="systemBlueColor"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="refreshList:" destination="jdu-il-Y1q" eventType="touchUpInside" id="Pg9-r6-N2d"/>
+                                </connections>
+                            </button>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="tdG-KE-rYS">
+                                <rect key="frame" x="0.0" y="62" width="393" height="780"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </tableView>
                         </subviews>
@@ -243,19 +256,20 @@
                         <constraints>
                             <constraint firstItem="EbV-5D-MMq" firstAttribute="trailing" secondItem="tdG-KE-rYS" secondAttribute="trailing" id="KiS-G7-kbV"/>
                             <constraint firstItem="EbV-5D-MMq" firstAttribute="bottom" secondItem="tdG-KE-rYS" secondAttribute="bottom" id="KkK-3A-qeh"/>
-                            <constraint firstItem="tdG-KE-rYS" firstAttribute="top" secondItem="EbV-5D-MMq" secondAttribute="top" constant="20" id="W67-Xq-9I9"/>
+                            <constraint firstItem="tdG-KE-rYS" firstAttribute="top" secondItem="EbV-5D-MMq" secondAttribute="top" constant="67" id="W67-Xq-9I9"/>
                             <constraint firstItem="tdG-KE-rYS" firstAttribute="leading" secondItem="EbV-5D-MMq" secondAttribute="leading" id="t9i-KY-EtN"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="AyN-dn-I1I"/>
                     <connections>
+                        <outlet property="refreshButton" destination="NVJ-d9-DWx" id="3Tg-Cv-DYG"/>
                         <outlet property="tableView" destination="tdG-KE-rYS" id="S8r-J7-riK"/>
                         <segue destination="TCJ-4f-SFT" kind="show" identifier="ScanListImageViewController" id="sUP-yn-sbf"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="V0J-HQ-GYe" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="911" y="250"/>
+            <point key="canvasLocation" x="910.68702290076328" y="250"/>
         </scene>
         <!--Scan List Image-->
         <scene sceneID="bC9-Il-Yrl">
@@ -1214,6 +1228,7 @@
     <color key="tintColor" systemColor="tintColor"/>
     <resources>
         <image name="Image 1" width="678" height="121"/>
+        <image name="arrow.clockwise.circle" catalog="system" width="128" height="123"/>
         <image name="arrowgrey" width="512" height="512"/>
         <image name="camera" catalog="system" width="128" height="93"/>
         <image name="doc" catalog="system" width="115" height="128"/>
