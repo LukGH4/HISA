@@ -16,10 +16,10 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
     
     @IBOutlet weak var tableView: UITableView!
     
+    @IBOutlet weak var refreshButton: UIButton!
     
     var images: [[String: String]] = []
     var username: String = ""
-        
         
         
     
@@ -178,7 +178,18 @@ class ScanListViewController: UIViewController, UITableViewDelegate, UITableView
         
     
     }
-
     
+    func reloadScanList() {
+        images.removeAll()
+        tableView.reloadData()
+        fetchImagesFromFirebase()
+        fetchVideosFromFirebase()
+    }
+    
+
+    @IBAction func refreshList(_ sender: Any) {
+        self.reloadScanList()
+        print("List page was refreshed.")
+    }
     
 }

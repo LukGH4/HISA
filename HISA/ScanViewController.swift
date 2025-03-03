@@ -570,4 +570,5 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         captureButton.isHidden = false
         
     }
+    
 }

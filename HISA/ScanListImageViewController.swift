@@ -203,5 +203,7 @@ class ScanListImageViewController: UIViewController {
         player?.seek(to: CMTime.zero) // Restart the video
         player?.play()
     }
+    
+
 }
 
