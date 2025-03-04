@@ -13,6 +13,7 @@
 		13D1ECA02D457B3600DB616F /* CurrentUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D1EC9F2D457B3300DB616F /* CurrentUser.swift */; };
 		13D1ECA22D457B3F00DB616F /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D1ECA12D457B3B00DB616F /* UserService.swift */; };
 		41FD383D2D6163E900F56D4E /* ChangePasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FD383C2D6163D600F56D4E /* ChangePasswordViewController.swift */; };
+		5E1A24B22D75B2270053454B /* CircularProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1A24B12D75B2270053454B /* CircularProgressView.swift */; };
 		5E64934E2CE91ADD00E10A3A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E64934D2CE91ADD00E10A3A /* AppDelegate.swift */; };
 		5E6493502CE91ADD00E10A3A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E64934F2CE91ADD00E10A3A /* SceneDelegate.swift */; };
 		5E6493552CE91ADD00E10A3A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5E6493532CE91ADD00E10A3A /* Main.storyboard */; };
@@ -44,6 +45,7 @@
 		13D1EC9F2D457B3300DB616F /* CurrentUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentUser.swift; sourceTree = "<group>"; };
 		13D1ECA12D457B3B00DB616F /* UserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
 		41FD383C2D6163D600F56D4E /* ChangePasswordViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewController.swift; sourceTree = "<group>"; };
+		5E1A24B12D75B2270053454B /* CircularProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressView.swift; sourceTree = "<group>"; };
 		5E64934A2CE91ADD00E10A3A /* HISA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HISA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E64934D2CE91ADD00E10A3A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5E64934F2CE91ADD00E10A3A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -125,6 +127,7 @@
 				13D1EC9F2D457B3300DB616F /* CurrentUser.swift */,
 				13D1ECA12D457B3B00DB616F /* UserService.swift */,
 				8869D0FD2D6D3404001C8728 /* Assets.xcassets */,
+				5E1A24B12D75B2270053454B /* CircularProgressView.swift */,
 			);
 			path = HISA;
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 				41FD383D2D6163E900F56D4E /* ChangePasswordViewController.swift in Sources */,
 				8813172F2D39051900A9E74C /* LoginViewController.swift in Sources */,
 				888E758F2D425A020028D518 /* EmployeeDetailViewController.swift in Sources */,
+				5E1A24B22D75B2270053454B /* CircularProgressView.swift in Sources */,
 				5E8A3E5C2D3B171D001D3C03 /* ForgotUserViewController.swift in Sources */,
 				888E758B2D424B0F0028D518 /* EmployeeTableViewCell.swift in Sources */,
 				5E64934E2CE91ADD00E10A3A /* AppDelegate.swift in Sources */,

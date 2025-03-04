@@ -26,6 +26,11 @@ class ScanListImageViewController: UIViewController {
     @IBOutlet weak var classificationLabel: UILabel!
     @IBOutlet weak var confidenceLabel: UILabel!
     
+    @IBOutlet weak var topBannerView: UIView!
+    @IBOutlet weak var bottomBannerView: UIView!
+    
+    @IBOutlet weak var descriptionView: UIView!
+    
     var isFromEmployeeDetail: Bool = false
     
     
@@ -44,19 +49,66 @@ class ScanListImageViewController: UIViewController {
     private var playerLayer: AVPlayerLayer?
     
     let videoExtensions = ["mp4", "mov", "avi", "mkv"]
+    
+    let strokeTextAttributes: [NSAttributedString.Key: Any] = [
+        .strokeColor: UIColor.black,
+        .foregroundColor: UIColor.white,
+        .strokeWidth: -3.0  // Negative value to have stroke + fill
+    ]
 
+    let circularProgress = CircularProgressView(frame: CGRect(x: 45, y: 630, width: 60, height: 60))
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let imageTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleDescriptionView))
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(imageTapGesture)
+        
+        let videoTapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleDescriptionView))
+        videoView.isUserInteractionEnabled = true
+        videoView.addGestureRecognizer(videoTapGesture)
+            
+        
+        
+        
         if isFromEmployeeDetail {
                 deleteButton.isEnabled = false
                 deleteButton.alpha = 0.5
             }
         usernameLabel.text = username
+
+        
         dateLabel.text = date
+
+        
+        if let status1 = status, status1.contains("Bad") {
+            topBannerView.backgroundColor = UIColor.systemRed
+            bottomBannerView.backgroundColor = UIColor.systemRed
+        } else {
+            topBannerView.backgroundColor = UIColor.systemGreen
+            bottomBannerView.backgroundColor = UIColor.systemGreen
+        }
         statusLabel.text = status
         classificationLabel.text = classification
-        confidenceLabel.text = confidence
+        
+        if let confidenceString = confidence,
+           let confidenceValue = Double(confidenceString) {
+            
+            let percentage = Int(confidenceValue * 100)
+            confidenceLabel.text = "\(percentage)"
+        }
+        
+
+        view.addSubview(circularProgress)
+
+        if let confidenceString = confidence,
+           let confidenceValue = Double(confidenceString) {
+            
+            let progress = CGFloat(confidenceValue)
+            circularProgress.setProgress(to: progress)
+        }
+        
         if let fileName = fileName, !videoExtensions.contains(where: { fileName.hasSuffix(".\($0)") }) {
             imageView.isHidden = false
             videoView.isHidden = true
@@ -204,6 +256,10 @@ class ScanListImageViewController: UIViewController {
         player?.play()
     }
     
+    @objc func toggleDescriptionView() {
+        descriptionView.isHidden.toggle()
+        circularProgress.isHidden.toggle()
+    }
 
 }
 
