@@ -281,7 +281,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
             scanVC.imageURL = scan.url
             scanVC.videoURL = scan.url
             scanVC.fileName = scan.fileName
-            scanVC.username = employee?.name
+            scanVC.partType = scan.partType
             scanVC.date = scan.date
             scanVC.folderKey = scan.folderKey
             scanVC.date = scan.date

@@ -59,6 +59,7 @@ def upload_file():
 
     file = request.files['file']
     user_id = request.form.get('user_id', 'unknown_user')
+    part_type = request.form.get('part_type', 'unknown_part')  # Get part_type from form data
     file_ext = file.filename.split('.')[-1].lower()
     
     if file.filename == '':
@@ -85,7 +86,7 @@ def upload_file():
 
     firebase_url = f"https://firebasestorage.googleapis.com/v0/b/jib-4338-hisa.firebasestorage.app/o/{storage_path.replace('/', '%2F')}?alt=media"
     
-    save_to_firebase(user_id, filename, firebase_url, status, classification, confidence)
+    save_to_firebase(user_id, filename, firebase_url, status, classification, confidence, part_type)  # Pass part_type
     os.remove(file_path)
 
     return jsonify({
@@ -161,7 +162,7 @@ def classify_video(video_path):
         return f"Error processing video: {str(e)}"
 
 
-def save_to_firebase(user_id, filename, file_url, status, classification, confidence):
+def save_to_firebase(user_id, filename, file_url, status, classification, confidence, part_type):
     ref_type = "images" if filename.lower().endswith(('.png', '.jpg', '.jpeg')) else "videos"
     ref = db.reference(f"users/employees/{user_id}/{ref_type}").push()
     ref.set({
@@ -170,8 +171,14 @@ def save_to_firebase(user_id, filename, file_url, status, classification, confid
         "status": status,
         "classification": classification,
         "confidence": confidence,
+        "part_type": part_type,  # Add part_type to the database
         "date": date.today().isoformat()
     })
+
+    # Increment scan counter for the user
+    user_ref = db.reference(f"users/employees/{user_id}")
+    scan_counter = user_ref.child("scanCounter").get() or 0
+    user_ref.update({"scanCounter": scan_counter + 1})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3333, debug=True)

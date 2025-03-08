@@ -88,7 +88,7 @@
                                 <rect key="frame" x="0.0" y="59" width="393" height="596"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bjp-8c-lkN">
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bjp-8c-lkN">
                                 <rect key="frame" x="158" y="671" width="77" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
@@ -233,17 +233,13 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NVJ-d9-DWx">
+                            <button contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NVJ-d9-DWx">
                                 <rect key="frame" x="163" y="9" width="69" height="50"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="">
-                                    <imageReference key="image" image="arrow.clockwise.circle" catalog="system" symbolScale="large"/>
-                                    <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" configurationType="pointSize" pointSize="30"/>
-                                    <color key="baseForegroundColor" systemColor="systemBlueColor"/>
-                                </buttonConfiguration>
+                                <buttonConfiguration key="configuration" style="plain" image="refre" title=""/>
                                 <connections>
-                                    <action selector="refreshList:" destination="jdu-il-Y1q" eventType="touchUpInside" id="Pg9-r6-N2d"/>
+                                    <action selector="refreshButtonTapped:" destination="jdu-il-Y1q" eventType="touchUpInside" id="J01-0K-7u5"/>
                                 </connections>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="tdG-KE-rYS">
@@ -262,7 +258,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="AyN-dn-I1I"/>
                     <connections>
-                        <outlet property="refreshButton" destination="NVJ-d9-DWx" id="3Tg-Cv-DYG"/>
+                        <outlet property="refreshButton" destination="NVJ-d9-DWx" id="vzc-MC-0AV"/>
                         <outlet property="tableView" destination="tdG-KE-rYS" id="S8r-J7-riK"/>
                         <segue destination="TCJ-4f-SFT" kind="show" identifier="ScanListImageViewController" id="sUP-yn-sbf"/>
                     </connections>
@@ -380,10 +376,10 @@
                         <outlet property="deleteButton" destination="74F-5z-Tqd" id="cS1-jC-DpT"/>
                         <outlet property="descriptionView" destination="30a-K9-3rh" id="duu-uq-X1H"/>
                         <outlet property="imageView" destination="nR7-jI-jkJ" id="NmM-Bt-yOK"/>
-                        <outlet property="playbutton" destination="HdJ-C0-W9z" id="5Uk-H4-vrk"/>
+                        <outlet property="partTypeLabel" destination="pO4-ra-lut" id="5ws-vl-Rtg"/>
+                        <outlet property="playButton" destination="HdJ-C0-W9z" id="W3V-eY-GDD"/>
                         <outlet property="statusLabel" destination="NZr-sR-n6Z" id="VMX-Kd-3Vo"/>
                         <outlet property="topBannerView" destination="2Ne-W3-mTZ" id="N9J-ym-X0m"/>
-                        <outlet property="usernameLabel" destination="pO4-ra-lut" id="4RU-SC-3JD"/>
                         <outlet property="videoView" destination="KLn-W0-2g0" id="EoG-lb-FTi"/>
                     </connections>
                 </viewController>
@@ -399,7 +395,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <viewLayoutGuide key="safeArea" id="pmb-eo-96v"/>
-                        <color key="backgroundColor" systemColor="systemYellowColor"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="Stats" image="doc" catalog="system" id="IAZ-WE-n1M"/>
                 </viewController>
@@ -971,7 +967,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EmployeeCell" rowHeight="100" translatesAutoresizingMaskIntoConstraints="NO" id="hxX-EN-25l" customClass="EmployeeTableViewCell" customModule="HISA" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EmployeeCell" rowHeight="100" translatesAutoresizingMaskIntoConstraints="NO" id="hxX-EN-25l" customClass="EmployeeTableViewCell" customModule="HISA" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="360" height="100"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="hxX-EN-25l" id="aOB-YJ-Vce">
@@ -1252,7 +1248,6 @@
     <color key="tintColor" systemColor="tintColor"/>
     <resources>
         <image name="Image 1" width="678" height="121"/>
-        <image name="arrow.clockwise.circle" catalog="system" width="128" height="123"/>
         <image name="arrowgrey" width="512" height="512"/>
         <image name="camera" catalog="system" width="128" height="93"/>
         <image name="doc" catalog="system" width="115" height="128"/>
@@ -1264,23 +1259,21 @@
         <image name="person.2" catalog="system" width="128" height="87"/>
         <image name="play.circle" catalog="system" width="128" height="123"/>
         <image name="record.circle" catalog="system" width="128" height="123"/>
+        <image name="refre" width="128" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemYellowColor">
-            <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tintColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="viewFlipsideBackgroundColor">
             <color red="0.12156862745098039" green="0.12941176470588237" blue="0.14117647058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
