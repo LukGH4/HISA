@@ -21,6 +21,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     var capturePhotoOutput: AVCapturePhotoOutput!
     var videoOutput: AVCaptureMovieFileOutput!
     
+    
     // UI Components
     @IBOutlet weak var cameraPreviewView: UIView!
     @IBOutlet weak var captureButton: UIButton!
@@ -53,6 +54,14 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     var playerLayer: AVPlayerLayer?
     var player: AVPlayer?
     
+    var partTypePicker: UIPickerView!
+    var partTypePopupView: UIView!
+    var partTypes: [String] = []
+    
+    var partTypeDisplayButton: UIButton!
+    
+    var selectedPartType: String = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("Submit button:", submitButton as Any)
@@ -60,6 +69,10 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         setupGridOverlay()
         setupGridToggleButton()
+        setupPartTypeDisplayButton()
+        setupPartTypePopup()
+        
+        partTypes = ["Wing", "Engine", "Window", "Wheel"]
         
         setupPopupView()
         recordedVideoView.isHidden = true
@@ -181,6 +194,10 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         capturePhotoOutput.capturePhoto(with: settings, delegate: self)
         captureButton.isEnabled = false
         captureButton.isHidden = true
+        
+        // Show the part type popup
+        showPartTypePopup()
+        partTypeDisplayButton.isHidden = false // Show the display button
     }
     
     @IBAction func recordVideo(_ sender: UIButton) {
@@ -204,6 +221,10 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             recordButton.isHidden = true
             discardButton.isHidden = false
             discardButton.isEnabled = true
+            
+            // Show the part type popup
+            showPartTypePopup()
+            partTypeDisplayButton.isHidden = false // Show the display button
         }
         isRecording.toggle()
         
@@ -272,10 +293,11 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             self.player = AVPlayer(url: url)
             self.playerLayer = AVPlayerLayer(player: self.player)
             self.playerLayer?.frame = self.recordedVideoView.bounds
-            self.playerLayer?.videoGravity = .resizeAspectFill
+            //self.playerLayer?.videoGravity = .resizeAspectFill
             
             // Add AVPlayerLayer to the separate video preview view
             self.recordedVideoView.layer.addSublayer(self.playerLayer!)
+            self.recordedVideoView.backgroundColor = .clear
             
             // Hide the captured image view and show the video preview
             self.capturedImageView.isHidden = true
@@ -310,6 +332,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         submitButton.isHidden = true
         submitButtonR.isHidden = true
         popupView.isHidden = true
+        partTypeDisplayButton.isHidden = true // Hide the display button
         
         if isVideoMode {
             recordedVideoView.isHidden = true
@@ -359,7 +382,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://10.8.17.11:3333/upload")! // replace
+        let url = URL(string: "http://10.20.51.54:3333/upload")! // replace
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -420,7 +443,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://10.8.17.11:3333/upload")! // replace
+        let url = URL(string: "http://10.20.51.54:3333/upload")! // replace
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -571,4 +594,183 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
     }
     
+
+    func setupPartTypePopup() {
+        // Create the popup view
+        partTypePopupView = UIView()
+        partTypePopupView.translatesAutoresizingMaskIntoConstraints = false
+        partTypePopupView.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+        partTypePopupView.layer.cornerRadius = 16
+        partTypePopupView.layer.masksToBounds = true
+        partTypePopupView.isHidden = true
+        self.view.addSubview(partTypePopupView)
+
+        // Add a blur effect
+        let blurEffect = UIBlurEffect(style: .systemMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        partTypePopupView.addSubview(blurView)
+
+        // Add a vibrancy effect
+        let vibrancyEffect = UIVibrancyEffect(blurEffect: blurEffect)
+        let vibrancyView = UIVisualEffectView(effect: vibrancyEffect)
+        vibrancyView.translatesAutoresizingMaskIntoConstraints = false
+        blurView.contentView.addSubview(vibrancyView)
+
+        // Add a title label
+        let titleLabel = UILabel()
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Select Part Type"
+        titleLabel.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        titleLabel.textColor = .label
+        titleLabel.textAlignment = .center
+        vibrancyView.contentView.addSubview(titleLabel)
+
+        // Add a UIPickerView
+        partTypePicker = UIPickerView()
+        partTypePicker.translatesAutoresizingMaskIntoConstraints = false
+        partTypePicker.delegate = self
+        partTypePicker.dataSource = self
+        vibrancyView.contentView.addSubview(partTypePicker)
+
+        // Add a submit button
+        let submitButton = UIButton(type: .system)
+        submitButton.translatesAutoresizingMaskIntoConstraints = false
+        submitButton.setTitle("Confirm", for: .normal)
+        submitButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        submitButton.setTitleColor(.white, for: .normal)
+        submitButton.layer.cornerRadius = 8
+        submitButton.addTarget(self, action: #selector(submitPartType), for: .touchUpInside)
+        vibrancyView.contentView.addSubview(submitButton)
+
+        // Add a cancel button
+        let cancelButton = UIButton(type: .system)
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelButton.setTitle("Cancel", for: .normal)
+        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        cancelButton.setTitleColor(.systemRed, for: .normal)
+        cancelButton.addTarget(self, action: #selector(cancelPartTypeSelection), for: .touchUpInside)
+        vibrancyView.contentView.addSubview(cancelButton)
+
+        // Use a UIStackView to organize the buttons
+        let buttonStackView = UIStackView(arrangedSubviews: [cancelButton, submitButton])
+        buttonStackView.translatesAutoresizingMaskIntoConstraints = false
+        buttonStackView.axis = .horizontal
+        buttonStackView.distribution = .fillEqually
+        buttonStackView.spacing = 16
+        vibrancyView.contentView.addSubview(buttonStackView)
+
+        // Constraints for the popup view
+        NSLayoutConstraint.activate([
+            partTypePopupView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            partTypePopupView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
+            partTypePopupView.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: 0.8),
+            partTypePopupView.heightAnchor.constraint(equalToConstant: 300),
+
+            // Blur and vibrancy effects
+            blurView.topAnchor.constraint(equalTo: partTypePopupView.topAnchor),
+            blurView.leadingAnchor.constraint(equalTo: partTypePopupView.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: partTypePopupView.trailingAnchor),
+            blurView.bottomAnchor.constraint(equalTo: partTypePopupView.bottomAnchor),
+
+            vibrancyView.topAnchor.constraint(equalTo: blurView.topAnchor),
+            vibrancyView.leadingAnchor.constraint(equalTo: blurView.leadingAnchor),
+            vibrancyView.trailingAnchor.constraint(equalTo: blurView.trailingAnchor),
+            vibrancyView.bottomAnchor.constraint(equalTo: blurView.bottomAnchor),
+
+            // Title label
+            titleLabel.topAnchor.constraint(equalTo: vibrancyView.topAnchor, constant: 20),
+            titleLabel.leadingAnchor.constraint(equalTo: vibrancyView.leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: vibrancyView.trailingAnchor, constant: -20),
+
+            // Picker view
+            partTypePicker.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            partTypePicker.leadingAnchor.constraint(equalTo: vibrancyView.leadingAnchor, constant: 20),
+            partTypePicker.trailingAnchor.constraint(equalTo: vibrancyView.trailingAnchor, constant: -20),
+            partTypePicker.heightAnchor.constraint(equalToConstant: 120),
+
+            // Button stack view
+            buttonStackView.topAnchor.constraint(equalTo: partTypePicker.bottomAnchor, constant: 20),
+            buttonStackView.leadingAnchor.constraint(equalTo: vibrancyView.leadingAnchor, constant: 20),
+            buttonStackView.trailingAnchor.constraint(equalTo: vibrancyView.trailingAnchor, constant: -20),
+            buttonStackView.bottomAnchor.constraint(equalTo: vibrancyView.bottomAnchor, constant: -20),
+            buttonStackView.heightAnchor.constraint(equalToConstant: 44)
+        ])
+    }
+    
+    @objc func showPartTypePopup() {
+        partTypePopupView.isHidden = false
+        partTypePopupView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        partTypePopupView.alpha = 0
+
+        UIView.animate(withDuration: 0.3, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: .curveEaseInOut, animations: {
+            self.partTypePopupView.transform = .identity
+            self.partTypePopupView.alpha = 1
+        }, completion: nil)
+    }
+
+    @objc func cancelPartTypeSelection() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.partTypePopupView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            self.partTypePopupView.alpha = 0
+        }, completion: { _ in
+            self.partTypePopupView.isHidden = true
+        })
+    }
+    
+    @objc func submitPartType() {
+        selectedPartType = partTypes[partTypePicker.selectedRow(inComponent: 0)]
+        print("Selected part type: \(selectedPartType)")
+
+        // Update the part type display button
+        partTypeDisplayButton.setTitle("Part Type: \(selectedPartType)", for: .normal)
+        partTypeDisplayButton.isHidden = false
+        
+
+        // Hide the popup with animation
+        UIView.animate(withDuration: 0.2, animations: {
+            self.partTypePopupView.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            self.partTypePopupView.alpha = 0
+        }, completion: { _ in
+            self.partTypePopupView.isHidden = true
+        })
+
+    }
+    
+    func setupPartTypeDisplayButton() {
+            partTypeDisplayButton = UIButton(type: .system)
+            partTypeDisplayButton.translatesAutoresizingMaskIntoConstraints = false
+            partTypeDisplayButton.setTitle("Part Type: Not Selected", for: .normal)
+            partTypeDisplayButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+            partTypeDisplayButton.setTitleColor(.white, for: .normal)
+            partTypeDisplayButton.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+            partTypeDisplayButton.layer.cornerRadius = 8
+            partTypeDisplayButton.addTarget(self, action: #selector(showPartTypePopup), for: .touchUpInside)
+            partTypeDisplayButton.isHidden = true // Hide initially
+            self.view.addSubview(partTypeDisplayButton)
+
+            // Constraints for the button
+            NSLayoutConstraint.activate([
+                partTypeDisplayButton.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20),
+                partTypeDisplayButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -30),
+                partTypeDisplayButton.heightAnchor.constraint(equalToConstant: 40),
+                partTypeDisplayButton.widthAnchor.constraint(equalToConstant: 200)
+            ])
+        }
+    
+
+}
+
+extension ScanViewController: UIPickerViewDelegate, UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return partTypes.count
+    }
+
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return partTypes[row]
+    }
 }

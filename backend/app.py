@@ -173,5 +173,10 @@ def save_to_firebase(user_id, filename, file_url, status, classification, confid
         "date": date.today().isoformat()
     })
 
+    # Increment scan counter for the user
+    user_ref = db.reference(f"users/employees/{user_id}")
+    scan_counter = user_ref.child("scanCounter").get() or 0
+    user_ref.update({"scanCounter": scan_counter + 1})
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3333, debug=True)
