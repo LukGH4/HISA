@@ -333,6 +333,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         submitButtonR.isHidden = true
         popupView.isHidden = true
         partTypeDisplayButton.isHidden = true // Hide the display button
+        selectedPartType = ""
         
         if isVideoMode {
             recordedVideoView.isHidden = true
@@ -374,6 +375,11 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             print("No image to submit")
             return
         }
+        guard !selectedPartType.isEmpty else {
+            print("No part type selected")
+            showPopup(message: "Please select a part type before submitting.")
+            return
+        }
         self.logActivity(action: "submitted a photo scan")
         guard let imageData = capturedImage.jpegData(compressionQuality: 0.8) else {
             print("Failed to convert image to data")
@@ -394,6 +400,11 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
         body.append("\(userId)\r\n".data(using: .utf8)!)
+        
+        // Append part type
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"part_type\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(selectedPartType)\r\n".data(using: .utf8)!)
         
         // Append image data
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -439,12 +450,16 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             print("No video to upload")
             return
         }
+        guard !selectedPartType.isEmpty else {
+            print("No part type selected")
+            showPopup(message: "Please select a part type before submitting.")
+            return
+        }
         self.logActivity(action: "submitted a video scan")
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
         let url = URL(string: "http://10.20.51.54:3333/upload")! // replace
-
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -456,6 +471,11 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
         body.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
         body.append("\(userId)\r\n".data(using: .utf8)!)
+        
+        // Append part type
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"part_type\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(selectedPartType)\r\n".data(using: .utf8)!)
         
         // Append video data
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
