@@ -1,195 +1,286 @@
-//
-//  ScanListViewController.swift
-//  HISA
-//
-//  Created by Hoyeon Kang on 1/22/25.
-//
-
 import UIKit
 import Firebase
 import FirebaseAuth
 import AVKit
 import FirebaseDatabaseInternal
 
-class ScanListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
+class ScanListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, ScanListImageViewControllerDelegate {
     
     @IBOutlet weak var tableView: UITableView!
-    
     @IBOutlet weak var refreshButton: UIButton!
     
-    var images: [[String: String]] = []
+    var scans: [[String: String]] = [] // Renamed from `images` to `scans`
     var username: String = ""
-        
-        
+    
+    private let refreshControl = UIRefreshControl() // For pull-to-refresh
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        setupUI()
+        setupTableView()
+        fetchScansFromFirebase()
+    }
+    
+    func setupUI() {
+        // Customize refresh button
+        refreshButton.layer.cornerRadius = 8
+                refreshButton.layer.shadowColor = UIColor.black.cgColor
+                refreshButton.layer.shadowOpacity = 0.3
+                refreshButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+                refreshButton.layer.shadowRadius = 4
+        // For system image (SF Symbols)
+        if let image = UIImage(systemName: "arrow.clockwise.circle") {
+            let scaledImage = image.withConfiguration(UIImage.SymbolConfiguration(pointSize: 30, weight: .regular, scale: .default))
+            refreshButton.setImage(scaledImage, for: .normal)
+        }
+        
+        // Add pull-to-refresh
+        refreshControl.addTarget(self, action: #selector(refreshList), for: .valueChanged)
+        tableView.refreshControl = refreshControl
+    }
+    
+    func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        // Do any additional setup after loading the view.
+        tableView.register(ScanTableViewCell.self, forCellReuseIdentifier: "ScanCell") // Register custom cell
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .systemGroupedBackground
+    }
+    
+    func fetchScansFromFirebase() {
+        scans.removeAll()
         fetchImagesFromFirebase()
         fetchVideosFromFirebase()
     }
     
     func fetchImagesFromFirebase() {
-        // Reference to the Firebase Database
-        var databaseRef: DatabaseReference?
         guard let user = Auth.auth().currentUser else {
             print("No user is signed in")
             return
         }
         
         let uid = user.uid
-        databaseRef = Database.database().reference().child("users").child("employees").child(uid) // This line has been modified by Hoyeon Kang for testing uid
-
-
-        // Observe and fetch data
-        databaseRef!.observeSingleEvent(of: .value) { snapshot in
+        let databaseRef = Database.database().reference().child("users").child("employees").child(uid)
+        
+        databaseRef.observeSingleEvent(of: .value) { snapshot in
             guard let employeeData = snapshot.value as? [String: Any],
                   let username = employeeData["name"] as? String,
                   let imagesData = employeeData["images"] as? [String: [String: Any]] else {
                 print("No data found or incorrect structure")
                 return
             }
-
-            // Iterate through each folder and fetch details
+            
             for (folderKey, imageDetails) in imagesData {
-                let date = imageDetails["date"] as? String ?? ""
-                let url = imageDetails["url"] as? String ?? ""
-                let status = imageDetails["status"] as? String ?? ""
-                let classification = imageDetails["classification"] as? String ?? ""
-                let confidence = imageDetails["confidence"] as? String ?? ""
-                let fileName = imageDetails["fileName"] as? String ?? ""
-
-                // Add details to the images array
-                self.images.append([
+                self.scans.append([
                     "folderKey": folderKey,
-                    "username": username, // Include the username
-                    "date": date,
-                    "url": url,
-                    "status": status,
-                    "classification": classification,
-                    "confidence": confidence,
-                    "fileName": fileName
+                    "partType": imageDetails["part_type"] as? String ?? "Unknown Part", // Add part type
+                    "date": imageDetails["date"] as? String ?? "",
+                    "url": imageDetails["url"] as? String ?? "",
+                    "status": imageDetails["status"] as? String ?? "",
+                    "classification": imageDetails["classification"] as? String ?? "",
+                    "confidence": imageDetails["confidence"] as? String ?? "",
+                    "fileName": imageDetails["fileName"] as? String ?? ""
                 ])
             }
-
-            // Reload table view after data fetch
+            
             DispatchQueue.main.async {
                 self.tableView.reloadData()
+                self.refreshControl.endRefreshing()
             }
         }
     }
     
     func fetchVideosFromFirebase() {
-        // Reference to the Firebase Database
-        var databaseRef: DatabaseReference?
         guard let user = Auth.auth().currentUser else {
             print("No user is signed in")
             return
         }
         
         let uid = user.uid
-        databaseRef = Database.database().reference().child("users").child("employees").child(uid) // This line has been modified by Hoyeon Kang for testing uid
-
-
-        // Observe and fetch data
-        databaseRef!.observeSingleEvent(of: .value) { snapshot in
+        let databaseRef = Database.database().reference().child("users").child("employees").child(uid)
+        
+        databaseRef.observeSingleEvent(of: .value) { snapshot in
             guard let employeeData = snapshot.value as? [String: Any],
                   let username = employeeData["name"] as? String,
-                  let imagesData = employeeData["videos"] as? [String: [String: Any]] else {
+                  let videosData = employeeData["videos"] as? [String: [String: Any]] else {
                 print("No data found or incorrect structure")
                 return
             }
-
-            // Iterate through each folder and fetch details
-            for (folderKey, imageDetails) in imagesData {
-                let date = imageDetails["date"] as? String ?? ""
-                let url = imageDetails["url"] as? String ?? ""
-                let status = imageDetails["status"] as? String ?? ""
-                let classification = imageDetails["classification"] as? String ?? ""
-                let confidence = imageDetails["confidence"] as? String ?? ""
-                let fileName = imageDetails["fileName"] as? String ?? ""
-
-                // Add details to the images array
-                self.images.append([
+            
+            for (folderKey, videoDetails) in videosData {
+                self.scans.append([
                     "folderKey": folderKey,
-                    "username": username, // Include the username
-                    "date": date,
-                    "url": url,
-                    "status": status,
-                    "classification": classification,
-                    "confidence": confidence,
-                    "fileName": fileName
+                    "partType": videoDetails["part_type"] as? String ?? "Unknown Part", // Add part type
+                    "date": videoDetails["date"] as? String ?? "",
+                    "url": videoDetails["url"] as? String ?? "",
+                    "status": videoDetails["status"] as? String ?? "",
+                    "classification": videoDetails["classification"] as? String ?? "",
+                    "confidence": videoDetails["confidence"] as? String ?? "",
+                    "fileName": videoDetails["fileName"] as? String ?? ""
                 ])
             }
-
-            // Reload table view after data fetch
+            
             DispatchQueue.main.async {
                 self.tableView.reloadData()
+                self.refreshControl.endRefreshing()
             }
         }
     }
- 
     
+    // MARK: - UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return images.count
+        return scans.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        let image = images[indexPath.row]
-        cell.textLabel?.text = image["username"]
-        cell.detailTextLabel?.text = image["date"]
-        cell.backgroundColor = indexPath.row % 2 == 0 ? .gray : .darkGray
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ScanCell", for: indexPath) as! ScanTableViewCell
+        let scan = scans[indexPath.row]
+        
+        cell.partTypeLabel.text = scan["partType"]
+        cell.dateLabel.text = scan["date"]
+        cell.statusLabel.text = scan["status"]
+        
+        if let confidence = scan["confidence"], let confidenceValue = Double(confidence) {
+            cell.confidenceLabel.text = "\(Int(confidenceValue * 100))%"
+        } else {
+            cell.confidenceLabel.text = "N/A"
+        }
+        
+        // Set status color
+        if let status = scan["status"], status.contains("Bad") {
+            cell.statusLabel.textColor = .systemRed
+        } else {
+            cell.statusLabel.textColor = .systemGreen
+        }
+        
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedImage = images[indexPath.row]
-        performSegue(withIdentifier: "ScanListImageViewController", sender: selectedImage)
+    // MARK: - UITableViewDelegate
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80 // Adjust height as needed
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedScan = scans[indexPath.row]
+        performSegue(withIdentifier: "ScanListImageViewController", sender: selectedScan)
+    }
+    
+    // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ScanListImageViewController",
            let detailVC = segue.destination as? ScanListImageViewController,
-           let selectedImage = sender as? [String: String] {
-            detailVC.username = selectedImage["username"]
-            detailVC.date = selectedImage["date"]
-            detailVC.imageURL = selectedImage["url"]
-            detailVC.folderKey = selectedImage["folderKey"]
-            detailVC.videoURL = selectedImage["videoURL"]
-            detailVC.status = selectedImage["status"]
-            detailVC.classification = selectedImage["classification"]
-            detailVC.confidence = selectedImage["confidence"]
-            detailVC.fileName = selectedImage["fileName"]
+           let selectedScan = sender as? [String: String] {
+            detailVC.partType = selectedScan["partType"]
+            detailVC.date = selectedScan["date"]
+            detailVC.imageURL = selectedScan["url"]
+            detailVC.folderKey = selectedScan["folderKey"]
+            detailVC.videoURL = selectedScan["videoURL"]
+            detailVC.status = selectedScan["status"]
+            detailVC.classification = selectedScan["classification"]
+            detailVC.confidence = selectedScan["confidence"]
+            detailVC.fileName = selectedScan["fileName"]
+            
+            detailVC.delegate = self
         }
     }
     
-
+    // MARK: - ScanListImageViewControllerDelegate
     
-    @objc func handleTap(_ sender: UITapGestureRecognizer) {
-        guard let index = sender.view?.tag else { return }
-        print("Tapped on row at index: \(index)")
-        performSegue(withIdentifier: "ScanListImageViewController", sender: index)
-        
-    
+    func didDeleteScan() {
+        reloadScanList()
     }
     
-    func reloadScanList() {
-        images.removeAll()
-        tableView.reloadData()
-        fetchImagesFromFirebase()
-        fetchVideosFromFirebase()
-    }
+    // MARK: - Actions
     
-
-    @IBAction func refreshList(_ sender: Any) {
-        self.reloadScanList()
+    @objc func refreshList() {
+        fetchScansFromFirebase()
         print("List page was refreshed.")
     }
     
+    func reloadScanList() {
+        scans.removeAll()
+        tableView.reloadData()
+        fetchScansFromFirebase()
+    }
+    
+    @IBAction func refreshButtonTapped(_ sender: Any) {
+        refreshList()
+    }
+}
+
+// MARK: - Custom UITableViewCell
+
+class ScanTableViewCell: UITableViewCell {
+    
+    let partTypeLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
+        label.textColor = .label
+        return label
+    }()
+    
+    let dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .secondaryLabel
+        return label
+    }()
+    
+    let statusLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        return label
+    }()
+    
+    let confidenceLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .secondaryLabel
+        return label
+    }()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setupUI() {
+        contentView.addSubview(partTypeLabel)
+        contentView.addSubview(dateLabel)
+        contentView.addSubview(statusLabel)
+        contentView.addSubview(confidenceLabel)
+        
+        partTypeLabel.translatesAutoresizingMaskIntoConstraints = false
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
+        confidenceLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            partTypeLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            partTypeLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            partTypeLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            
+            dateLabel.topAnchor.constraint(equalTo: partTypeLabel.bottomAnchor, constant: 4),
+            dateLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            
+            statusLabel.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 4),
+            statusLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            
+            confidenceLabel.topAnchor.constraint(equalTo: dateLabel.bottomAnchor, constant: 4),
+            confidenceLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
+        ])
+        
+        contentView.backgroundColor = .systemBackground
+        contentView.layer.cornerRadius = 8
+        contentView.layer.masksToBounds = true
+    }
 }

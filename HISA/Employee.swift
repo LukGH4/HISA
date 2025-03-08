@@ -4,6 +4,7 @@ struct Scan {
     let folderKey: String?
     let status: String?
     let classification: String?
+    let partType: String?
     let confidence: String?
     let date: String?
     let fileName : String?
@@ -42,6 +43,7 @@ struct Employee {
                 folderKey: key,
                 status: value["status"] as? String,
                 classification: value["classification"] as? String,
+                partType: value["part_type"] as? String,
                 confidence: value["confidence"] as? String,
                 date: value["date"] as? String,
                 fileName: value["fileName"] as? String
@@ -53,6 +55,7 @@ struct Employee {
                 folderKey: key,
                 status: value["status"] as? String,
                 classification: value["classification"] as? String,
+                partType: value["part_type"] as? String,
                 confidence: value["confidence"] as? String,
                 date: value["date"] as? String,
                 fileName: value["fileName"] as? String
