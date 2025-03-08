@@ -48,6 +48,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         databaseRef = Database.database().reference().child("users/employees").child(employeeID)
 
         fetchEmployeeData()
+        setupExportButton()
         setupDeleteButton()
         setupEditButton()
     }
@@ -85,6 +86,20 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         dataAccessControl.isOn = !employee.dataAccess
         scanHistoryTableView.reloadData()
     }
+    
+    private func setupExportButton() {
+        let exportButton = UIButton(type: .system)
+        exportButton.setTitle("Export", for: .normal)
+        exportButton.addTarget(self, action: #selector(exportButtonTapped), for: .touchUpInside)
+
+        exportButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(exportButton)
+
+        NSLayoutConstraint.activate([
+            exportButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            exportButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90)
+        ])
+    }
 
     private func setupDeleteButton() {
         let deleteButton = UIButton(type: .system)
@@ -96,7 +111,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
         NSLayoutConstraint.activate([
             deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -5)
         ])
     }
 
@@ -110,9 +125,82 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
         NSLayoutConstraint.activate([
             editButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            editButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -60)
+            editButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -47.5)
         ])
     }
+    
+    @objc func exportButtonTapped() {
+        print("Export Button is tapped.")
+        
+        guard let employee = self.employee else {
+            print("No employee data available")
+            return
+        }
+
+        let fileName = "\(employee.name)_Data.csv"
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let filePath = documentsDirectory.appendingPathComponent(fileName)
+
+        var csvText = "Name,"
+        csvText.append("\(employee.name)\n")
+        
+        csvText.append("ID,")
+        csvText.append("\(employee.id)\n")
+        
+        csvText.append("Email,")
+        csvText.append("\(employee.email)\n")
+        
+        csvText.append("Last Accessed,")
+        csvText.append("\(employee.date)\n\n")
+
+
+        csvText.append("Images\nFile Name,Part Type,Status,Classification,Confidence,Date,URL\n")
+        for scan in employee.scanHistory where scan.url.contains("/images") {
+            print("\(scan)")
+            
+            csvText.append("\"\(scan.fileName ?? "")\",")
+            csvText.append("\"\(scan.part_type ?? "")\",")
+            csvText.append("\"\(scan.status ?? "")\",")
+            csvText.append("\"\(scan.classification ?? "")\",")
+            csvText.append("\"\(scan.confidence ?? "")\",")
+            csvText.append("\"\(scan.date ?? "")\",")
+            csvText.append("\"\(scan.url)\"\n")
+        }
+
+        csvText.append("\nVideos\nFile Name,Part Type,Status,Classification,Confidence,Date,URL\n")
+        for scan in employee.scanHistory where scan.url.contains("/videos") {
+            print("\(scan)")
+            
+            csvText.append("\"\(scan.fileName ?? "")\",")
+            csvText.append("\"\(scan.part_type ?? "")\",")
+            csvText.append("\"\(scan.status ?? "")\",")
+            csvText.append("\"\(scan.classification ?? "")\",")
+            csvText.append("\"\(scan.confidence ?? "")\",")
+            csvText.append("\"\(scan.date ?? "")\",")
+            csvText.append("\"\(scan.url)\"\n")
+        }
+
+
+        do {
+            try csvText.write(to: filePath, atomically: true, encoding: .utf8)
+            shareFile(filePath: filePath)
+        } catch {
+            print("Error saving CSV file: \(error.localizedDescription)")
+        }
+    }
+    
+    func shareFile(filePath: URL) {
+        let fileManager = FileManager.default
+        if fileManager.fileExists(atPath: filePath.path) {
+            let activityVC = UIActivityViewController(activityItems: [filePath], applicationActivities: nil)
+            activityVC.popoverPresentationController?.sourceView = self.view
+            self.present(activityVC, animated: true, completion: nil)
+        } else {
+            print("Error: File not found at \(filePath.path)")
+        }
+    }
+
+
 
     @objc func deleteButtonTapped() {
         let alert = UIAlertController(

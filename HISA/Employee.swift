@@ -6,6 +6,7 @@ struct Scan {
     let classification: String?
     let partType: String?
     let confidence: String?
+    let part_type: String?
     let date: String?
     let fileName : String?
 }
@@ -13,14 +14,24 @@ struct Scan {
 struct Employee {
     var id: String
     var name: String
+    var email: String
     var date: String
     var scans: Int
     var dataAccess: Bool
     var scanHistory: [Scan]
     var profileImageUrl: String?
+    
+    var imageScans: [Scan] {
+        return scanHistory.filter { $0.url.contains("/images/") }
+    }
+
+    var videoScans: [Scan] {
+        return scanHistory.filter { $0.url.contains("/videos/") }
+    }
 
     init?(id: String, data: [String: Any]) {
         guard let name = data["name"] as? String,
+              let email = data["email"] as? String,
               let date = data["lastAccessed"] as? String,
               let dataAccess = data["dataAccess"] as? String else {
             return nil
@@ -28,6 +39,7 @@ struct Employee {
         
         self.id = id
         self.name = name
+        self.email = email
         self.date = date
         self.dataAccess = dataAccess.lowercased() == "true"
 
@@ -45,8 +57,10 @@ struct Employee {
                 classification: value["classification"] as? String,
                 partType: value["part_type"] as? String,
                 confidence: value["confidence"] as? String,
+                part_type: value["part_type"] as? String,
                 date: value["date"] as? String,
                 fileName: value["fileName"] as? String
+                
             )
         } + images.map { (key, value) in
             Scan(
@@ -57,8 +71,10 @@ struct Employee {
                 classification: value["classification"] as? String,
                 partType: value["part_type"] as? String,
                 confidence: value["confidence"] as? String,
+                part_type: value["part_type"] as? String,
                 date: value["date"] as? String,
                 fileName: value["fileName"] as? String
+                
             )
         })
 
