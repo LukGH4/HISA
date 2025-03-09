@@ -201,6 +201,16 @@
                                     <action selector="submitVideo:" destination="pkp-5r-bcn" eventType="touchUpInside" id="pSm-PV-F8O"/>
                                 </connections>
                             </button>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="cTo-0e-itA">
+                                <rect key="frame" x="56" y="722" width="265" height="34"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="0.51812287410000002" colorSpace="custom" customColorSpace="sRGB"/>
+                                <accessibility key="accessibilityConfiguration" label="signup_id"/>
+                                <edgeInsets key="layoutMargins" top="8" left="20" bottom="8" right="20"/>
+                                <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Gg4-9a-nya"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -212,6 +222,7 @@
                         <outlet property="captureToggleButton" destination="3bG-HF-D6t" id="gM8-xl-0av"/>
                         <outlet property="capturedImageView" destination="4CS-oN-AZb" id="PVO-9w-Gxe"/>
                         <outlet property="discardButton" destination="bjp-8c-lkN" id="vqT-rG-0cM"/>
+                        <outlet property="feedbackTextField" destination="cTo-0e-itA" id="E0t-vy-TgG"/>
                         <outlet property="gridToggleButton" destination="1r0-lX-Qoo" id="q18-FY-00Q"/>
                         <outlet property="recordButton" destination="HbA-Ye-oDQ" id="oeX-Ul-ykJ"/>
                         <outlet property="recordToggleButton" destination="Qqm-4D-b62" id="ag3-rl-rg2"/>
@@ -320,9 +331,16 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Classification" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jxV-gd-dc5">
-                                        <rect key="frame" x="122" y="26" width="263" height="36"/>
+                                        <rect key="frame" x="134" y="31" width="162" height="28"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="30"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Feedback" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cVU-rV-5yT">
+                                        <rect key="frame" x="280" y="28" width="105" height="33"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <nil key="highlightedColor"/>
                                     </label>
@@ -375,6 +393,7 @@
                         <outlet property="dateLabel" destination="3PP-kv-ExK" id="P3Q-K5-HBW"/>
                         <outlet property="deleteButton" destination="74F-5z-Tqd" id="cS1-jC-DpT"/>
                         <outlet property="descriptionView" destination="30a-K9-3rh" id="duu-uq-X1H"/>
+                        <outlet property="feedbackLabel" destination="cVU-rV-5yT" id="Dlz-KV-eca"/>
                         <outlet property="imageView" destination="nR7-jI-jkJ" id="NmM-Bt-yOK"/>
                         <outlet property="partTypeLabel" destination="pO4-ra-lut" id="5ws-vl-Rtg"/>
                         <outlet property="playButton" destination="HdJ-C0-W9z" id="W3V-eY-GDD"/>
