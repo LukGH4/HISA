@@ -13,7 +13,7 @@ import Firebase
 import FirebaseStorage
 import FirebaseAuth
 
-class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCaptureFileOutputRecordingDelegate {
+class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCaptureFileOutputRecordingDelegate, UITextFieldDelegate {
     
     // Camera components
     var captureSession: AVCaptureSession!
@@ -64,6 +64,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         print("Submit button:", submitButton as Any)
         setupCamera()
         
@@ -88,11 +89,17 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         captureToggleButton.isEnabled = false
         recordButton.isHidden = true
         recordButton.isEnabled = false
-    
         
+        feedbackTextField.delegate = self
+    
         // Ensure grid toggle is hidden initially and grid is off
         gridToggleButton.isHidden = false
     }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            textField.resignFirstResponder() // Hide keyboard
+            return true
+        }
     
     func logActivity(action: String) {
             guard let userId = Auth.auth().currentUser?.uid else { return }
@@ -388,7 +395,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://10.20.51.54:3333/upload")! // replace
+        let url = URL(string: "http://172.16.20.49:3333/upload")! // replace
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -436,6 +443,19 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         }
         
         task.resume()
+
+        // Append feedback storage to Firebase (only added at the end)
+        let databaseRef = Database.database().reference()
+        let newFolderKey = databaseRef.child("users/employees/\(userId)/images").childByAutoId().key ?? UUID().uuidString
+        let feedbackText = self.feedbackTextField.text ?? ""
+
+        databaseRef.child("users/employees/\(userId)/images/\(newFolderKey)/feedback").setValue(feedbackText) { error, _ in
+            if let error = error {
+                print("Error saving feedback: \(error.localizedDescription)")
+            } else {
+                print("Feedback saved successfully!")
+            }
+        }
     }
 
     func showPopup(message: String) {
@@ -444,6 +464,8 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             self.popupLabel.text = message
         }
     }
+    
+    @IBOutlet weak var feedbackTextField: UITextField!
     
     @IBAction func submitVideo(_ sender: Any) {
         guard let videoURL = self.videoURL else {
@@ -459,7 +481,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://10.20.51.54:3333/upload")! // replace
+        let url = URL(string: "http://172.16.20.49:3333/upload")! // replace
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -513,6 +535,19 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         }
         
         task.resume()
+
+        // Append feedback storage to Firebase
+        let databaseRef = Database.database().reference()
+        let newFolderKey = databaseRef.child("users/employees/\(userId)/videos").childByAutoId().key ?? UUID().uuidString
+        let feedbackText = self.feedbackTextField.text ?? ""
+
+        databaseRef.child("users/employees/\(userId)/videos/\(newFolderKey)/feedback").setValue(feedbackText) { error, _ in
+            if let error = error {
+                print("Error saving feedback: \(error.localizedDescription)")
+            } else {
+                print("Feedback saved successfully!")
+            }
+        }
     }
     
     
