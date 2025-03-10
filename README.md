@@ -5,6 +5,35 @@
 
 # Release Notes
 
+## Version 0.3.0
+
+### Features
+- **Integration of Part Types**:
+  Parts are now categorized by type, with classifications stored in `Firebase` alongside other part data. Users must select a part type when submitting a scan.
+ - **Improvements to Manager Page:**
+     - Managers can now view a real-time activity feed on the home page, tracking when employees submit or delete scans or modify account information.
+     - Managers can now access scan results directly.
+     - Alerts have been implemented to notify managers when a part exceeds a modifiable failure threshold.
+- **User Interface and Experience Improvements:**
+     - Enhanced UI for the scan list and scan results pages, including improved organization.
+     - A color-coded indicator based on part classification for quick visual identification.
+     - Enhanced UI for the employees management page.
+     - Profile pictures can now be uploaded for both employee and manager accounts.
+- **User Feedback:**
+  Users can now submit feedback on the accuracy of the `YOLOv8` model’s classifications.
+- **Data Exporting:**
+  User data can now be exported in a CSV format.
+
+### Bug Fixes
+- Resolved an issue where profile pictures occasionally failed to load due to asynchronous processing.
+- Added a refresh button to update the scan list after deleting a photo or video.
+- Fixed UI inconsistencies in the scan list page.
+- Fixed UI bug for part type components.
+
+### Known Issues
+- **ML Model Classification Accuracy**:  
+  The `YOLOv8` model requires additional training to improve its reliability.
+
 ## Version 0.2.0
 
 ### Features
