@@ -23,8 +23,6 @@ class ScanListImageViewController: UIViewController {
     
     @IBOutlet weak var descriptionView: UIView!
     
-    @IBOutlet weak var feedbackLabel: UILabel!
-    
     var isFromEmployeeDetail: Bool = false
     
     var imageURL: String?
@@ -53,30 +51,6 @@ class ScanListImageViewController: UIViewController {
         setupUI()
         setupGestures()
         loadMedia()
-        fetchFeedback()
-    }
-    
-    func fetchFeedback() {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            print("No user logged in")
-            return
-        }
-        
-        guard let folderKey = folderKey else {
-            print("Folder key is missing!")
-            return
-        }
-
-        let feedbackRef = Database.database().reference()
-            .child("users/employees/\(userId)/images/\(folderKey)/feedback")
-
-        feedbackRef.observeSingleEvent(of: .value) { snapshot in
-            if let feedback = snapshot.value as? String {
-                self.feedbackLabel.text = feedback
-            } else {
-                self.feedbackLabel.text = "No feedback available"
-            }
-        }
     }
     
     func setupUI() {
