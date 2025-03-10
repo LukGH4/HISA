@@ -16,7 +16,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     var partTypes: [String: [String: Any]] = [:]
     var partTypeNames: [String] = []
     
-    let failureRateThreshold: Double = 0.0 //hardcoded for testing, will make editable from managers later
+    let failureRateThreshold: Double = -1.0 //hardcoded for testing, will make editable from managers later
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -73,7 +73,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
     
     func checkFailureRates() {
-        var alertMessage = "The following part types have a high failure rate\n"
+        var alertMessage = "The following parts have surpassed the failure threshold:\n"
         var hasHighFailureRate = false
         
         for (partType, statusCounts) in partTypes {
@@ -82,7 +82,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                 let total = goodCount + badCount
                 let failureRatio = total > 0 ? (Double(badCount) / Double(total)) * 100 : 0.0
 
-                if failureRatio >= failureRateThreshold {
+                if failureRatio > failureRateThreshold {
                     alertMessage += "\(partType): \(failureRatio)%\n"
                     hasHighFailureRate = true
                     
@@ -117,7 +117,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             let total = goodCount + badCount
             let failureRatio  = badCount/total * 100
 
-            let alert = UIAlertController(title: "Part Information", message: "Part Type: \(partType)\nFailure Ratio: \(failureRatio)%", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Part Information", message: "Part Type: \(partType)\nFailure Rate: \(failureRatio)%", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
