@@ -13,7 +13,7 @@ import Firebase
 import FirebaseStorage
 import FirebaseAuth
 
-class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCaptureFileOutputRecordingDelegate, UITextFieldDelegate {
+class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCaptureFileOutputRecordingDelegate {
     
     // Camera components
     var captureSession: AVCaptureSession!
@@ -89,17 +89,10 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         captureToggleButton.isEnabled = false
         recordButton.isHidden = true
         recordButton.isEnabled = false
-        
-        feedbackTextField.delegate = self
     
         // Ensure grid toggle is hidden initially and grid is off
         gridToggleButton.isHidden = false
     }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-            textField.resignFirstResponder() // Hide keyboard
-            return true
-        }
     
     func logActivity(action: String) {
             guard let userId = Auth.auth().currentUser?.uid else { return }
@@ -447,21 +440,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
                 }
             }
         }
-        
         task.resume()
-
-        // Append feedback storage to Firebase (only added at the end)
-        let databaseRef = Database.database().reference()
-        let newFolderKey = databaseRef.child("users/employees/\(userId)/images").childByAutoId().key ?? UUID().uuidString
-        let feedbackText = self.feedbackTextField.text ?? ""
-
-        databaseRef.child("users/employees/\(userId)/images/\(newFolderKey)/feedback").setValue(feedbackText) { error, _ in
-            if let error = error {
-                print("Error saving feedback: \(error.localizedDescription)")
-            } else {
-                print("Feedback saved successfully!")
-            }
-        }
     }
 
     func showPopup(message: String) {
@@ -471,8 +450,6 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
             self.present(alert, animated: true, completion: nil)
         }
     }
-    
-    @IBOutlet weak var feedbackTextField: UITextField!
     
     @IBAction func submitVideo(_ sender: Any) {
         guard let videoURL = self.videoURL else {
@@ -542,23 +519,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         }
         
         task.resume()
-
-        // Append feedback storage to Firebase
-        let databaseRef = Database.database().reference()
-        let newFolderKey = databaseRef.child("users/employees/\(userId)/videos").childByAutoId().key ?? UUID().uuidString
-        let feedbackText = self.feedbackTextField.text ?? ""
-
-        databaseRef.child("users/employees/\(userId)/videos/\(newFolderKey)/feedback").setValue(feedbackText) { error, _ in
-            if let error = error {
-                print("Error saving feedback: \(error.localizedDescription)")
-            } else {
-                print("Feedback saved successfully!")
-            }
-        }
     }
-    
-    
-    
     
     func setupGridToggleButton() {
         gridToggleButton.addTarget(self, action: #selector(toggleGrid), for: .touchUpInside)
