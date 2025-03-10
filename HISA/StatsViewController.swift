@@ -15,6 +15,8 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     var ref: DatabaseReference!
     var partTypes: [String: [String: Any]] = [:]
     var partTypeNames: [String] = []
+    
+    let failureRateThreshold: Double = 0.0 //hardcoded for testing, will make editable from managers later
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,12 +61,38 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                     self.partTypes = localPartTypes
                     self.partTypeNames = Array(self.partTypes.keys)
                     self.tableView.reloadData()
+                    
+                    self.checkFailureRates()
                 }
             } else {
                 print("No data found")
             }
         }) { error in
             print("Error retrieving data: \(error.localizedDescription)")
+        }
+    }
+    
+    func checkFailureRates() {
+        var alertMessage = "The following part types have a high failure rate\n"
+        var hasHighFailureRate = false
+        
+        for (partType, statusCounts) in partTypes {
+            if let goodCount = statusCounts["good"] as? Int,
+               let badCount = statusCounts["bad"] as? Int {
+                let total = goodCount + badCount
+                let failureRatio = total > 0 ? (Double(badCount) / Double(total)) * 100 : 0.0
+
+                if failureRatio >= failureRateThreshold {
+                    alertMessage += "\(partType): \(failureRatio)%\n"
+                    hasHighFailureRate = true
+                    
+                }
+            }
+        }
+        if hasHighFailureRate {
+            let alert = UIAlertController(title: "High Failure Rate Alert", message: alertMessage, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
         }
     }
 
