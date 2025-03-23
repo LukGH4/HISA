@@ -48,7 +48,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         databaseRef = Database.database().reference().child("users/employees").child(employeeID)
 
         fetchEmployeeData()
-        setupExportButton()
+        setupExportButtons()
         setupDeleteButton()
         setupEditButton()
     }
@@ -87,19 +87,36 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         scanHistoryTableView.reloadData()
     }
     
-    private func setupExportButton() {
-        let exportButton = UIButton(type: .system)
-        exportButton.setTitle("Export", for: .normal)
-        exportButton.addTarget(self, action: #selector(exportButtonTapped), for: .touchUpInside)
+    private func setupExportButtons() {
+        let exportAllButton = UIButton(type: .system)
+        exportAllButton.setTitle("Export All", for: .normal)
+        exportAllButton.addTarget(self, action: #selector(exportButtonTapped), for: .touchUpInside)
 
-        exportButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(exportButton)
+        let exportCustomButton = UIButton(type: .system)
+        exportCustomButton.setTitle("Export a Part", for: .normal)
+        exportCustomButton.addTarget(self, action: #selector(exportPartTapped), for: .touchUpInside)
+
+        let buttonStack = UIStackView(arrangedSubviews: [exportAllButton, exportCustomButton])
+        buttonStack.axis = .horizontal
+        buttonStack.spacing = 24
+        buttonStack.distribution = .fillEqually
+        buttonStack.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(buttonStack)
 
         NSLayoutConstraint.activate([
-            exportButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            exportButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90)
+            buttonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90),
+            buttonStack.widthAnchor.constraint(equalToConstant: 280),
+            buttonStack.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
+
+    @objc func exportPartTapped() {
+        print("Export Part Button tapped")
+        performSegue(withIdentifier: "toManagerPartList", sender: self)
+    }
+
 
     private func setupDeleteButton() {
         let deleteButton = UIButton(type: .system)
@@ -132,11 +149,43 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
     @objc func exportButtonTapped() {
         print("Export Button is tapped.")
         
+        exportFormat()
+
+    }
+    
+    func shareFile(filePath: URL) {
+        let fileManager = FileManager.default
+        if fileManager.fileExists(atPath: filePath.path) {
+            let activityVC = UIActivityViewController(activityItems: [filePath], applicationActivities: nil)
+            activityVC.popoverPresentationController?.sourceView = self.view
+            self.present(activityVC, animated: true, completion: nil)
+        } else {
+            print("Error: File not found at \(filePath.path)")
+        }
+    }
+    
+    func exportFormat() {
+        let alert = UIAlertController(title: "Export Format", message: "Choose a format to export the data:", preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Export as CSV", style: .default, handler: { _ in
+            self.exportAsCSV()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Export as PDF", style: .default, handler: { _ in
+            self.exportAsPDF()
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func exportAsCSV() {
         guard let employee = self.employee else {
             print("No employee data available")
             return
         }
-
+        
         let fileName = "\(employee.name)_Data.csv"
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let filePath = documentsDirectory.appendingPathComponent(fileName)
@@ -187,18 +236,106 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         } catch {
             print("Error saving CSV file: \(error.localizedDescription)")
         }
+        
     }
     
-    func shareFile(filePath: URL) {
-        let fileManager = FileManager.default
-        if fileManager.fileExists(atPath: filePath.path) {
-            let activityVC = UIActivityViewController(activityItems: [filePath], applicationActivities: nil)
-            activityVC.popoverPresentationController?.sourceView = self.view
-            self.present(activityVC, animated: true, completion: nil)
-        } else {
-            print("Error: File not found at \(filePath.path)")
+    func exportAsPDF() {
+        guard let employee = self.employee else {
+            print("No employee data available")
+            return
+        }
+
+        let fileName = "\(employee.name)_Data.pdf"
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let filePath = documentsDirectory.appendingPathComponent(fileName)
+
+        let pageWidth: CGFloat = 595.2
+        let pageHeight: CGFloat = 841.8
+        let margin: CGFloat = 20.0
+
+        // Build the full string
+        var content = ""
+        content += "Name: \(employee.name)\n"
+        content += "ID: \(employee.id)\n"
+        content += "Email: \(employee.email)\n"
+        content += "Last Accessed: \(employee.date)\n\n"
+
+        content += "Images:\n\n"
+        for scan in employee.scanHistory where scan.url.contains("/images") {
+            content += "File Name: \(scan.fileName ?? "")\n"
+            content += "Part Type: \(scan.part_type ?? "")\n"
+            content += "Status: \(scan.status ?? "")\n"
+            content += "Classification: \(scan.classification ?? "")\n"
+            content += "Confidence: \(scan.confidence ?? "")\n"
+            content += "Date: \(scan.date ?? "")\n"
+            content += "URL: \(scan.url)\n"
+            content += "--------------------------------------\n"
+        }
+
+        content += "\nVideos:\n\n"
+        for scan in employee.scanHistory where scan.url.contains("/videos") {
+            content += "File Name: \(scan.fileName ?? "")\n"
+            content += "Part Type: \(scan.part_type ?? "")\n"
+            content += "Status: \(scan.status ?? "")\n"
+            content += "Classification: \(scan.classification ?? "")\n"
+            content += "Confidence: \(scan.confidence ?? "")\n"
+            content += "Date: \(scan.date ?? "")\n"
+            content += "URL: \(scan.url)\n"
+            content += "--------------------------------------\n"
+        }
+
+        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight))
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = .byWordWrapping
+        paragraphStyle.alignment = .left
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 12),
+            .paragraphStyle: paragraphStyle
+        ]
+
+        let attributedText = NSAttributedString(string: content, attributes: attributes)
+
+        do {
+            try renderer.writePDF(to: filePath) { context in
+                var currentOffset: CGFloat = margin
+                let textRect = CGRect(x: margin, y: margin, width: pageWidth - 2 * margin, height: pageHeight - 2 * margin)
+
+                let framesetter = CTFramesetterCreateWithAttributedString(attributedText as CFAttributedString)
+
+                var currentRange = CFRange(location: 0, length: 0)
+                let fullLength = attributedText.length
+
+                while currentRange.location < fullLength {
+                    context.beginPage()
+                    
+                    let cgContext = context.cgContext
+                    cgContext.translateBy(x: 0, y: pageHeight)
+                    cgContext.scaleBy(x: 1.0, y: -1.0)
+
+                    let path = CGMutablePath()
+                    path.addRect(textRect)
+
+                    let frame = CTFramesetterCreateFrame(framesetter, currentRange, path, nil)
+                    CTFrameDraw(frame, context.cgContext)
+
+                    // Update the range for next page
+                    let visibleRange = CTFrameGetVisibleStringRange(frame)
+                    currentRange.location += visibleRange.length
+                }
+            }
+
+            print("PDF created at: \(filePath)")
+            shareFile(filePath: filePath)
+
+        } catch {
+            print("Could not create PDF file: \(error.localizedDescription)")
         }
     }
+
+
+
 
 
 
@@ -291,6 +428,11 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
                 scanVC.confidence = metadata.confidence
             }
             scanVC.isFromEmployeeDetail = true
+        }
+        
+        if segue.identifier == "toManagerPartList",
+           let destinationVC = segue.destination as? ManagerPartListController {
+            destinationVC.employeeID = self.employeeID
         }
     }
 }
