@@ -22,8 +22,8 @@
                     <connections>
                         <segue destination="qES-aD-u0E" kind="relationship" relationship="viewControllers" id="U7U-v2-ahu"/>
                         <segue destination="pkp-5r-bcn" kind="relationship" relationship="viewControllers" id="3ni-DB-Vjc"/>
-                        <segue destination="1jt-mx-5wB" kind="relationship" relationship="viewControllers" id="jme-5K-Imw"/>
-                        <segue destination="JAq-z2-Q0z" kind="relationship" relationship="viewControllers" id="NSQ-1W-tOU"/>
+                        <segue destination="iw5-H2-O4N" kind="relationship" relationship="viewControllers" id="Yu3-xa-o1f"/>
+                        <segue destination="JAq-z2-Q0z" kind="relationship" relationship="viewControllers" id="hvh-3P-sMu"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W4V-Aq-C4S" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -386,6 +386,36 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="N3O-Vh-kB4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2049.6183206106871" y="250"/>
+        </scene>
+        <!--EmployeeStats-->
+        <scene sceneID="52K-9A-R7e">
+            <objects>
+                <viewController title="EmployeeStats" id="iw5-H2-O4N" customClass="EmployeeStatsViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="aaG-2k-gev">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" bouncesZoom="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="h3p-bI-VLV">
+                                <rect key="frame" x="0.0" y="166" width="393" height="603"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Part Types" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dum-fp-pWk">
+                                <rect key="frame" x="141" y="104" width="111" height="28"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="23"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Rx3-RD-oIA"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Stats" image="doc" catalog="system" id="Rjw-vF-81a"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="d62-md-V1P" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-193.12977099236642" y="1634.5070422535211"/>
         </scene>
         <!--Stats-->
         <scene sceneID="Yop-Nw-F4X">
@@ -986,7 +1016,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EmployeeCell" rowHeight="100" translatesAutoresizingMaskIntoConstraints="NO" id="hxX-EN-25l" customClass="EmployeeTableViewCell" customModule="HISA" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EmployeeCell" rowHeight="100" translatesAutoresizingMaskIntoConstraints="NO" id="hxX-EN-25l" customClass="EmployeeTableViewCell" customModule="HISA" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="360" height="100"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="hxX-EN-25l" id="aOB-YJ-Vce">
@@ -1341,8 +1371,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="NSQ-1W-tOU"/>
-        <segue reference="BaI-bV-qsW"/>
+        <segue reference="hvh-3P-sMu"/>
         <segue reference="sUP-yn-sbf"/>
     </inferredMetricsTieBreakers>
     <color key="tintColor" systemColor="tintColor"/>

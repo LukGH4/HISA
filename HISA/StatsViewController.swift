@@ -10,6 +10,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     var partTypeNames: [String] = []
     
     var selectedPartsForComparison: [String] = [] // Array to store selected parts for comparison
+    var selectedIndexPaths: Set<IndexPath> = [] // Array to store selected parts for comparison
     
     let failureRateThreshold: Double = -1.0
     
@@ -26,11 +27,14 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         
         tableView.register(StatsTableViewCell.self, forCellReuseIdentifier: "StatsCell")
         
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        tableView.addGestureRecognizer(longPressRecognizer)
+        
         fetchPartTypesAndStatuses()
         self.checkFailureRates()
         
         let compareButton = UIButton(type: .system)
-        compareButton.setTitle("Compare", for: .normal)
+        compareButton.setTitle("Compare Selected", for: .normal)
         compareButton.addTarget(self, action: #selector(compareTapped), for: .touchUpInside)
         compareButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(compareButton)
@@ -41,9 +45,9 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
         // Add constraints
         NSLayoutConstraint.activate([
-            compareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            compareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
+                   compareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+                   compareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+               ])
         
         print("Stats Screen Loaded")
     }
@@ -136,7 +140,25 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
            let badCount = statusCounts["bad"] as? Int {
             cell.configure(with: partType, goodCount: goodCount, badCount: badCount)
         }
+        
+        if selectedIndexPaths.contains(indexPath) {
+            cell.accessoryType = .checkmark
+            tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
+        } else {
+            cell.accessoryType = .none
+        }
+        
         return cell
+    }
+    
+    @objc func handleLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
+        if gestureRecognizer.state == .began {
+            let touchPoint = gestureRecognizer.location(in: tableView)
+            if let indexPath = tableView.indexPathForRow(at: touchPoint) {
+                let partType = partTypeNames[indexPath.row]
+                performSegue(withIdentifier: "showPartDetail", sender: partType)
+            }
+        }
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -144,32 +166,31 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
         let partType = partTypeNames[indexPath.row]
         
-        // Navigate to PartDetailViewController
-        performSegue(withIdentifier: "showPartDetail", sender: partType)
+        if selectedPartsForComparison.contains(partType) {
+                // Deselect if already selected
+                selectedPartsForComparison.removeAll { $0 == partType }
+                selectedIndexPaths.remove(indexPath)
+                tableView.cellForRow(at: indexPath)?.accessoryType = .none
+                tableView.deselectRow(at: indexPath, animated: true)
+            } else {
+                // Select if not selected
+                selectedPartsForComparison.append(partType)
+                selectedIndexPaths.insert(indexPath)
+                tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+            }
     }
 
     @objc func compareTapped(_ sender: UIBarButtonItem) {
         // Present a selection view for the manager to select multiple parts
-        let alertController = UIAlertController(title: "Select Parts for Comparison", message: nil, preferredStyle: .alert)
-
-        for partType in partTypeNames {
-            alertController.addAction(UIAlertAction(title: partType, style: .default, handler: { [weak self] _ in
-                self?.selectedPartsForComparison.append(partType)
-            }))
-        }
-
-        alertController.addAction(UIAlertAction(title: "Done", style: .default, handler: { [weak self] _ in
-            // Navigate to ComparisonViewController
-            if self?.selectedPartsForComparison.count ?? 0 > 1 {
-                self?.performSegue(withIdentifier: "showComparison", sender: nil)
-            } else {
-                let errorAlert = UIAlertController(title: "Error", message: "Please select at least two parts to compare.", preferredStyle: .alert)
-                errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self?.present(errorAlert, animated: true)
-            }
-        }))
-
-        present(alertController, animated: true)
+        if selectedPartsForComparison.count >= 2 {
+                   performSegue(withIdentifier: "showComparison", sender: nil)
+               } else {
+                   let alert = UIAlertController(title: "Selection Required",
+                                               message: "Please select at least two parts to compare.",
+                                               preferredStyle: .alert)
+                   alert.addAction(UIAlertAction(title: "OK", style: .default))
+                   present(alert, animated: true)
+               }
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

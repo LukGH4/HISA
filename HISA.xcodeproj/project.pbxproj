@@ -10,6 +10,7 @@
 		1336526E2CE941470061D5B3 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526C2CE941470061D5B3 /* SettingsViewController.swift */; };
 		1336526F2CE941470061D5B3 /* StatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526D2CE941470061D5B3 /* StatsViewController.swift */; };
 		133652702CE941470061D5B3 /* HomeViewContoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526B2CE941470061D5B3 /* HomeViewContoller.swift */; };
+		135541DA2D95D1BD00582EC6 /* EmployeeStatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135541D92D95D1B400582EC6 /* EmployeeStatsViewController.swift */; };
 		13A6D0BE2D94F6AF00AE8FE1 /* StatsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A6D0BD2D94F6A300AE8FE1 /* StatsTableViewCell.swift */; };
 		13A6D0C02D94FDD000AE8FE1 /* PartDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A6D0BF2D94FDC300AE8FE1 /* PartDetailViewController.swift */; };
 		13A6D0C22D94FDE900AE8FE1 /* ComparisonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A6D0C12D94FDE300AE8FE1 /* ComparisonViewController.swift */; };
@@ -46,6 +47,7 @@
 		1336526B2CE941470061D5B3 /* HomeViewContoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewContoller.swift; sourceTree = "<group>"; };
 		1336526C2CE941470061D5B3 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		1336526D2CE941470061D5B3 /* StatsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewController.swift; sourceTree = "<group>"; };
+		135541D92D95D1B400582EC6 /* EmployeeStatsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeStatsViewController.swift; sourceTree = "<group>"; };
 		13A6D0BD2D94F6A300AE8FE1 /* StatsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsTableViewCell.swift; sourceTree = "<group>"; };
 		13A6D0BF2D94FDC300AE8FE1 /* PartDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartDetailViewController.swift; sourceTree = "<group>"; };
 		13A6D0C12D94FDE300AE8FE1 /* ComparisonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComparisonViewController.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				883F9F912D390D9A0016650A /* ViewController.swift */,
 				888E75882D4249B20028D518 /* ManagerDashViewController.swift */,
 				886618492D71733C00B32D16 /* ActivityLogViewController.swift */,
+				135541D92D95D1B400582EC6 /* EmployeeStatsViewController.swift */,
 				888E75902D425F530028D518 /* Employee.swift */,
 				888E758E2D425A020028D518 /* EmployeeDetailViewController.swift */,
 				888E758A2D424B0F0028D518 /* EmployeeTableViewCell.swift */,
@@ -239,6 +242,7 @@
 				5E8A3E5A2D3B1701001D3C03 /* SignUpViewController.swift in Sources */,
 				13D1ECA02D457B3600DB616F /* CurrentUser.swift in Sources */,
 				13A6D0C02D94FDD000AE8FE1 /* PartDetailViewController.swift in Sources */,
+				135541DA2D95D1BD00582EC6 /* EmployeeStatsViewController.swift in Sources */,
 				883F9F922D390D9A0016650A /* ViewController.swift in Sources */,
 				5E8F35192D8EAF5D0018E62E /* ManagerPartListController.swift in Sources */,
 				5E9FB6192D41AC7000168ABB /* ScanListImageViewController.swift in Sources */,
