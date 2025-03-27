@@ -27,12 +27,17 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         tableView.register(StatsTableViewCell.self, forCellReuseIdentifier: "StatsCell")
         
         fetchPartTypesAndStatuses()
+        self.checkFailureRates()
         
         let compareButton = UIButton(type: .system)
         compareButton.setTitle("Compare", for: .normal)
         compareButton.addTarget(self, action: #selector(compareTapped), for: .touchUpInside)
         compareButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(compareButton)
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        tableView.refreshControl = refreshControl
 
         // Add constraints
         NSLayoutConstraint.activate([
@@ -52,10 +57,24 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
                 for employeeSnapshot in snapshot.children.allObjects as! [DataSnapshot] {
                     let imagesRef = employeeSnapshot.childSnapshot(forPath: "images")
+                    let videosRef = employeeSnapshot.childSnapshot(forPath: "videos")
 
                     for imageSnapshot in imagesRef.children.allObjects as! [DataSnapshot] {
                         if let partType = imageSnapshot.childSnapshot(forPath: "part_type").value as? String,
                            let status = imageSnapshot.childSnapshot(forPath: "status").value as? String {
+                            var partTypeEntry = localPartTypes[partType] ?? ["good": 0, "bad": 0]
+
+                            if status == "Good Part" {
+                                partTypeEntry["good"] = (partTypeEntry["good"] as? Int ?? 0) + 1
+                            } else {
+                                partTypeEntry["bad"] = (partTypeEntry["bad"] as? Int ?? 0) + 1
+                            }
+                            localPartTypes[partType] = partTypeEntry
+                        }
+                    }
+                    for videoSnapshot in videosRef.children.allObjects as! [DataSnapshot] {
+                        if let partType = videoSnapshot.childSnapshot(forPath: "part_type").value as? String,
+                           let status = videoSnapshot.childSnapshot(forPath: "status").value as? String {
                             var partTypeEntry = localPartTypes[partType] ?? ["good": 0, "bad": 0]
 
                             if status == "Good Part" {
@@ -73,7 +92,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                     self.partTypeNames = Array(self.partTypes.keys)
                     self.tableView.reloadData()
                     
-                    self.checkFailureRates()
                 }
             } else {
                 print("No data found")
@@ -164,6 +182,18 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             let comparisonVC = segue.destination as! ComparisonViewController
             comparisonVC.selectedParts = selectedPartsForComparison
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.checkFailureRates()
+        fetchPartTypesAndStatuses()
+    }
+    
+    @objc func refreshData() {
+        fetchPartTypesAndStatuses()
+        
+        tableView.refreshControl?.endRefreshing()
     }
 
 }

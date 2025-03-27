@@ -394,7 +394,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://172.16.20.49:3333/upload")! // replace
+        let url = URL(string: "http://10.20.51.62:3333/upload")! // replace
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
@@ -465,7 +465,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
         
-        let url = URL(string: "http://172.16.20.49:3333/upload")! // replace
+        let url = URL(string: "http://10.20.51.62:3333/upload")! // replace
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         
