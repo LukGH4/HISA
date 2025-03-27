@@ -33,11 +33,11 @@ logging.getLogger("ultralytics").setLevel(logging.ERROR)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 label_to_cls = {
-    0: "crack",
-    1: "dent",
-    2: "missing-head",
-    3: "paint-off",
-    4: "scratch"
+    0: "Crack",
+    1: "Dent",
+    2: "Missing-head",
+    3: "Paint-off",
+    4: "Scratch"
 }
 
 test_transform = A.Compose([
