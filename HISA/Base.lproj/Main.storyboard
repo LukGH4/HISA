@@ -464,8 +464,6 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="Stats" image="doc" catalog="system" id="IAZ-WE-n1M"/>
                     <connections>
-                        <outlet property="filterButton" destination="19d-Xw-l6N" id="uN8-CZ-65O"/>
-                        <outlet property="searchBar" destination="6fv-hw-WMC" id="T65-9a-bCY"/>
                         <outlet property="tableView" destination="xRq-AX-Gl3" id="h8r-i8-kdU"/>
                         <segue destination="F8X-Br-If5" kind="show" identifier="showPartDetail" id="bqd-bP-rVG"/>
                         <segue destination="YWQ-23-wVq" kind="show" identifier="showComparison" id="nYL-Ls-gY1"/>
