@@ -48,7 +48,7 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
         employeeTable.rowHeight = UITableView.automaticDimension
         employeeTable.estimatedRowHeight = 60
         employeeTable.showsVerticalScrollIndicator = false
-        employeeTable.register(StatsTableViewCell.self, forCellReuseIdentifier: "StatsCell")
+        employeeTable.register(EmployeeStatsCell.self, forCellReuseIdentifier: "StatsCell")
         employeeTable.register(ChartTableViewCell.self, forCellReuseIdentifier: "ChartCell")
     }
     
@@ -90,7 +90,6 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
                 self.partTypeNames = Array(self.partTypes.keys)
                 self.employeeTable.reloadData()
                 self.updateCharts()
-                self.checkFailureRates()
             }
         }) { error in
             print("Error retrieving employee data: \(error.localizedDescription)")
@@ -141,31 +140,6 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
             print("Error retrieving scan history: \(error.localizedDescription)")
         }
     }
-    
-    private func checkFailureRates() {
-        var alertParts = [String]()
-        
-        for (partType, statusCounts) in partTypes {
-            if let good = statusCounts["good"] as? Int,
-               let bad = statusCounts["bad"] as? Int,
-               good + bad > 0 {
-                let failureRatio = (Double(bad) / Double(good + bad)) * 100
-                if failureRatio > failureRateThreshold {
-                    alertParts.append("\(partType): \(String(format: "%.2f", failureRatio))%")
-                }
-            }
-        }
-        
-        if !alertParts.isEmpty {
-            let alert = UIAlertController(
-                title: "High Failure Rate Alert",
-                message: "The following parts have surpassed the failure threshold:\n" + alertParts.joined(separator: "\n"),
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true)
-        }
-    }
 
     // MARK: - TableView DataSource & Delegate
     
@@ -188,7 +162,7 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch Section(rawValue: indexPath.section) {
         case .parts:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "StatsCell", for: indexPath) as! StatsTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "StatsCell", for: indexPath) as! EmployeeStatsCell
             let partType = partTypeNames[indexPath.row]
             if let counts = partTypes[partType],
                let good = counts["good"] as? Int,
