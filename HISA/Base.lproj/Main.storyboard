@@ -390,18 +390,18 @@
         <!--EmployeeStats-->
         <scene sceneID="52K-9A-R7e">
             <objects>
-                <viewController title="EmployeeStats" id="iw5-H2-O4N" customClass="EmployeeStatsViewController" sceneMemberID="viewController">
+                <viewController title="EmployeeStats" id="iw5-H2-O4N" customClass="EmployeeStatsViewController" customModule="HISA" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="aaG-2k-gev">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" bouncesZoom="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="h3p-bI-VLV">
-                                <rect key="frame" x="0.0" y="166" width="393" height="603"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="mr4-Xl-Ap4">
+                                <rect key="frame" x="0.0" y="128" width="393" height="621"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </tableView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Part Types" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dum-fp-pWk">
-                                <rect key="frame" x="141" y="104" width="111" height="28"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Scan Statistics" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dum-fp-pWk">
+                                <rect key="frame" x="113" y="94" width="167" height="26"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="23"/>
                                 <nil key="textColor"/>
@@ -412,10 +412,14 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="Stats" image="doc" catalog="system" id="Rjw-vF-81a"/>
+                    <connections>
+                        <outlet property="employeeTable" destination="mr4-Xl-Ap4" id="YJq-au-k4g"/>
+                        <segue destination="Psc-XF-vBq" kind="show" identifier="showEmployeePart" id="hRx-7o-kwQ"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d62-md-V1P" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-193.12977099236642" y="1634.5070422535211"/>
+            <point key="canvasLocation" x="-193.12977099236642" y="1644.3661971830986"/>
         </scene>
         <!--Stats-->
         <scene sceneID="Yop-Nw-F4X">
@@ -425,7 +429,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" bouncesZoom="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="xRq-AX-Gl3">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" restorationIdentifier="tableV" alwaysBounceVertical="YES" bouncesZoom="NO" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="xRq-AX-Gl3">
                                 <rect key="frame" x="0.0" y="166" width="393" height="589"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -443,7 +447,7 @@
                     </view>
                     <tabBarItem key="tabBarItem" title="Stats" image="doc" catalog="system" id="IAZ-WE-n1M"/>
                     <connections>
-                        <outlet property="tableView" destination="xRq-AX-Gl3" id="h8r-i8-kdU"/>
+                        <outlet property="tableView" destination="xRq-AX-Gl3" id="h2h-x7-Mq4"/>
                         <segue destination="F8X-Br-If5" kind="show" identifier="showPartDetail" id="bqd-bP-rVG"/>
                         <segue destination="YWQ-23-wVq" kind="show" identifier="showComparison" id="nYL-Ls-gY1"/>
                     </connections>
@@ -1368,6 +1372,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zXB-E6-ZyT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1370" y="935"/>
+        </scene>
+        <!--Employee Part Details Controller-->
+        <scene sceneID="gH0-Ta-QUc">
+            <objects>
+                <viewController id="Psc-XF-vBq" customClass="EmployeePartDetailsController" customModule="HISA" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="FC7-0q-lVy">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="VCK-lV-TLj"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="2ql-l2-Alf"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="R3B-Zd-Iye" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="639" y="1635"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
