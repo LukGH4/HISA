@@ -2,7 +2,7 @@ import UIKit
 import FirebaseDatabase
 
 class StatsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-
+    
     @IBOutlet weak var tableView: UITableView!
     
     var ref: DatabaseReference!
@@ -14,12 +14,12 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     
     let failureRateThreshold: Double = -1.0
     
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         ref = Database.database().reference()
-
+        
         tableView.dataSource = self
         tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
@@ -31,7 +31,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         tableView.addGestureRecognizer(longPressRecognizer)
         
         fetchPartTypesAndStatuses()
-        self.checkFailureRates()
         
         let compareButton = UIButton(type: .system)
         compareButton.setTitle("Compare Selected", for: .normal)
@@ -42,32 +41,28 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         tableView.refreshControl = refreshControl
-
-        // Add constraints
+        
         NSLayoutConstraint.activate([
-                   compareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-                   compareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-               ])
+            compareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            compareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
         
         print("Stats Screen Loaded")
     }
-
+    
     func fetchPartTypesAndStatuses() {
         let employeesRef = ref.child("users").child("employees")
-
         employeesRef.observeSingleEvent(of: .value, with: { snapshot in
             if snapshot.exists() {
                 var localPartTypes: [String: [String: Any]] = [:]
-
                 for employeeSnapshot in snapshot.children.allObjects as! [DataSnapshot] {
                     let imagesRef = employeeSnapshot.childSnapshot(forPath: "images")
                     let videosRef = employeeSnapshot.childSnapshot(forPath: "videos")
-
                     for imageSnapshot in imagesRef.children.allObjects as! [DataSnapshot] {
                         if let partType = imageSnapshot.childSnapshot(forPath: "part_type").value as? String,
                            let status = imageSnapshot.childSnapshot(forPath: "status").value as? String {
                             var partTypeEntry = localPartTypes[partType] ?? ["good": 0, "bad": 0]
-
+                            
                             if status == "Good Part" {
                                 partTypeEntry["good"] = (partTypeEntry["good"] as? Int ?? 0) + 1
                             } else {
@@ -80,7 +75,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                         if let partType = videoSnapshot.childSnapshot(forPath: "part_type").value as? String,
                            let status = videoSnapshot.childSnapshot(forPath: "status").value as? String {
                             var partTypeEntry = localPartTypes[partType] ?? ["good": 0, "bad": 0]
-
+                            
                             if status == "Good Part" {
                                 partTypeEntry["good"] = (partTypeEntry["good"] as? Int ?? 0) + 1
                             } else {
@@ -90,12 +85,11 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                         }
                     }
                 }
-
                 DispatchQueue.main.async {
                     self.partTypes = localPartTypes
                     self.partTypeNames = Array(self.partTypes.keys)
                     self.tableView.reloadData()
-                    
+                    self.checkFailureRates()
                 }
             } else {
                 print("No data found")
@@ -104,34 +98,64 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             print("Error retrieving data: \(error.localizedDescription)")
         }
     }
+
     
     func checkFailureRates() {
         var alertMessage = "The following parts have surpassed the failure threshold:\n"
         var hasHighFailureRate = false
-        
+        var thresholdFetchCount = 0
+        let totalPartTypes = partTypes.count
         for (partType, statusCounts) in partTypes {
             if let goodCount = statusCounts["good"] as? Int,
                let badCount = statusCounts["bad"] as? Int {
                 let total = goodCount + badCount
                 let failureRatio = total > 0 ? (Double(badCount) / Double(total)) * 100 : 0.0
-
-                if failureRatio > failureRateThreshold {
-                    alertMessage += "\(partType): \(String(format: "%.2f", failureRatio))%\n"
-                    hasHighFailureRate = true
+                
+                fetchThreshold(for: partType) { threshold in
+                    let partTypeThreshold = threshold ?? self.failureRateThreshold
+                    if failureRatio > partTypeThreshold {
+                        alertMessage += "\(partType): \(String(format: "%.2f", failureRatio))%\n"
+                        hasHighFailureRate = true
+                    }
+                    thresholdFetchCount += 1
+                    if thresholdFetchCount == totalPartTypes {
+                        if hasHighFailureRate {
+                            DispatchQueue.main.async {
+                                let alert = UIAlertController(title: "High Failure Rate Alert", message: alertMessage, preferredStyle: .alert)
+                                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                                self.present(alert, animated: true, completion: nil)
+                            }
+                        }
+                    }
                 }
             }
         }
-        if hasHighFailureRate {
-            let alert = UIAlertController(title: "High Failure Rate Alert", message: alertMessage, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
+    }
+
+
+
+
+    func fetchThreshold(for partType: String, completion: @escaping (Double?) -> Void) {
+        let partsRef = Database.database().reference().child("parts").child(partType)
+        
+        partsRef.observeSingleEvent(of: .value, with: { snapshot in
+            if let data = snapshot.value as? [String: Any], let storedThreshold = data["threshold"] as? Double {
+                print("Fetched threshold for \(partType): \(storedThreshold)")
+                completion(storedThreshold)
+            } else {
+                print("No threshold found for \(partType). Using default.")
+                completion(nil)
+            }
+        }) { error in
+            print("Error retrieving threshold for part type \(partType): \(error.localizedDescription)")
+            completion(nil)
         }
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return partTypeNames.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "StatsCell", for: indexPath) as! StatsTableViewCell
         let partType = partTypeNames[indexPath.row]
@@ -160,46 +184,44 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             }
         }
     }
-
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-
+        
         let partType = partTypeNames[indexPath.row]
         
         if selectedPartsForComparison.contains(partType) {
-                // Deselect if already selected
-                selectedPartsForComparison.removeAll { $0 == partType }
-                selectedIndexPaths.remove(indexPath)
-                tableView.cellForRow(at: indexPath)?.accessoryType = .none
-                tableView.deselectRow(at: indexPath, animated: true)
-            } else {
-                // Select if not selected
-                selectedPartsForComparison.append(partType)
-                selectedIndexPaths.insert(indexPath)
-                tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-            }
+            // Deselect if already selected
+            selectedPartsForComparison.removeAll { $0 == partType }
+            selectedIndexPaths.remove(indexPath)
+            tableView.cellForRow(at: indexPath)?.accessoryType = .none
+            tableView.deselectRow(at: indexPath, animated: true)
+        } else {
+            // Select if not selected
+            selectedPartsForComparison.append(partType)
+            selectedIndexPaths.insert(indexPath)
+            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+        }
     }
-
+    
     @objc func compareTapped(_ sender: UIBarButtonItem) {
         // Present a selection view for the manager to select multiple parts
         if selectedPartsForComparison.count >= 2 {
-                   performSegue(withIdentifier: "showComparison", sender: nil)
-               } else {
-                   let alert = UIAlertController(title: "Selection Required",
-                                               message: "Please select at least two parts to compare.",
-                                               preferredStyle: .alert)
-                   alert.addAction(UIAlertAction(title: "OK", style: .default))
-                   present(alert, animated: true)
-               }
+            performSegue(withIdentifier: "showComparison", sender: nil)
+        } else {
+            let alert = UIAlertController(title: "Selection Required",
+                                          message: "Please select at least two parts to compare.",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
     }
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showPartDetail", let partType = sender as? String {
-            // Pass the partType to PartDetailViewController
             let partDetailVC = segue.destination as! PartDetailViewController
             partDetailVC.partType = partType
         } else if segue.identifier == "showComparison" {
-            // Ensure that selectedPartsForComparison is populated with the correct data
             let comparisonVC = segue.destination as! ComparisonViewController
             comparisonVC.selectedParts = selectedPartsForComparison
         }
@@ -216,5 +238,4 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         
         tableView.refreshControl?.endRefreshing()
     }
-
 }
