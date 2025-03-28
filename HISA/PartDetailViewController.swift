@@ -291,7 +291,7 @@ struct FailureRateChartView: View {
                             y: .value("Failure Rate", item.failureRate)
                         )
                         .foregroundStyle(.red)
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.linear)
                         
                         PointMark(
                             x: .value("Date", item.date),
@@ -314,12 +314,11 @@ struct FailureRateChartView: View {
                 }
                 .chartXAxis {
                     AxisMarks(values: .automatic) { value in
-                        AxisGridLine()
-                        if let dateStr = value.as(String.self) {
+                        if let date = value.as(Date.self) {
+                            AxisGridLine()
+                            AxisTick()
                             AxisValueLabel {
-                                Text(dateStr)
-                                    .font(.caption2)
-                                    .rotationEffect(.degrees(-45))
+                                Text(date, format: .dateTime.day().month())
                             }
                         }
                     }
@@ -354,7 +353,7 @@ struct ConfidenceChartView: View {
                             y: .value("Confidence", item.confidence * 100)
                         )
                         .foregroundStyle(.blue)
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.linear)
                         
                         PointMark(
                             x: .value("Date", item.date),
@@ -377,12 +376,11 @@ struct ConfidenceChartView: View {
                 }
                 .chartXAxis {
                     AxisMarks(values: .automatic) { value in
-                        AxisGridLine()
-                        if let dateStr = value.as(String.self) {
+                        if let date = value.as(Date.self) {
+                            AxisGridLine()
+                            AxisTick()
                             AxisValueLabel {
-                                Text(dateStr)
-                                    .font(.caption2)
-                                    .rotationEffect(.degrees(-45))
+                                Text(date, format: .dateTime.day().month())
                             }
                         }
                     }

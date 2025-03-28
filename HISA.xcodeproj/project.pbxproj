@@ -10,6 +10,8 @@
 		1336526E2CE941470061D5B3 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526C2CE941470061D5B3 /* SettingsViewController.swift */; };
 		1336526F2CE941470061D5B3 /* StatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526D2CE941470061D5B3 /* StatsViewController.swift */; };
 		133652702CE941470061D5B3 /* HomeViewContoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1336526B2CE941470061D5B3 /* HomeViewContoller.swift */; };
+		133BB18C2D96606100CE121B /* EmployeePartDetailsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133BB18B2D96605700CE121B /* EmployeePartDetailsController.swift */; };
+		133BB18E2D96766800CE121B /* EmployeeStatsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133BB18D2D96765E00CE121B /* EmployeeStatsCell.swift */; };
 		135541DA2D95D1BD00582EC6 /* EmployeeStatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135541D92D95D1B400582EC6 /* EmployeeStatsViewController.swift */; };
 		13A6D0BE2D94F6AF00AE8FE1 /* StatsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A6D0BD2D94F6A300AE8FE1 /* StatsTableViewCell.swift */; };
 		13A6D0C02D94FDD000AE8FE1 /* PartDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A6D0BF2D94FDC300AE8FE1 /* PartDetailViewController.swift */; };
@@ -47,6 +49,8 @@
 		1336526B2CE941470061D5B3 /* HomeViewContoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewContoller.swift; sourceTree = "<group>"; };
 		1336526C2CE941470061D5B3 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		1336526D2CE941470061D5B3 /* StatsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsViewController.swift; sourceTree = "<group>"; };
+		133BB18B2D96605700CE121B /* EmployeePartDetailsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeePartDetailsController.swift; sourceTree = "<group>"; };
+		133BB18D2D96765E00CE121B /* EmployeeStatsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeStatsCell.swift; sourceTree = "<group>"; };
 		135541D92D95D1B400582EC6 /* EmployeeStatsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmployeeStatsViewController.swift; sourceTree = "<group>"; };
 		13A6D0BD2D94F6A300AE8FE1 /* StatsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsTableViewCell.swift; sourceTree = "<group>"; };
 		13A6D0BF2D94FDC300AE8FE1 /* PartDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartDetailViewController.swift; sourceTree = "<group>"; };
@@ -119,6 +123,7 @@
 				8813172E2D39051900A9E74C /* LoginViewController.swift */,
 				5E64934F2CE91ADD00E10A3A /* SceneDelegate.swift */,
 				13A6D0BD2D94F6A300AE8FE1 /* StatsTableViewCell.swift */,
+				133BB18D2D96765E00CE121B /* EmployeeStatsCell.swift */,
 				1336526B2CE941470061D5B3 /* HomeViewContoller.swift */,
 				1336526C2CE941470061D5B3 /* SettingsViewController.swift */,
 				1336526D2CE941470061D5B3 /* StatsViewController.swift */,
@@ -136,6 +141,7 @@
 				5E8A3E592D3B1701001D3C03 /* SignUpViewController.swift */,
 				5E8A3E5B2D3B171D001D3C03 /* ForgotUserViewController.swift */,
 				5E9FB6162D41A6AA00168ABB /* ScanListViewController.swift */,
+				133BB18B2D96605700CE121B /* EmployeePartDetailsController.swift */,
 				5E9FB6182D41AC7000168ABB /* ScanListImageViewController.swift */,
 				41FD383C2D6163D600F56D4E /* ChangePasswordViewController.swift */,
 				13D1EC9F2D457B3300DB616F /* CurrentUser.swift */,
@@ -228,12 +234,14 @@
 				1336526E2CE941470061D5B3 /* SettingsViewController.swift in Sources */,
 				1336526F2CE941470061D5B3 /* StatsViewController.swift in Sources */,
 				13D1ECA22D457B3F00DB616F /* UserService.swift in Sources */,
+				133BB18C2D96606100CE121B /* EmployeePartDetailsController.swift in Sources */,
 				133652702CE941470061D5B3 /* HomeViewContoller.swift in Sources */,
 				13A6D0C22D94FDE900AE8FE1 /* ComparisonViewController.swift in Sources */,
 				888E75912D425F530028D518 /* Employee.swift in Sources */,
 				41FD383D2D6163E900F56D4E /* ChangePasswordViewController.swift in Sources */,
 				8813172F2D39051900A9E74C /* LoginViewController.swift in Sources */,
 				888E758F2D425A020028D518 /* EmployeeDetailViewController.swift in Sources */,
+				133BB18E2D96766800CE121B /* EmployeeStatsCell.swift in Sources */,
 				5E1A24B22D75B2270053454B /* CircularProgressView.swift in Sources */,
 				5E8A3E5C2D3B171D001D3C03 /* ForgotUserViewController.swift in Sources */,
 				888E758B2D424B0F0028D518 /* EmployeeTableViewCell.swift in Sources */,
