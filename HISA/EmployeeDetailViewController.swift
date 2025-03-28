@@ -106,7 +106,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
         NSLayoutConstraint.activate([
             buttonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90),
+            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -60),
             buttonStack.widthAnchor.constraint(equalToConstant: 280),
             buttonStack.heightAnchor.constraint(equalToConstant: 40)
         ])
@@ -128,7 +128,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
         NSLayoutConstraint.activate([
             deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -5)
+            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
         ])
     }
 
@@ -142,7 +142,7 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
         NSLayoutConstraint.activate([
             editButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            editButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -47.5)
+            editButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30)
         ])
     }
     
