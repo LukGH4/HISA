@@ -2,80 +2,127 @@ import UIKit
 import FirebaseDatabaseInternal
 
 class StatsTableViewCell: UITableViewCell {
-    
+
     static let reuseIdentifier = "StatsTableViewCell"
-    
+    let selectionIndicator = UIView()
     let partTypeLabel = UILabel()
     let goodCountLabel = UILabel()
     let badCountLabel = UILabel()
     let failureRateLabel = UILabel()
-    let selectionIndicator = UIView()
+    let progressBar = UIProgressView()
+    let containerView = UIView()
     let editButton = UIButton()
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupUI() {
+        containerView.layer.cornerRadius = 8
+        containerView.layer.shadowColor = UIColor.black.cgColor
+        containerView.layer.shadowOpacity = 0.1
+        containerView.layer.shadowOffset = CGSize(width: 0, height: 2)
+        containerView.layer.shadowRadius = 4
+        containerView.backgroundColor = .white
+
         selectionIndicator.layer.cornerRadius = 12
         selectionIndicator.layer.borderWidth = 2
         selectionIndicator.layer.borderColor = UIColor.systemBlue.cgColor
         selectionIndicator.isHidden = true
-        
+        containerView.addSubview(selectionIndicator)
+
+        selectionIndicator.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            selectionIndicator.widthAnchor.constraint(equalToConstant: 24),
+            selectionIndicator.heightAnchor.constraint(equalToConstant: 24),
+            selectionIndicator.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            selectionIndicator.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+        ])
+
         partTypeLabel.font = UIFont.boldSystemFont(ofSize: 16)
-        failureRateLabel.font = UIFont.systemFont(ofSize: 14)
+        partTypeLabel.textColor = .darkGray
+
         goodCountLabel.font = UIFont.systemFont(ofSize: 14)
+        goodCountLabel.textColor = .systemGreen
+
         badCountLabel.font = UIFont.systemFont(ofSize: 14)
+        badCountLabel.textColor = .systemRed
+
+        failureRateLabel.font = UIFont.systemFont(ofSize: 14)
+        failureRateLabel.textColor = .gray
+
+        progressBar.progressTintColor = .systemGreen
+        progressBar.trackTintColor = .lightGray
+        progressBar.layer.cornerRadius = 4
+        progressBar.clipsToBounds = true
+        progressBar.translatesAutoresizingMaskIntoConstraints = false
+        progressBar.heightAnchor.constraint(equalToConstant: 6).isActive = true
         
+
         editButton.setTitle("Edit", for: .normal)
         editButton.setTitleColor(.systemBlue, for: .normal)
         editButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
         editButton.addTarget(self, action: #selector(editTapped), for: .touchUpInside)
-        
-        let labelsStack = UIStackView(arrangedSubviews: [partTypeLabel, goodCountLabel, badCountLabel, failureRateLabel])
-        labelsStack.axis = .horizontal
-        labelsStack.spacing = 10
-        labelsStack.alignment = .center
-        
-        let mainStack = UIStackView(arrangedSubviews: [selectionIndicator, labelsStack, editButton])
-        mainStack.spacing = 8
+
+        let countsStack = UIStackView(arrangedSubviews: [goodCountLabel, badCountLabel])
+        countsStack.axis = .horizontal
+        countsStack.spacing = 16
+        countsStack.alignment = .center
+
+        let labelsStack = UIStackView(arrangedSubviews: [partTypeLabel, countsStack, failureRateLabel, progressBar])
+        labelsStack.axis = .vertical
+        labelsStack.spacing = 8
+        labelsStack.alignment = .fill
+        labelsStack.distribution = .fill
+
+        let mainStack = UIStackView(arrangedSubviews: [labelsStack, editButton])
+        mainStack.axis = .horizontal
+        mainStack.spacing = 16
         mainStack.alignment = .center
-        
-        contentView.addSubview(mainStack)
-        
-        selectionIndicator.translatesAutoresizingMaskIntoConstraints = false
+
+        containerView.addSubview(mainStack)
+        contentView.addSubview(containerView)
+
         mainStack.translatesAutoresizingMaskIntoConstraints = false
-        
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
-            selectionIndicator.widthAnchor.constraint(equalToConstant: 24),
-            selectionIndicator.heightAnchor.constraint(equalToConstant: 24),
-            
-            mainStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            mainStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            mainStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            mainStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
+            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            mainStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            mainStack.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            mainStack.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
+            mainStack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
+            editButton.widthAnchor.constraint(equalToConstant: 50)
         ])
+
     }
-    
-    func configure(with partType: String, goodCount: Int, badCount: Int, isSelected: Bool = false) {
+
+    func configure(with partType: String, goodCount: Int, badCount: Int) {
         partTypeLabel.text = partType
         goodCountLabel.text = "Good: \(goodCount)"
         badCountLabel.text = "Bad: \(badCount)"
-        
         let total = goodCount + badCount
-        let failureRate = total > 0 ? (Double(badCount) / Double(total)) * 100 : 0.0
+        let goodRatio = total > 0 ? Float(goodCount) / Float(total) : 0.0
+        let failureRate = total > 0 ? (Float(badCount) / Float(total)) * 100 : 0.0
         failureRateLabel.text = "Failure: \(String(format: "%.1f", failureRate))%"
-        failureRateLabel.textColor = failureRate > 20 ? .red : .green
-        
-        selectionIndicator.isHidden = !isSelected
-        selectionIndicator.backgroundColor = isSelected ? .systemBlue.withAlphaComponent(0.2) : .clear
+        progressBar.progress = goodRatio
+        if goodRatio > 0.5 {
+            progressBar.progressTintColor = .systemGreen
+            progressBar.trackTintColor = .lightGray
+        } else {
+            progressBar.progressTintColor = .systemRed
+            progressBar.trackTintColor = .systemGray
+        }
     }
-    
+
     @objc func editTapped() {
         let alert = UIAlertController(title: "Set Failure Rate Threshold", message: "Enter a custom threshold for the failure rate for this part type.", preferredStyle: .alert)
         
@@ -85,7 +132,6 @@ class StatsTableViewCell: UITableViewCell {
         }
         
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
         alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { _ in
             if let thresholdText = alert.textFields?.first?.text, let threshold = Double(thresholdText), threshold >= 0, threshold <= 100 {
                 self.saveCustomThreshold(threshold)
@@ -98,7 +144,7 @@ class StatsTableViewCell: UITableViewCell {
         
         self.window?.rootViewController?.present(alert, animated: true, completion: nil)
     }
-    
+
     private func saveCustomThreshold(_ threshold: Double) {
         let partType = partTypeLabel.text ?? ""
         let partsRef = Database.database().reference().child("parts")
@@ -123,7 +169,6 @@ class StatsTableViewCell: UITableViewCell {
         }
     }
 
-    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         selectionIndicator.isHidden = !selected
