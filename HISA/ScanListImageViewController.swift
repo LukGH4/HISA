@@ -155,7 +155,9 @@ class ScanListImageViewController: UIViewController {
             return
         }
         
+        // Determine whether we are deleting an image or a video
         if let fileName = fileName, !videoExtensions.contains(where: { fileName.hasSuffix(".\($0)") }) {
+            // Handle image deletion
             let uid = user.uid
             databaseRef = Database.database().reference().child("users/employees/\(uid)/images/\(folderKey)")
             
@@ -167,11 +169,17 @@ class ScanListImageViewController: UIViewController {
                 } else {
                     print("File deleted successfully from Firebase Storage.")
 
+                    // Remove from database
                     databaseRef!.removeValue { error, _ in
                         if let error = error {
                             print("Error deleting folder from Firebase Database: \(error.localizedDescription)")
                         } else {
                             print("Folder deleted successfully from Firebase Database.")
+
+                            // Update part count if applicable
+                            if let partType = self.partType, let status = self.status {
+                                self.updatePartCounts(partType: partType, status: status)
+                            }
 
                             self.logActivity(action: "deleted a scan")
                             self.delegate?.didDeleteScan()
@@ -208,6 +216,10 @@ class ScanListImageViewController: UIViewController {
                         } else {
                             print("Folder deleted successfully from Firebase Database.")
 
+                            if let partType = self.partType, let status = self.status {
+                                self.updatePartCounts(partType: partType, status: status)
+                            }
+
                             self.logActivity(action: "deleted a scan")
                             self.delegate?.didDeleteScan()
 
@@ -228,6 +240,35 @@ class ScanListImageViewController: UIViewController {
         }
     }
     
+    func updatePartCounts(partType: String, status: String) {
+        let partRef = Database.database().reference().child("parts/\(partType)")
+        
+        partRef.observeSingleEvent(of: .value) { snapshot in
+            guard var partData = snapshot.value as? [String: Any] else {
+                print("Error fetching part data.")
+                return
+            }
+
+            var goodCount = partData["good"] as? Int ?? 0
+            var badCount = partData["bad"] as? Int ?? 0
+
+            if status == "Good Part" {
+                goodCount -= 1
+            } else if status == "Bad Part" {
+                badCount -= 1
+            }
+
+            partData["good"] = goodCount
+            partData["bad"] = badCount
+            partRef.updateChildValues(partData) { error, _ in
+                if let error = error {
+                    print("Error updating part counts: \(error.localizedDescription)")
+                } else {
+                    print("Part counts updated successfully.")
+                }
+            }
+        }
+    }
     
     @IBAction func playVideo(_ sender: UIButton) {
         if player?.rate == 0 {

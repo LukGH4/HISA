@@ -31,12 +31,11 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         ref = Database.database().reference()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         setupTableView()
+        employeeTable.separatorStyle = .none
         fetchEmployeeData()
-        
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         employeeTable.refreshControl = refreshControl
@@ -140,8 +139,6 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
             print("Error retrieving scan history: \(error.localizedDescription)")
         }
     }
-
-    // MARK: - TableView DataSource & Delegate
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return Section.allCases.count
@@ -154,7 +151,7 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section) {
         case .parts: return partTypeNames.count
-        case .charts: return 1 // Single row containing both charts
+        case .charts: return 1
         default: return 0
         }
     }
@@ -210,8 +207,6 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
         }
     }
     
-    // MARK: - Navigation
-    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showEmployeePart",
            let partType = sender as? String,
@@ -220,8 +215,6 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
             detailVC.userId = userId
         }
     }
-    
-    // MARK: - Refresh
     
     @objc private func refreshData() {
         fetchEmployeeData()
@@ -234,7 +227,6 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
     }
 }
 
-// Chart Table View Cell
 class ChartTableViewCell: UITableViewCell {
     private var hostingController: UIHostingController<AnyView>?
     

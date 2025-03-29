@@ -159,10 +159,11 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         ref.child("users").child("employees").observeSingleEvent(of: .value, with: { snapshot in
             if snapshot.exists() {
                 var localPartTypes: [String: [String: Any]] = [:]
+                
                 for employeeSnapshot in snapshot.children.allObjects as! [DataSnapshot] {
                     let imagesRef = employeeSnapshot.childSnapshot(forPath: "images")
                     let videosRef = employeeSnapshot.childSnapshot(forPath: "videos")
-                    
+
                     for imageSnapshot in imagesRef.children.allObjects as! [DataSnapshot] {
                         if let partType = imageSnapshot.childSnapshot(forPath: "part_type").value as? String,
                            let status = imageSnapshot.childSnapshot(forPath: "status").value as? String {
@@ -190,6 +191,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                     }
                 }
                 
+                self.savePartCountsToFirebase(localPartTypes)
                 DispatchQueue.main.async {
                     self.partTypes = localPartTypes
                     self.partTypeNames = Array(self.partTypes.keys)
@@ -211,6 +213,25 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             }
         }
     }
+    
+    func savePartCountsToFirebase(_ partCounts: [String: [String: Any]]) {
+        let partsRef = Database.database().reference().child("parts")
+
+        for (partType, statusCounts) in partCounts {
+            let partTypeRef = partsRef.child(partType)
+            partTypeRef.updateChildValues([
+                "good": statusCounts["good"] ?? 0,
+                "bad": statusCounts["bad"] ?? 0
+            ]) { error, _ in
+                if let error = error {
+                    print("Failed to update counts for \(partType): \(error.localizedDescription)")
+                } else {
+                    print("Successfully updated counts for \(partType)")
+                }
+            }
+        }
+    }
+
 
     func checkFailureRates() {
         var alertMessage = "The following parts have surpassed the failure threshold:\n"

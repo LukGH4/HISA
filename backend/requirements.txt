@@ -12,3 +12,5 @@ firebase-admin
 albumentations
 gdown
 ultralytics
+smtplib
+email
