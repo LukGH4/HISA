@@ -46,11 +46,17 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         scanHistoryTableView.delegate = self
         
         databaseRef = Database.database().reference().child("users/employees").child(employeeID)
-
         fetchEmployeeData()
         setupExportButtons()
         setupDeleteButton()
         setupEditButton()
+        navigationController?.navigationBar.prefersLargeTitles = true
+            navigationController?.navigationBar.barTintColor = UIColor.systemBlue
+            navigationController?.navigationBar.tintColor = .white
+            navigationController?.navigationBar.titleTextAttributes = [
+                .foregroundColor: UIColor.white,
+                .font: UIFont.systemFont(ofSize: 18, weight: .bold)
+            ]
     }
 
     private func fetchEmployeeData() {
@@ -81,35 +87,34 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
     private func updateEmployeeDetails() {
         guard let employee = employee else { return }
         nameLabel.text = employee.name
+        nameLabel.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        nameLabel.textColor = UIColor.label
+
         dateLabel.text = formattedDate(from: employee.date)
+        dateLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        dateLabel.textColor = UIColor.secondaryLabel
+
         scansLabel.text = "\(employee.scans)"
+        scansLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        scansLabel.textColor = UIColor.secondaryLabel
         dataAccessControl.isOn = !employee.dataAccess
         scanHistoryTableView.reloadData()
+        scanHistoryTableView.separatorStyle = .singleLine
+        scanHistoryTableView.separatorColor = UIColor.lightGray
+        scanHistoryTableView.rowHeight = UITableView.automaticDimension
+        scanHistoryTableView.estimatedRowHeight = 50
     }
-    
-    private func setupExportButtons() {
-        let exportAllButton = UIButton(type: .system)
-        exportAllButton.setTitle("Export All", for: .normal)
-        exportAllButton.addTarget(self, action: #selector(exportButtonTapped), for: .touchUpInside)
 
-        let exportCustomButton = UIButton(type: .system)
-        exportCustomButton.setTitle("Export a Part", for: .normal)
-        exportCustomButton.addTarget(self, action: #selector(exportPartTapped), for: .touchUpInside)
-
-        let buttonStack = UIStackView(arrangedSubviews: [exportAllButton, exportCustomButton])
-        buttonStack.axis = .horizontal
-        buttonStack.spacing = 24
-        buttonStack.distribution = .fillEqually
-        buttonStack.translatesAutoresizingMaskIntoConstraints = false
-
-        view.addSubview(buttonStack)
-
-        NSLayoutConstraint.activate([
-            buttonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -60),
-            buttonStack.widthAnchor.constraint(equalToConstant: 280),
-            buttonStack.heightAnchor.constraint(equalToConstant: 40)
-        ])
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ScanHistoryCell", for: indexPath)
+        let scan = employee?.scanHistory[indexPath.row]
+        cell.textLabel?.text = scan?.fileName
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        cell.selectionStyle = .none
+        cell.contentView.layer.cornerRadius = 10
+        cell.contentView.layer.masksToBounds = true
+        cell.contentView.backgroundColor = UIColor.systemGray6
+        return cell
     }
 
     @objc func exportPartTapped() {
@@ -117,10 +122,48 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         performSegue(withIdentifier: "toManagerPartList", sender: self)
     }
 
+    private func setupExportButtons() {
+        let exportAllButton = UIButton(type: .system)
+        exportAllButton.setTitle("Export All", for: .normal)
+        exportAllButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        exportAllButton.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.8)
+        exportAllButton.tintColor = .white
+        exportAllButton.layer.cornerRadius = 8
+        exportAllButton.layer.masksToBounds = true
+        exportAllButton.addTarget(self, action: #selector(exportButtonTapped), for: .touchUpInside)
+
+        let exportCustomButton = UIButton(type: .system)
+        exportCustomButton.setTitle("Export a Part", for: .normal)
+        exportCustomButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        exportCustomButton.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.8)
+        exportCustomButton.tintColor = .white
+        exportCustomButton.layer.cornerRadius = 8
+        exportCustomButton.layer.masksToBounds = true
+        exportCustomButton.addTarget(self, action: #selector(exportPartTapped), for: .touchUpInside)
+
+        let buttonStack = UIStackView(arrangedSubviews: [exportAllButton, exportCustomButton])
+        buttonStack.axis = .horizontal
+        buttonStack.spacing = 12
+        buttonStack.distribution = .fillEqually
+        buttonStack.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(buttonStack)
+
+        NSLayoutConstraint.activate([
+            buttonStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100),
+            buttonStack.widthAnchor.constraint(equalToConstant: 240),
+            buttonStack.heightAnchor.constraint(equalToConstant: 44)
+        ])
+    }
 
     private func setupDeleteButton() {
         let deleteButton = UIButton(type: .system)
-        deleteButton.setTitle("Delete Employee", for: .normal)
+        deleteButton.setTitle("Delete", for: .normal)
+        deleteButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        deleteButton.tintColor = .systemRed
+        deleteButton.layer.cornerRadius = 8
+        deleteButton.layer.masksToBounds = true
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
 
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
@@ -128,13 +171,19 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
         NSLayoutConstraint.activate([
             deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
+            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+            deleteButton.widthAnchor.constraint(equalToConstant: 120),
+            deleteButton.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
 
     private func setupEditButton() {
         let editButton = UIButton(type: .system)
-        editButton.setTitle("Edit Employee", for: .normal)
+        editButton.setTitle("Edit", for: .normal)
+        editButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        editButton.tintColor = .systemBlue
+        editButton.layer.cornerRadius = 8
+        editButton.layer.masksToBounds = true
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
 
         editButton.translatesAutoresizingMaskIntoConstraints = false
@@ -142,15 +191,15 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
         NSLayoutConstraint.activate([
             editButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            editButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30)
+            editButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
+            editButton.widthAnchor.constraint(equalToConstant: 120),
+            editButton.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
     
     @objc func exportButtonTapped() {
         print("Export Button is tapped.")
-        
         exportFormat()
-
     }
     
     func shareFile(filePath: URL) {
@@ -334,19 +383,18 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
         }
     }
 
-
-
-
-
-
     @objc func deleteButtonTapped() {
         let alert = UIAlertController(
             title: "Confirm Deletion",
             message: "Are you sure you want to delete \(employee?.name ?? "this employee")?",
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+        alert.view.tintColor = .systemRed
+
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        cancelAction.setValue(UIColor.systemBlue, forKey: "titleTextColor")
+        
+        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
             self.databaseRef.removeValue { error, _ in
                 if error == nil {
@@ -354,9 +402,15 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
                     self.navigationController?.popViewController(animated: true)
                 }
             }
-        })
+        }
+        deleteAction.setValue(UIColor.systemRed, forKey: "titleTextColor")
+        
+        alert.addAction(cancelAction)
+        alert.addAction(deleteAction)
+        
         present(alert, animated: true, completion: nil)
     }
+
 
     @objc func editButtonTapped() {
         guard let employee = employee else { return }
@@ -395,12 +449,6 @@ class EmployeeDetailViewController: UIViewController, UITableViewDataSource, UIT
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return employee?.scanHistory.count ?? 0
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ScanHistoryCell", for: indexPath)
-        cell.textLabel?.text = employee?.scanHistory[indexPath.row].name
-        return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

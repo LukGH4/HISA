@@ -21,6 +21,9 @@ class StatsTableViewCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    private let goodProgressView = UIView()
+    private let badProgressView = UIView()
 
     private func setupUI() {
         containerView.layer.cornerRadius = 8
@@ -56,17 +59,19 @@ class StatsTableViewCell: UITableViewCell {
         failureRateLabel.font = UIFont.systemFont(ofSize: 14)
         failureRateLabel.textColor = .gray
 
-        progressBar.progressTintColor = .systemGreen
-        progressBar.trackTintColor = .lightGray
+        goodProgressView.backgroundColor = .systemGreen
+        badProgressView.backgroundColor = .systemRed
+        progressBar.addSubview(goodProgressView)
+        progressBar.addSubview(badProgressView)
+
         progressBar.layer.cornerRadius = 4
         progressBar.clipsToBounds = true
         progressBar.translatesAutoresizingMaskIntoConstraints = false
         progressBar.heightAnchor.constraint(equalToConstant: 6).isActive = true
-        
 
-        editButton.setTitle("Edit", for: .normal)
-        editButton.setTitleColor(.systemBlue, for: .normal)
-        editButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+        editButton.setImage(UIImage(systemName: "bell.fill"), for: .normal)
+        editButton.tintColor = .systemBlue
+        editButton.contentMode = .scaleAspectFit
         editButton.addTarget(self, action: #selector(editTapped), for: .touchUpInside)
 
         let countsStack = UIStackView(arrangedSubviews: [goodCountLabel, badCountLabel])
@@ -102,24 +107,22 @@ class StatsTableViewCell: UITableViewCell {
             mainStack.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -12),
             editButton.widthAnchor.constraint(equalToConstant: 50)
         ])
-
     }
+
 
     func configure(with partType: String, goodCount: Int, badCount: Int) {
         partTypeLabel.text = partType
         goodCountLabel.text = "Good: \(goodCount)"
         badCountLabel.text = "Bad: \(badCount)"
         let total = goodCount + badCount
-        let goodRatio = total > 0 ? Float(goodCount) / Float(total) : 0.0
+        let goodRatio = total > 0 ? CGFloat(goodCount) / CGFloat(total) : 0.0
+        let badRatio = 1.0 - goodRatio
         let failureRate = total > 0 ? (Float(badCount) / Float(total)) * 100 : 0.0
+
         failureRateLabel.text = "Failure: \(String(format: "%.1f", failureRate))%"
-        progressBar.progress = goodRatio
-        if goodRatio > 0.5 {
-            progressBar.progressTintColor = .systemGreen
-            progressBar.trackTintColor = .lightGray
-        } else {
-            progressBar.progressTintColor = .systemRed
-            progressBar.trackTintColor = .systemGray
+        DispatchQueue.main.async {
+            self.goodProgressView.frame = CGRect(x: 0, y: 0, width: self.progressBar.frame.width * goodRatio, height: self.progressBar.frame.height)
+            self.badProgressView.frame = CGRect(x: self.progressBar.frame.width * goodRatio, y: 0, width: self.progressBar.frame.width * badRatio, height: self.progressBar.frame.height)
         }
     }
 

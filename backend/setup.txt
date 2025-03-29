@@ -13,3 +13,7 @@ Start the backend by running: `python app.py`
 Update the URLs in ScanViewController to the URL in the terminal
 
 If you are sure everything is working but the upload functionality is giving errors, try changing your network to a public network (eduroam should work)
+
+For the email functionality, as of now you need an email that has an app password. To have an app password 2fa must be enabled, more info can be found here: https://support.google.com/mail/answer/185833?hl=en
+
+Then you will want to replace the email and app_password lines in app.py with your own
