@@ -4,17 +4,18 @@ import SwiftUI
 import Charts
 
 class PartDetailViewController: UIViewController {
-    
+
     var partType: String!
     var partData: [(date: String, failureRate: Double, confidence: Double, classification: String)] = []
     var classifyData: [String: Int] = [:]
     var ref: DatabaseReference!
-    
+    var dateRange: (Date, Date)? // Added to support filtering by date
+
     private var scrollView: UIScrollView!
     private var contentView: UIView!
     private var hostingControllers: [UIHostingController<AnyView>] = []
     private var stackView: UIStackView!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -22,29 +23,29 @@ class PartDetailViewController: UIViewController {
         setupScrollView()
         fetchPartData()
     }
-    
+
     private func setupScrollView() {
         scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsVerticalScrollIndicator = false
         view.addSubview(scrollView)
-        
+
         contentView = UIView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
-        
+
         stackView = UIStackView()
         stackView.axis = .vertical
         stackView.spacing = 16
         stackView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(stackView)
-        
+
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            
+
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
@@ -57,13 +58,13 @@ class PartDetailViewController: UIViewController {
             stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -20)
         ])
     }
-    
+
     private func setupViews() {
         // Clear previous views
         hostingControllers.forEach { $0.removeFromParent() }
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         hostingControllers.removeAll()
-        
+
         // Title Label
         let titleLabel = UILabel()
         titleLabel.text = partType
@@ -71,104 +72,158 @@ class PartDetailViewController: UIViewController {
         titleLabel.textColor = .label
         titleLabel.textAlignment = .center
         stackView.addArrangedSubview(titleLabel)
-        
+
         // Stats Summary
         let statsView = createStatsView()
         stackView.addArrangedSubview(statsView)
-        
+
         // Create charts
         let failureRateChart = createChartView(title: "Failure Rate Over Time", chartType: .failureRate)
         let confidenceChart = createChartView(title: "Confidence Level Over Time", chartType: .confidence)
         let classifyChart = createChartView(title: "Defect Type Distribution", chartType: .classify)
-        
+
         // Add charts to stack view
         stackView.addArrangedSubview(failureRateChart.view)
         stackView.addArrangedSubview(classifyChart.view)
         stackView.addArrangedSubview(confidenceChart.view)
-        
+
         // Set fixed heights for charts
         failureRateChart.view.heightAnchor.constraint(equalToConstant: 250).isActive = true
         classifyChart.view.heightAnchor.constraint(equalToConstant: 300).isActive = true
         confidenceChart.view.heightAnchor.constraint(equalToConstant: 250).isActive = true
-        
+
         // Add spacing between views
         stackView.setCustomSpacing(20, after: titleLabel)
         stackView.setCustomSpacing(24, after: statsView)
         stackView.setCustomSpacing(24, after: failureRateChart.view)
         stackView.setCustomSpacing(24, after: classifyChart.view)
-        
-        // Remove all the NSLayoutConstraint.activate code since we're using stack view
     }
-    
+
+    @IBAction func filterButtonTapped(_ sender: UIButton) {
+        // This method is needed if the button in storyboard is connected to this selector
+        print("Filter button tapped")
+    }
+
+    func fetchPartData() {
+        let employeesRef = ref.child("users").child("employees")
+
+        employeesRef.observeSingleEvent(of: .value) { snapshot in
+            guard snapshot.exists() else {
+                print("No data found")
+                return
+            }
+
+            var newData: [(date: String, failureRate: Double, confidence: Double, classification: String)] = []
+            var newclassifyData: [String: Int] = [:]
+
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+
+            for case let employeeSnapshot as DataSnapshot in snapshot.children {
+                let imagesRef = employeeSnapshot.childSnapshot(forPath: "images")
+                let videosRef = employeeSnapshot.childSnapshot(forPath: "videos")
+
+                let combined = (imagesRef.children.allObjects + videosRef.children.allObjects) as! [DataSnapshot]
+
+                for snapshot in combined {
+                    guard
+                        let part_type = snapshot.childSnapshot(forPath: "part_type").value as? String,
+                        part_type.contains(self.partType),
+                        let status = snapshot.childSnapshot(forPath: "status").value as? String,
+                        let classification = snapshot.childSnapshot(forPath: "classification").value as? String,
+                        let confidence = snapshot.childSnapshot(forPath: "confidence").value as? String,
+                        let dateStr = snapshot.childSnapshot(forPath: "date").value as? String
+                    else { continue }
+
+                    if let range = self.dateRange,
+                       let dateObj = df.date(from: dateStr),
+                       !(dateObj >= range.0 && dateObj <= range.1) {
+                        continue
+                    }
+
+                    let failureRate = (status == "Good Part") ? 0.0 : 100.0
+                    newclassifyData[classification] = (newclassifyData[classification] ?? 0) + 1
+                    newData.append((date: dateStr, failureRate: failureRate, confidence: Double(confidence)!, classification))
+                }
+            }
+
+            DispatchQueue.main.async {
+                self.partData = newData.sorted { $0.date < $1.date }
+                self.classifyData = newclassifyData
+                self.setupViews()
+            }
+        }
+    }
+
     private func createStatsView() -> UIView {
         let container = UIView()
         container.translatesAutoresizingMaskIntoConstraints = false
         container.backgroundColor = .secondarySystemBackground
         container.layer.cornerRadius = 12
-        
+
         let failureRate = calculateAverageFailureRate()
         let avgConfidence = calculateAverageConfidence()
         let totalScans = partData.count
-        
+
         let statsStack = UIStackView()
         statsStack.axis = .horizontal
         statsStack.distribution = .fillEqually
         statsStack.spacing = 8
         statsStack.translatesAutoresizingMaskIntoConstraints = false
-        
+
         let failureStat = createStatView(value: String(format: "%.1f%%", failureRate), label: "Failure Rate")
         let confidenceStat = createStatView(value: String(format: "%.1f%%", avgConfidence), label: "Avg Confidence")
-        let Scanstat = createStatView(value: "\(totalScans)", label: "Scans")
-        
+        let scanStat = createStatView(value: "\(totalScans)", label: "Scans")
+
         statsStack.addArrangedSubview(failureStat)
         statsStack.addArrangedSubview(confidenceStat)
-        statsStack.addArrangedSubview(Scanstat)
-        
+        statsStack.addArrangedSubview(scanStat)
+
         container.addSubview(statsStack)
-        
+
         NSLayoutConstraint.activate([
             statsStack.topAnchor.constraint(equalTo: container.topAnchor, constant: 25),
             statsStack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 25),
             statsStack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -25),
             statsStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -25)
         ])
-        
+
         return container
     }
-    
+
     private func createStatView(value: String, label: String) -> UIView {
         let container = UIView()
-        
+
         let valueLabel = UILabel()
         valueLabel.text = value
         valueLabel.font = .systemFont(ofSize: 18, weight: .bold)
         valueLabel.textAlignment = .center
         valueLabel.textColor = .label
-        
+
         let descriptionLabel = UILabel()
         descriptionLabel.text = label
         descriptionLabel.font = .systemFont(ofSize: 14, weight: .medium)
         descriptionLabel.textAlignment = .center
         descriptionLabel.textColor = .secondaryLabel
-        
+
         let stack = UIStackView(arrangedSubviews: [valueLabel, descriptionLabel])
         stack.axis = .vertical
         stack.spacing = 4
         stack.translatesAutoresizingMaskIntoConstraints = false
-        
+
         container.addSubview(stack)
-        
+
         NSLayoutConstraint.activate([
             stack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
             stack.centerYAnchor.constraint(equalTo: container.centerYAnchor)
         ])
-        
+
         return container
     }
-    
+
     private func createChartView(title: String, chartType: ChartType) -> UIHostingController<AnyView> {
         let chartView: AnyView
-        
+
         switch chartType {
         case .failureRate:
             chartView = AnyView(FailureRateChartView(data: partData, title: title))
@@ -177,88 +232,28 @@ class PartDetailViewController: UIViewController {
         case .classify:
             chartView = AnyView(classifyChartView(data: classifyData, title: title))
         }
-        
+
         let hostingController = UIHostingController(rootView: chartView)
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        
+
         addChild(hostingController)
         hostingController.didMove(toParent: self)
         hostingControllers.append(hostingController)
-        
+
         return hostingController
     }
-    
+
     private func calculateAverageFailureRate() -> Double {
         guard !partData.isEmpty else { return 0 }
         let totalFailures = partData.reduce(0) { $0 + $1.failureRate }
         return totalFailures / Double(partData.count)
     }
-    
+
     private func calculateAverageConfidence() -> Double {
         guard !partData.isEmpty else { return 0 }
         let totalConfidence = partData.reduce(0) { $0 + $1.confidence }
         return (totalConfidence / Double(partData.count)) * 100
-    }
-    
-    func fetchPartData() {
-        let employeesRef = ref.child("users").child("employees")
-        
-        employeesRef.observeSingleEvent(of: .value) { snapshot in
-            guard snapshot.exists() else {
-                print("No data found")
-                return
-            }
-            
-            var newData: [(date: String, failureRate: Double, confidence: Double, classification: String)] = []
-            var newclassifyData: [String: Int] = [:]
-            
-            for case let employeeSnapshot as DataSnapshot in snapshot.children {
-                let imagesRef = employeeSnapshot.childSnapshot(forPath: "images")
-                let videosRef = employeeSnapshot.childSnapshot(forPath: "videos")
-                
-                for case let imageSnapshot as DataSnapshot in imagesRef.children {
-                    guard
-                        let part_type = imageSnapshot.childSnapshot(forPath: "part_type").value as? String,
-                        part_type.contains(self.partType),
-                        let status = imageSnapshot.childSnapshot(forPath: "status").value as? String,
-                        let classification = imageSnapshot.childSnapshot(forPath: "classification").value as? String,
-                        let confidence = imageSnapshot.childSnapshot(forPath: "confidence").value as? String,
-                        let date = imageSnapshot.childSnapshot(forPath: "date").value as? String
-                    else { continue }
-                    
-                    
-                    let failureRate = (status == "Good Part") ? 0.0 : 100.0
-                    
-                    newclassifyData[classification] = (newclassifyData[classification] ?? 0) + 1
-                    
-                    newData.append((date: date, failureRate: failureRate, confidence: Double(confidence)!, classification))
-                }
-                for case let videoSnapshot as DataSnapshot in videosRef.children {
-                    guard
-                        let part_type = videoSnapshot.childSnapshot(forPath: "part_type").value as? String,
-                        part_type.contains(self.partType),
-                        let status = videoSnapshot.childSnapshot(forPath: "status").value as? String,
-                        let classification = videoSnapshot.childSnapshot(forPath: "classification").value as? String,
-                        let confidence = videoSnapshot.childSnapshot(forPath: "confidence").value as? String,
-                        let date = videoSnapshot.childSnapshot(forPath: "date").value as? String
-                    else { continue }
-                    
-                    
-                    let failureRate = (status == "Good Part") ? 0.0 : 100.0
-                    
-                    newclassifyData[classification] = (newclassifyData[classification] ?? 0) + 1
-                    
-                    newData.append((date: date, failureRate: failureRate, confidence: Double(confidence)!, classification))
-                }
-            }
-            
-            DispatchQueue.main.async {
-                self.partData = newData.sorted { $0.date < $1.date }
-                self.classifyData = newclassifyData
-                self.setupViews()
-            }
-        }
     }
 }
 
