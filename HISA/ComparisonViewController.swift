@@ -181,10 +181,11 @@ struct ComparisonChartView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 30) {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text("Failure Rate (%)")
                         .font(.headline)
                         .padding(.horizontal)
+                        .frame(height: 40)
 
                     Chart {
                         ForEach(partNames, id: \.self) { partName in
@@ -230,11 +231,15 @@ struct ComparisonChartView: View {
                     .frame(height: 300)
                     .padding()
                 }
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(10)
+                .padding(.horizontal)
 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text("Confidence Levels (%)")
                         .font(.headline)
                         .padding(.horizontal)
+                        .frame(height: 40)
 
                     Chart {
                         ForEach(partNames, id: \.self) { partName in
@@ -280,8 +285,11 @@ struct ComparisonChartView: View {
                     .frame(height: 300)
                     .padding()
                 }
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(10)
+                .padding(.horizontal)
             }
-            .padding(.vertical)
+            .padding(.vertical, 20)
         }
         .scrollIndicators(.hidden)
     }

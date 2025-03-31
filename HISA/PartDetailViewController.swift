@@ -265,6 +265,7 @@ enum ChartType {
 }
 
 // MARK: - SwiftUI Chart Views
+
 struct FailureRateChartView: View {
     let data: [(date: String, failureRate: Double, confidence: Double, classification: String)]
     let title: String
@@ -275,12 +276,14 @@ struct FailureRateChartView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            if data.isEmpty {
+            let aggregatedData = aggregateFailureRatePerDay(data)
+            
+            if aggregatedData.isEmpty {
                 Text("No data available")
                     .frame(height: 200)
             } else {
                 Chart {
-                    ForEach(data, id: \.date) { item in
+                    ForEach(aggregatedData, id: \.date) { item in
                         LineMark(
                             x: .value("Date", item.date),
                             y: .value("Failure Rate", item.failureRate)
@@ -325,7 +328,34 @@ struct FailureRateChartView: View {
         .background(Color(.secondarySystemBackground))
         .cornerRadius(10)
     }
+    
+    /// Aggregates failure rates per day by averaging them
+    private func aggregateFailureRatePerDay(_ data: [(date: String, failureRate: Double, confidence: Double, classification: String)]) -> [(date: Date, failureRate: Double)] {
+        var dailySums: [Date: (total: Double, count: Int)] = [:]
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        
+        for item in data {
+            if let date = formatter.date(from: item.date) {
+                if let existing = dailySums[date] {
+                    dailySums[date] = (existing.total + item.failureRate, existing.count + 1)
+                } else {
+                    dailySums[date] = (item.failureRate, 1)
+                }
+            }
+        }
+        
+        return dailySums.map { (date, stats) in
+            (date: date, failureRate: stats.total / Double(stats.count))
+        }
+        .sorted { $0.date < $1.date } // Ensure chronological order
+    }
 }
+
+
+import SwiftUI
+import Charts
 
 struct ConfidenceChartView: View {
     let data: [(date: String, failureRate: Double, confidence: Double, classification: String)]
@@ -337,12 +367,14 @@ struct ConfidenceChartView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            if data.isEmpty {
+            let aggregatedData = aggregateConfidencePerDay(data)
+            
+            if aggregatedData.isEmpty {
                 Text("No data available")
                     .frame(height: 200)
             } else {
                 Chart {
-                    ForEach(data, id: \.date) { item in
+                    ForEach(aggregatedData, id: \.date) { item in
                         LineMark(
                             x: .value("Date", item.date),
                             y: .value("Confidence", item.confidence * 100)
@@ -387,7 +419,31 @@ struct ConfidenceChartView: View {
         .background(Color(.secondarySystemBackground))
         .cornerRadius(10)
     }
+    
+    /// Aggregates confidence scores per day by averaging them
+    private func aggregateConfidencePerDay(_ data: [(date: String, failureRate: Double, confidence: Double, classification: String)]) -> [(date: Date, confidence: Double)] {
+        var dailySums: [Date: (total: Double, count: Int)] = [:]
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withFullDate]
+        
+        for item in data {
+            if let date = formatter.date(from: item.date) {
+                if let existing = dailySums[date] {
+                    dailySums[date] = (existing.total + item.confidence, existing.count + 1)
+                } else {
+                    dailySums[date] = (item.confidence, 1)
+                }
+            }
+        }
+        
+        return dailySums.map { (date, stats) in
+            (date: date, confidence: stats.total / Double(stats.count))
+        }
+        .sorted { $0.date < $1.date } // Ensure chronological order
+    }
 }
+
 
 struct classifyChartView: View {
     let data: [String: Int]
