@@ -11,11 +11,9 @@
      - Users can now view detailed statistics for each individual part over time.
      - Key metrics such as failure rate, confidence levels, and defect type distributions are displayed in charts utilizing `SwiftUI`.
      - An overall failure rate and average confidence metric are also provided.
-- **Comparison of Parts:**
-  Users can select and compare two or more parts to analyze their statistics graphically.
-- **Scan Statistics for Employees:**
-  Employees can now access their individual scan history and part distribution data graphically.
-- **Scan Statistics for Managers:**
+     - Users can select and compare two or more parts to analyze their statistics graphically.
+- **Scan Statistics for Users**
+     - Employees can now access their individual scan history and part distribution data graphically.
      - Managers can now view aggregate scan statistics for all employees.
      - Searching and filtering by name, failure rate, and date added for accessibility.
 - **Updates to Alert System:**
