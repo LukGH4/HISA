@@ -14,7 +14,7 @@
      - Users can select and compare two or more parts to analyze their statistics graphically.
 - **Scan Statistics for Users**
      - Employees can now access their individual scan history and part distribution data graphically.
-     - Managers can now view aggregate scan statistics for all employees.
+     - Managers can now view aggregate scan statistics and failure rates for all employees and parts.
      - Searching and filtering by name, failure rate, and date added for accessibility.
 - **Updates to Alert System:**
      - Managers can define custom failure rate thresholds for individual parts. This data is stored in `Firebase`.
