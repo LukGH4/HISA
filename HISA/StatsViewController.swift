@@ -326,13 +326,36 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "StatsCell", for: indexPath) as! StatsTableViewCell
         let partType = filteredPartTypeNames[indexPath.row]
-
-        if let statusCounts = partTypes[partType],
-           let goodCount = statusCounts["good"] as? Int,
-           let badCount = statusCounts["bad"] as? Int {
+        
+        if let statusCounts = partTypes[partType] {
+            var goodCount = 0
+            var badCount = 0
+            
+            // If date range filter is active, count only entries within the range
+            if case .dateRange(let start, let end) = currentFilter,
+               let entries = statusCounts["entries"] as? [[String: Any]] {
+                for entry in entries {
+                    if let dateStr = entry["date"] as? String,
+                       let date = dateFormatter.date(from: dateStr),
+                       date >= start && date <= end {
+                        // Get status from the original data if available, or use the aggregated counts
+                        let status = statusCounts["status"] as? String ?? ""
+                        if status == "Good Part" || (status == "" && statusCounts["good"] as? Int ?? 0 > 0) {
+                            goodCount += 1
+                        } else {
+                            badCount += 1
+                        }
+                    }
+                }
+            } else {
+                // Use total counts when no date filter is applied
+                goodCount = statusCounts["good"] as? Int ?? 0
+                badCount = statusCounts["bad"] as? Int ?? 0
+            }
+            
             cell.configure(with: partType, goodCount: goodCount, badCount: badCount)
         }
-
+        
         cell.accessoryType = selectedIndexPaths.contains(indexPath) ? .checkmark : .none
         return cell
     }

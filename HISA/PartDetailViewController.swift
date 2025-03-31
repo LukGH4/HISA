@@ -15,6 +15,12 @@ class PartDetailViewController: UIViewController {
     private var contentView: UIView!
     private var hostingControllers: [UIHostingController<AnyView>] = []
     private var stackView: UIStackView!
+    
+    private let dateFormatter: DateFormatter = {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            return df
+        }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -132,14 +138,13 @@ class PartDetailViewController: UIViewController {
                         let status = snapshot.childSnapshot(forPath: "status").value as? String,
                         let classification = snapshot.childSnapshot(forPath: "classification").value as? String,
                         let confidence = snapshot.childSnapshot(forPath: "confidence").value as? String,
-                        let dateStr = snapshot.childSnapshot(forPath: "date").value as? String
+                        let dateStr = snapshot.childSnapshot(forPath: "date").value as? String,
+                        let dateObj = self.dateFormatter.date(from: dateStr)
                     else { continue }
 
-                    if let range = self.dateRange,
-                       let dateObj = df.date(from: dateStr),
-                       !(dateObj >= range.0 && dateObj <= range.1) {
-                        continue
-                    }
+                    if let range = self.dateRange, !(dateObj >= range.0 && dateObj <= range.1) {
+                                            continue
+                                        }
 
                     let failureRate = (status == "Good Part") ? 0.0 : 100.0
                     newclassifyData[classification] = (newclassifyData[classification] ?? 0) + 1
@@ -270,6 +275,12 @@ struct FailureRateChartView: View {
     let data: [(date: String, failureRate: Double, confidence: Double, classification: String)]
     let title: String
     
+    private let dateFormatter: DateFormatter = {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            return df
+        }()
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -331,26 +342,25 @@ struct FailureRateChartView: View {
     
     /// Aggregates failure rates per day by averaging them
     private func aggregateFailureRatePerDay(_ data: [(date: String, failureRate: Double, confidence: Double, classification: String)]) -> [(date: Date, failureRate: Double)] {
-        var dailySums: [Date: (total: Double, count: Int)] = [:]
-        
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        
-        for item in data {
-            if let date = formatter.date(from: item.date) {
-                if let existing = dailySums[date] {
-                    dailySums[date] = (existing.total + item.failureRate, existing.count + 1)
-                } else {
-                    dailySums[date] = (item.failureRate, 1)
+            var dailySums: [Date: (total: Double, count: Int)] = [:]
+            
+            for item in data {
+                if let date = dateFormatter.date(from: item.date) {
+                    let calendar = Calendar.current
+                    let startOfDay = calendar.startOfDay(for: date)
+                    if let existing = dailySums[startOfDay] {
+                        dailySums[startOfDay] = (existing.total + item.failureRate, existing.count + 1)
+                    } else {
+                        dailySums[startOfDay] = (item.failureRate, 1)
+                    }
                 }
             }
+            
+            return dailySums.map { (date, stats) in
+                (date: date, failureRate: stats.total / Double(stats.count))
+            }
+            .sorted { $0.date < $1.date }
         }
-        
-        return dailySums.map { (date, stats) in
-            (date: date, failureRate: stats.total / Double(stats.count))
-        }
-        .sorted { $0.date < $1.date } // Ensure chronological order
-    }
 }
 
 
@@ -360,6 +370,12 @@ import Charts
 struct ConfidenceChartView: View {
     let data: [(date: String, failureRate: Double, confidence: Double, classification: String)]
     let title: String
+    
+    private let dateFormatter: DateFormatter = {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            return df
+        }()
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -422,26 +438,25 @@ struct ConfidenceChartView: View {
     
     /// Aggregates confidence scores per day by averaging them
     private func aggregateConfidencePerDay(_ data: [(date: String, failureRate: Double, confidence: Double, classification: String)]) -> [(date: Date, confidence: Double)] {
-        var dailySums: [Date: (total: Double, count: Int)] = [:]
-        
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withFullDate]
-        
-        for item in data {
-            if let date = formatter.date(from: item.date) {
-                if let existing = dailySums[date] {
-                    dailySums[date] = (existing.total + item.confidence, existing.count + 1)
-                } else {
-                    dailySums[date] = (item.confidence, 1)
+            var dailySums: [Date: (total: Double, count: Int)] = [:]
+            
+            for item in data {
+                if let date = dateFormatter.date(from: item.date) {
+                    let calendar = Calendar.current
+                    let startOfDay = calendar.startOfDay(for: date)
+                    if let existing = dailySums[startOfDay] {
+                        dailySums[startOfDay] = (existing.total + item.confidence, existing.count + 1)
+                    } else {
+                        dailySums[startOfDay] = (item.confidence, 1)
+                    }
                 }
             }
+            
+            return dailySums.map { (date, stats) in
+                (date: date, confidence: stats.total / Double(stats.count))
+            }
+            .sorted { $0.date < $1.date }
         }
-        
-        return dailySums.map { (date, stats) in
-            (date: date, confidence: stats.total / Double(stats.count))
-        }
-        .sorted { $0.date < $1.date } // Ensure chronological order
-    }
 }
 
 

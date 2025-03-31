@@ -12,6 +12,7 @@ class ComparisonViewController: UIViewController {
     private var ref: DatabaseReference!
     private var loadingIndicator: UIActivityIndicatorView!
     private var hostingController: UIHostingController<ComparisonChartView>?
+    private var headerView: UIView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,9 +20,37 @@ class ComparisonViewController: UIViewController {
         title = "Part Comparison"
         ref = Database.database().reference()
 
+        //setupHeaderView()
         setupLoadingIndicator()
         fetchComparisonData()
     }
+    
+    
+    private func setupHeaderView() {
+            headerView = UIView()
+            headerView.translatesAutoresizingMaskIntoConstraints = false
+            headerView.backgroundColor = .systemBackground
+            view.addSubview(headerView)
+
+            let titleLabel = UILabel()
+            titleLabel.translatesAutoresizingMaskIntoConstraints = false
+            titleLabel.text = "Part Comparison"
+            titleLabel.font = .systemFont(ofSize: 24, weight: .bold)
+            titleLabel.textColor = .label
+            titleLabel.textAlignment = .center
+            headerView.addSubview(titleLabel)
+
+
+            NSLayoutConstraint.activate([
+                headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+                titleLabel.topAnchor.constraint(equalTo: headerView.topAnchor, constant: 10),
+                titleLabel.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
+                titleLabel.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -16),
+            ])
+        }
 
     private func setupLoadingIndicator() {
         loadingIndicator = UIActivityIndicatorView(style: .large)
@@ -149,6 +178,8 @@ class ComparisonViewController: UIViewController {
             selectedParts: partsData,
             partNames: selectedParts
         )
+        
+
 
         let newHostingController = UIHostingController(rootView: chartsView)
         newHostingController.view.backgroundColor = .clear
@@ -162,7 +193,8 @@ class ComparisonViewController: UIViewController {
             newHostingController.view.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             newHostingController.view.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             newHostingController.view.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            newHostingController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+            newHostingController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+        
         ])
 
         hostingController = newHostingController
@@ -180,7 +212,11 @@ struct ComparisonChartView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 30) {
+            VStack(alignment: .center, spacing: 30) {
+                Text("Part Comparison")
+                    .font(.system(size: 28, weight: .bold, design: .default))
+                    .padding(.horizontal)
+                    .frame(height: 45)
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Failure Rate (%)")
                         .font(.headline)

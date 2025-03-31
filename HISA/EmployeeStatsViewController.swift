@@ -352,7 +352,7 @@ struct ScanHistoryChartView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Scan History (Last 30 Days)")
+            Text("Scan History")
                 .font(.headline)
                 .foregroundColor(.primary)
             
