@@ -1,10 +1,40 @@
 # Honeywell ML Part Intake Scanning App
- - Problem:  Need a consistent way to determine if a part is good or bad at a Maintenance Repair & Overhaul during part intake. Dependence on individuals to determine good and bad part is not a consistent way to perform the task on part intake. Inefficient use of part utilization. 
+ - Problem: Need a consistent way to determine if a part is good or bad at a Maintenance Repair & Overhaul during part intake. Dependence on individuals to determine good and bad part is not a consistent way to perform the task on part intake. Inefficient use of part utilization. 
  
 - Solution: Using Machine Learning (ML) Image Classification technology, an ML tech stack will be created and integrated with a Part Intake Scanning mobile app. The ML model will be trained using a good part and bad part image dataset. The good / bad part ML model produced will be integrated as part of the app to determine if the part is Good / Bad based on the image taken at the depot using the app in real-time. The app will also have an on-device self-learning mode that will be used as feedback into the ML training to fine tune and improve the results over time. 
 
 # Release Notes
+## Version 0.4.0
 
+### Features
+- **Individual Part Statistics:**
+     - Users can now view detailed statistics for each individual part over time.
+     - Key metrics such as failure rate, confidence levels, and defect type distributions are displayed in charts utilizing `SwiftUI`.
+     - An overall failure rate and average confidence metric are also provided.
+- **Comparison of Parts:**
+  Users can select and compare two or more parts to analyze their statistics graphically.
+- **Scan Statistics for Employees:**
+  Employees can now access their individual scan history and part distribution data graphically.
+- **Scan Statistics for Managers:**
+     - Managers can now view aggregate scan statistics for all employees.
+     - Searching and filtering by name, failure rate, and date added for accessibility.
+- **Updates to Alert System:**
+     - Managers can define custom failure rate thresholds for individual parts. This data is stored in `Firebase`.
+     - Managers will receive emails as well as an in-app notification upon a part passing its predefined failure threshold.
+- **UI Improvements:**
+     - Added styling and improved organization in the employee information page.
+     - Added a container view to the statistics page, making it easier to navigate and select parts.
+     - Failure rates are also represented by a color-coded bar for quick visual interpretation.
+
+### Bug Fixes
+- Fixed an issue where deleting a scan would cause the scan list to crash.
+- Resolved an error where searching for a part resulted in deselecting previously selected parts.
+- Corrected an issue where the activity log displayed incorrect timestamps.
+
+### Known Issues
+- **UI Inconsistency**:
+  Minor inconsistencies and faults in the UI. We plan to polish the UI extensively in the next version.
+  
 ## Version 0.3.0
 
 ### Features
@@ -19,10 +49,8 @@
      - A color-coded indicator based on part classification for quick visual identification.
      - Enhanced UI for the employees management page.
      - Profile pictures can now be uploaded for both employee and manager accounts.
-- **User Feedback:**
-  Users can now submit feedback on the accuracy of the `YOLOv8` model’s classifications.
 - **Data Exporting:**
-  User data can now be exported in a CSV format.
+  Scan data can now be exported in a CSV and PDF format.
 
 ### Bug Fixes
 - Resolved an issue where profile pictures occasionally failed to load due to asynchronous processing.
