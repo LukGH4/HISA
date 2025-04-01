@@ -352,7 +352,7 @@ struct ScanHistoryChartView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Scan History (Last 30 Days)")
+            Text("Scan History")
                 .font(.headline)
                 .foregroundColor(.primary)
             
@@ -366,7 +366,7 @@ struct ScanHistoryChartView: View {
                             x: .value("Date", item.date),
                             y: .value("Count", item.count)
                         )
-                        .interpolationMethod(.catmullRom)
+                        .interpolationMethod(.linear)
                         
                         PointMark(
                             x: .value("Date", item.date),
@@ -375,19 +375,22 @@ struct ScanHistoryChartView: View {
                     }
                 }
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 5)) { value in // Show every 5th day
-                        AxisGridLine()
+                    AxisMarks(values: .automatic) { value in
                         if let date = value.as(Date.self) {
+                            AxisGridLine()
+                            AxisTick()
                             AxisValueLabel {
-                                Text(date, formatter: dateFormatter)
-                                    .font(.caption)
-                                    .rotationEffect(.degrees(-45))
-                                    .offset(y: 30) // Adjust offset if needed
+                                Text(date, format: .dateTime.day().month())
                             }
                         }
                     }
                 }
+                .chartYAxis {
+                    AxisMarks(position: .leading)
+                }
+                .chartLegend(position: .bottom, alignment: .center, spacing: 20)
                 .frame(height: 200)
+                .padding()
             }
         }
         .padding()
