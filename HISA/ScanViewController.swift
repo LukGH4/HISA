@@ -188,14 +188,16 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         if !isRecording {
             startRecording()
-            recordButton.setImage(UIImage(systemName: "stop.circle"), for: .normal)
+            let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .regular)
+            let stopImage = UIImage(systemName: "stop.circle", withConfiguration: config)
+            recordButton.setImage(stopImage, for: .normal)
             recordToggleButton.isHidden = true
             recordToggleButton.isEnabled = false
             captureToggleButton.isHidden = true
             captureToggleButton.isEnabled = false
         } else {
             stopRecording()
-            recordButton.setImage(UIImage(systemName: "record.circle"), for: .normal)
+            recordButton.setImage(UIImage(named: "Record Button"), for: .normal)
             recordToggleButton.isHidden = true
             recordToggleButton.isEnabled = false
             captureToggleButton.isHidden = false
@@ -220,6 +222,8 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
     
     func stopRecording() {
         videoOutput.stopRecording()
+        discardButton.isHidden = false
+        discardButton.isEnabled = true
     }
     
     
@@ -233,6 +237,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         capturedImageView.image = capturedImage
         capturedImageView.isHidden = false
         discardButton.isHidden = false
+        discardButton.isEnabled = true
         submitButton.isHidden = false
         submitButton.isEnabled = true
         submitButtonR.isHidden = true
