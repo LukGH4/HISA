@@ -402,7 +402,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PNV8X3GWPF;
+				DEVELOPMENT_TEAM = 34LV94T9AP;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HISA/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app required camera usage to scan parts";
@@ -432,7 +432,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = WCGTPWHM5S;
+				DEVELOPMENT_TEAM = 34LV94T9AP;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HISA/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app required camera usage to scan parts";
