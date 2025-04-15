@@ -249,41 +249,46 @@ class SettingsViewController: UIViewController, UIImagePickerControllerDelegate,
         }
     }
 
-    private func showEditAlert(for fieldKey: String, currentValue: String) {
+    private func showEditAlert(for fieldKey: String, currentValue: String?) {
         let fieldName = fieldKey.capitalized
         let alert = UIAlertController(title: "Edit \(fieldName)", message: nil, preferredStyle: .alert)
-        alert.addTextField { textField in
-            textField.text = currentValue
-        }
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { [weak self] _ in
-            guard let newValue = alert.textFields?.first?.text,
-                  !newValue.isEmpty,
-                  let userId = CurrentUser.shared.getFirebaseKey() else {
-                self?.showAlert(title: "Error", message: "Field cannot be empty")
-                return
+        if fieldKey == "profileImageUrl" {
+            alert.message = "Tap below to update your profile picture."
+            alert.addAction(UIAlertAction(title: "Change Profile Image", style: .default, handler: { [weak self] _ in
+                self?.uploadProfilePictureButtonTapped()
+            }))
+        } else {
+            alert.addTextField { textField in
+                textField.text = currentValue
             }
-
-            self?.showLoading()
-            UserService.shared.updateUserField(userId: userId, updates: [fieldKey: newValue]) { error in
-                DispatchQueue.main.async {
-                    self?.hideLoading()
-                    if let error = error {
-                        self?.showAlert(title: "Error", message: error.localizedDescription)
-                    } else {
-                        self?.showAlert(title: "Success", message: "\(fieldName) updated")
-                        self?.logActivity(action: "updated \(fieldKey)")
-                        var updatedData = CurrentUser.shared.getUserData()
-                        updatedData[fieldKey] = newValue
-                        CurrentUser.shared.setUserData(updatedData)
-                        self?.renderUserData()
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { [weak self] _ in
+                guard let newValue = alert.textFields?.first?.text,
+                      !newValue.isEmpty,
+                      let userId = CurrentUser.shared.getFirebaseKey() else {
+                    self?.showAlert(title: "Error", message: "Field cannot be empty")
+                    return
+                }
+                self?.showLoading()
+                UserService.shared.updateUserField(userId: userId, updates: [fieldKey: newValue]) { error in
+                    DispatchQueue.main.async {
+                        self?.hideLoading()
+                        if let error = error {
+                            self?.showAlert(title: "Error", message: error.localizedDescription)
+                        } else {
+                            self?.showAlert(title: "Success", message: "\(fieldName) updated")
+                            self?.logActivity(action: "updated \(fieldKey)")
+                            var updatedData = CurrentUser.shared.getUserData()
+                            updatedData[fieldKey] = newValue
+                            CurrentUser.shared.setUserData(updatedData)
+                            self?.renderUserData()
+                        }
                     }
                 }
-            }
-        }))
+            }))
+        }
         present(alert, animated: true)
     }
-
 
     private func setupActivityIndicator() {
         activityIndicator.center = view.center
@@ -413,7 +418,7 @@ class SettingsViewController: UIViewController, UIImagePickerControllerDelegate,
     }
 
     private func uploadProfileImage(_ image: UIImage) {
-        guard let userId = CurrentUser.shared.getId() else { return }
+        guard let userId = CurrentUser.shared.getFirebaseKey() else { return }
         
         showLoading()
         let storageRef = Storage.storage().reference().child("profile_images/\(userId).jpg")
@@ -516,4 +521,3 @@ class SettingsViewController: UIViewController, UIImagePickerControllerDelegate,
         }
     }
 }
-
