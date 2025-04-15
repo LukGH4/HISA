@@ -12,16 +12,24 @@ class UserService {
 
     private init() {}
 
-    func fetchUserInfoAndPersist(userId: String) {
+    func fetchUserInfoAndPersist(userId: String, completion: ((Bool) -> Void)? = nil) {
         let databaseRef = Database.database().reference()
 
         databaseRef.child("users/employees").child(userId).observeSingleEvent(of: .value) { snapshot in
-            if let userData = snapshot.value as? [String: Any] {
+            if var userData = snapshot.value as? [String: Any] {
+                userData["firebaseKey"] = snapshot.key
+                userData["role"] = "employee"
                 CurrentUser.shared.setUserData(userData)
+                completion?(true)
             } else {
                 databaseRef.child("users/managers").child(userId).observeSingleEvent(of: .value) { snapshot in
-                    if let userData = snapshot.value as? [String: Any] {
+                    if var userData = snapshot.value as? [String: Any] {
+                        userData["firebaseKey"] = snapshot.key
+                        userData["role"] = "manager"
                         CurrentUser.shared.setUserData(userData)
+                        completion?(true)
+                    } else {
+                        completion?(false)
                     }
                 }
             }
@@ -30,7 +38,6 @@ class UserService {
 
     func updateUserField(userId: String, updates: [String: Any], completion: @escaping (Error?) -> Void) {
         guard let userRole = CurrentUser.shared.getRole() else {
-            print("Error: User role not found")
             completion(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "User role not found"]))
             return
         }
@@ -50,19 +57,13 @@ class UserService {
             databaseRef.child(path).observeSingleEvent(of: .value) { snapshot in
                 for child in snapshot.children {
                     if let childSnapshot = child as? DataSnapshot,
-                       let userData = childSnapshot.value as? [String: Any],
+                       var userData = childSnapshot.value as? [String: Any],
                        let storedEmployeeId = userData["id"] as? String,
                        storedEmployeeId == employeeId {
                         
-                        // Add Firebase key to the user data dictionary
-                        var userWithKeyData = userData
-                        userWithKeyData["firebaseKey"] = childSnapshot.key
-
-                        // Determine role and store in CurrentUser
-                        userWithKeyData["role"] = path.contains("managers") ? "manager" : "employee"
-                        CurrentUser.shared.setUserData(userWithKeyData)
-
-                        print("User found in \(path) with Firebase key: \(childSnapshot.key)")
+                        userData["firebaseKey"] = childSnapshot.key
+                        userData["role"] = path.contains("managers") ? "manager" : "employee"
+                        CurrentUser.shared.setUserData(userData)
                         completion(true)
                         return
                     }
