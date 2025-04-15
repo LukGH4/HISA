@@ -233,7 +233,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                     self.partTypeNames = Array(self.partTypes.keys)
                     self.applyCurrentFilter()
                     self.tableView.reloadData()
-                    self.checkFailureRates()
                     self.tableView.refreshControl?.endRefreshing()
                 }
             } else {
