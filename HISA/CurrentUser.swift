@@ -78,7 +78,7 @@ class CurrentUser {
             "id": id ?? "",
             "role": role ?? "",
             "firebaseKey": firebaseKey ?? "",
-            "phonenumber": phoneNumber ?? "",
+            "phone number": phoneNumber ?? "",
             "profileImageUrl": profileImageUrl ?? "",
             "images": images ?? [:],
             "videos": videos ?? [:],
@@ -98,14 +98,36 @@ class CurrentUser {
             return
         }
 
-        let ref = Database.database().reference().child("users").child(firebaseKey)
-        let userData: [String: Any] = getUserData()
-        
-        ref.updateChildValues(userData) { error, _ in
-            if let error = error {
-                print("Error updating user data in Firebase: \(error.localizedDescription)")
+        let database = Database.database().reference()
+
+        let managersRef = database.child("users").child("managers").child(firebaseKey)
+        let employeesRef = database.child("users").child("employees").child(firebaseKey)
+
+        managersRef.observeSingleEvent(of: .value) { snapshot in
+            if snapshot.exists() {
+                let userData: [String: Any] = self.getUserData()
+                managersRef.updateChildValues(userData) { error, _ in
+                    if let error = error {
+                        print("Error updating manager data: \(error.localizedDescription)")
+                    } else {
+                        print("Manager data updated successfully.")
+                    }
+                }
             } else {
-                print("User data updated successfully.")
+                employeesRef.observeSingleEvent(of: .value) { snapshot in
+                    if snapshot.exists() {
+                        let userData: [String: Any] = self.getUserData()
+                        employeesRef.updateChildValues(userData) { error, _ in
+                            if let error = error {
+                                print("Error updating employee data: \(error.localizedDescription)")
+                            } else {
+                                print("Employee data updated successfully.")
+                            }
+                        }
+                    } else {
+                        print("User not found under managers or employees.")
+                    }
+                }
             }
         }
     }
