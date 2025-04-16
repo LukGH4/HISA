@@ -13,6 +13,7 @@ import logging
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -62,11 +63,14 @@ def upload_file():
     user_id = request.form.get('user_id', 'unknown_user')
     part_type = request.form.get('part_type', 'unknown_part')
     file_ext = file.filename.split('.')[-1].lower()
-    
+
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
-    file_id = str(uuid.uuid4())
+    date = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+    employee = request.form.get('name', 'unknown_user')
+    file_id = f"{date}"
     filename = f"{file_id}.{file_ext}"
     file_path = os.path.join(UPLOAD_FOLDER, filename)
     file.save(file_path)
@@ -86,7 +90,7 @@ def upload_file():
     blob.upload_from_filename(file_path)
 
     firebase_url = f"https://firebasestorage.googleapis.com/v0/b/jib-4338-hisa.firebasestorage.app/o/{storage_path.replace('/', '%2F')}?alt=media"
-    
+
     save_to_firebase(user_id, filename, firebase_url, status, classification, confidence, part_type)
     os.remove(file_path)
 
@@ -138,7 +142,7 @@ def classify_video(video_path):
 
                 results = model(frame_rgb)
                 detections = results[0].boxes
-                
+
                 for box in detections:
                     cls_idx = int(box.cls[0].item())
                     confidence = box.conf[0].item()
@@ -157,7 +161,7 @@ def classify_video(video_path):
             best_label, best_conf = "Good Part", 1.0
 
         return status, best_label, f"{best_conf:.2f}"
-    
+
     except Exception as e:
         return f"Error processing video: {str(e)}"
 
@@ -197,7 +201,7 @@ def update_part_counts(part_type, status):
         "good": good_count,
         "bad": bad_count
     })
-    
+
     if good_count + bad_count > 0:
         failure_rate = bad_count / (good_count + bad_count)
     else:
@@ -206,13 +210,13 @@ def update_part_counts(part_type, status):
     threshold = part_data.get("threshold", 50)
     if failure_rate > threshold / 100:
         send_email_to_managers(part_type, failure_rate, threshold)
-    
+
     print(f"Updated part counts for {part_type}: Good = {good_count}, Bad = {bad_count}, Failure Rate = {failure_rate:.2f}")
-    
+
 def send_email_to_managers(part_type, failure_rate, threshold):
     managers_ref = db.reference("users/managers")
     managers_data = managers_ref.get()
-    
+
     if not managers_data:
         print("No managers found.")
         return
@@ -251,5 +255,3 @@ def send_email(to_email, subject, body):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3333, debug=True)
-    
-
