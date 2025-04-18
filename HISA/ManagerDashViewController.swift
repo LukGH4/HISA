@@ -47,7 +47,7 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     @IBAction func filterButtonTapped(_ sender: UIButton) {
-        let alert = UIAlertController(title: "Sort Employees", message: "Choose a sorting option", preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "Sort Employees", message: nil, preferredStyle: .actionSheet)
         
         alert.addAction(UIAlertAction(title: "Sort by Name", style: .default, handler: { _ in
             self.sortEmployees(by: "name")

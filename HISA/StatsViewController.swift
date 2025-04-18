@@ -2,6 +2,7 @@ import UIKit
 import FirebaseDatabase
 import Charts
 import SwiftUI
+import FSCalendar
 
 class StatsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate, UIScrollViewDelegate {
 
@@ -78,7 +79,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
 
     @objc func setupButtons() {
-        // Create buttons
         let compareButton = UIButton(type: .system)
         compareButton.setTitle("Compare Selected", for: .normal)
         compareButton.addTarget(self, action: #selector(compareTapped), for: .touchUpInside)
@@ -91,7 +91,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         exportAllButton.setTitle("Export All", for: .normal)
         exportAllButton.addTarget(self, action: #selector(exportAllTapped), for: .touchUpInside)
 
-        // Create stack view
         buttonStackView = UIStackView(arrangedSubviews: [compareButton, exportSelectedButton, exportAllButton])
         buttonStackView.axis = .horizontal
         buttonStackView.spacing = 16
@@ -99,7 +98,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         buttonStackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(buttonStackView)
 
-        // Anchor to bottom of safe area
         bottomConstraint = buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
 
         NSLayoutConstraint.activate([
@@ -120,7 +118,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             return
         }
 
-        // Ensure selected parts are in filteredPartTypeNames
         let validSelectedParts = selectedPartsForComparison.filter { filteredPartTypeNames.contains($0) }
         guard !validSelectedParts.isEmpty else {
             let alert = UIAlertController(title: "No Valid Parts Selected",
@@ -131,7 +128,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             return
         }
 
-        // Aggregate data for selected parts by date
         var dateCounts: [String: (good: Int, bad: Int)] = [:]
         for partType in validSelectedParts {
             if let entries = partTypes[partType]?["entries"] as? [[String: Any]] {
@@ -153,23 +149,20 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             }
         }
 
-        // Convert to CSV format
         let data = dateCounts.map { (date, counts) in
             let total = counts.good + counts.bad
             let failureRate = total > 0 ? (Double(counts.bad) / Double(total)) * 100 : 0.0
             return (date: date, total: total, good: counts.good, bad: counts.bad, rate: failureRate)
-        }.sorted { $0.date > $1.date } // Sort by date descending
-
+        }.sorted { $0.date > $1.date }
+        
         let csvContent = generateCSV(from: data)
         shareCSV(content: csvContent, fileName: "SelectedPartsStats.csv")
     }
     
     @objc func exportAllTapped() {
-        // Use filtered scan history and failure rate data
         let scanData = filteredScanHistoryData()
         let failureData = filteredFailureRateData()
         
-        // Compute mapped data
         let mappedData: [(date: String, total: Int, good: Int, bad: Int, rate: Double)] = scanData.map { scan in
             let rate = failureData.first(where: { $0.0 == scan.0 })?.1 ?? 0.0
             let bad = Int(round(Double(scan.1) * (rate / 100.0)))
@@ -177,7 +170,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             return (date: scan.0, total: scan.1, good: good, bad: bad, rate: rate)
         }
         
-        // Sort data by date descending
         let data = mappedData.sorted { $0.date > $1.date }
         
         let csvContent = generateCSV(from: data)
@@ -194,7 +186,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
 
     private func shareCSV(content: String, fileName: String) {
-        // Write CSV content to a temporary file
         let tempDirectory = FileManager.default.temporaryDirectory
         let fileURL = tempDirectory.appendingPathComponent(fileName)
 
@@ -224,32 +215,22 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         showFilterOptions()
     }
 
-    @objc func presentDateRangePicker() {
-        let alert = UIAlertController(title: "Select Date Range", message: nil, preferredStyle: .alert)
-
-        alert.addTextField { textField in
-            textField.placeholder = "Start Date (yyyy-MM-dd)"
+    @objc func presentCalendarPicker() {
+        let calendarVC = CalendarFilterViewController()
+        calendarVC.delegate = self
+        if case .dateRange(let start, let end) = currentFilter {
+            calendarVC.selectedRange = (start, end)
         }
-        alert.addTextField { textField in
-            textField.placeholder = "End Date (yyyy-MM-dd)"
+        
+        if let popoverController = calendarVC.popoverPresentationController {
+            popoverController.sourceView = filterButton
+            popoverController.sourceRect = filterButton.bounds
+            popoverController.permittedArrowDirections = .up
+            popoverController.delegate = self
         }
-
-        alert.addAction(UIAlertAction(title: "Apply", style: .default, handler: { _ in
-            guard
-                let startText = alert.textFields?[0].text,
-                let endText = alert.textFields?[1].text,
-                let startDate = self.dateFormatter.date(from: startText),
-                let endDate = self.dateFormatter.date(from: endText)
-            else { return }
-
-            self.currentFilter = .dateRange(startDate, endDate)
-            self.applyCurrentFilter()
-            self.tableView.reloadData()
-        }))
-
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-
-        present(alert, animated: true)
+        
+        calendarVC.modalPresentationStyle = .popover
+        present(calendarVC, animated: true)
     }
 
     func applyCurrentFilter() {
@@ -292,7 +273,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
 
     @objc func showFilterOptions() {
-        let alert = UIAlertController(title: "Filter Options", message: "Choose a filter", preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "Filter Options", message: nil, preferredStyle: .actionSheet)
 
         alert.addAction(UIAlertAction(title: "Failure Rate > 20%", style: .default, handler: { _ in
             self.currentFilter = .failureRate(20)
@@ -321,22 +302,27 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         }))
 
         alert.addAction(UIAlertAction(title: "Filter by Date", style: .default, handler: { _ in
-            self.presentDateRangePicker()
+            self.presentCalendarPicker()
         }))
 
-        alert.addAction(UIAlertAction(title: "Show All", style: .default, handler: { _ in
+        alert.addAction(UIAlertAction(title: "Clear Filters", style: .destructive, handler: { _ in
             self.currentFilter = .none
             self.applyCurrentFilter()
             self.tableView.reloadData()
         }))
 
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        if let popoverController = alert.popoverPresentationController {
+            popoverController.sourceView = filterButton
+            popoverController.sourceRect = filterButton.bounds
+        }
+        
         present(alert, animated: true)
     }
 
     private func fetchAllData() {
         print("Fetching all data")
-        // Reset data to avoid stale state
         partTypes.removeAll()
         partTypeNames.removeAll()
         filteredPartTypeNames.removeAll()
@@ -345,19 +331,16 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
         let dispatchGroup = DispatchGroup()
 
-        // Fetch part types
         dispatchGroup.enter()
         fetchPartTypesAndStatuses { [weak self] in
             dispatchGroup.leave()
         }
 
-        // Fetch scan history and failure rates
         dispatchGroup.enter()
         fetchScanHistory { [weak self] in
             dispatchGroup.leave()
         }
 
-        // Update UI after both fetches complete
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
             print("All data fetched. Part types: \(self.partTypeNames.count), Scan history: \(self.scanHistory.count), Failure rate history: \(self.failureRateHistory.count)")
@@ -446,7 +429,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                     }
                 }
 
-                // Calculate scan history
                 var history = scanCounts.map { (date: $0.key, count: $0.value) }
                     .sorted { $0.date > $1.date }
                 if history.count > 30 {
@@ -454,7 +436,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                 }
                 self.scanHistory = history
 
-                // Calculate failure rate history
                 var failureRates = scanCounts.map { (date: $0.key, total: $0.value) }
                     .map { (date: $0.date, rate: Double(badCounts[$0.date] ?? 0) / Double($0.total) * 100) }
                     .sorted { $0.date > $1.date }
@@ -626,9 +607,10 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return Section(rawValue: section)?.title
     }
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-            return 44 // Standard header height to prevent overlap
-        }
+            return 44
+    }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let rowCount: Int
@@ -655,7 +637,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         if Section(rawValue: section) == .parts {
-            return 16 // Add padding between parts and charts sections
+            return 16
         }
         return 0
     }
@@ -712,7 +694,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if Section(rawValue: indexPath.section) == .charts {
-            return 850 // Height for three charts
+            return 850
         }
         return UITableView.automaticDimension
     }
@@ -781,7 +763,6 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     }
 }
 
-// Update ChartsView to include the new FailureRateChartView and add top padding
 struct ManagerChartsView: View {
     let partsData: [String: Double]
     let scanHistoryData: [(String, Int)]
@@ -793,11 +774,10 @@ struct ManagerChartsView: View {
             ScanHistoryChartView(data: scanHistoryData)
             OverallFailureRateChartView(data: failureRateData)
         }
-        .padding(.top, 30) // Add top padding to prevent overlap with section header
+        .padding(.top, 30)
     }
 }
 
-// FailureRateChartView for displaying failure rate over time
 struct OverallFailureRateChartView: View {
     let data: [(date: Date, rate: Double)]
     private let dateFormatter: DateFormatter
@@ -902,3 +882,166 @@ extension UIView {
         return nil
     }
 }
+
+extension StatsViewController: UIPopoverPresentationControllerDelegate {
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
+}
+
+class CalendarFilterViewController: UIViewController {
+
+    weak var delegate: StatsViewController?
+    var selectedRange: (start: Date?, end: Date?) = (nil, nil)
+
+    private lazy var calendar: FSCalendar = {
+        let calendar = FSCalendar()
+        calendar.translatesAutoresizingMaskIntoConstraints = false
+        calendar.delegate = self
+        calendar.allowsMultipleSelection = true
+        calendar.swipeToChooseGesture.isEnabled = true
+        calendar.scope = .month
+        calendar.appearance.headerTitleColor = .label
+        calendar.appearance.weekdayTextColor = .secondaryLabel
+        calendar.appearance.selectionColor = .systemBlue
+        calendar.appearance.todayColor = .systemGray5
+        return calendar
+    }()
+
+    private lazy var infoLabel: UILabel = createLabel(
+        text: "Select a start date",
+        font: .systemFont(ofSize: 16, weight: .medium),
+        backgroundColor: .systemGray6,
+        textColor: .systemBlue
+    )
+
+    private lazy var applyButton: UIButton = createButton(
+        title: "Apply",
+        backgroundColor: .systemBlue,
+        action: #selector(applyFilter)
+    )
+
+    private lazy var clearButton: UIButton = createButton(
+        title: "Clear",
+        backgroundColor: .systemGray4,
+        action: #selector(clearSelection)
+    )
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        setupViews()
+    }
+
+    private func setupViews() {
+        [calendar, infoLabel, applyButton, clearButton].forEach { view.addSubview($0) }
+
+        NSLayoutConstraint.activate([
+            calendar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            calendar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            calendar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+
+            infoLabel.topAnchor.constraint(equalTo: calendar.bottomAnchor, constant: 16),
+            infoLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            infoLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+
+            applyButton.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 16),
+            applyButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            applyButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            applyButton.heightAnchor.constraint(equalToConstant: 48),
+
+            clearButton.topAnchor.constraint(equalTo: applyButton.bottomAnchor, constant: 8),
+            clearButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            clearButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            clearButton.heightAnchor.constraint(equalToConstant: 48),
+            clearButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+        ])
+    }
+
+    @objc private func applyFilter() {
+        if let start = selectedRange.start, let end = selectedRange.end {
+            delegate?.currentFilter = .dateRange(start, end)
+            delegate?.applyCurrentFilter()
+            delegate?.tableView.reloadData()
+        }
+        dismiss(animated: true)
+    }
+
+    @objc private func clearSelection() {
+        selectedRange = (nil, nil)
+        calendar.selectedDates.forEach { calendar.deselect($0) }
+        infoLabel.text = "Select a start date"
+    }
+
+    private func createLabel(text: String, font: UIFont, backgroundColor: UIColor, textColor: UIColor) -> UILabel {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = text
+        label.font = font
+        label.textColor = textColor
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.backgroundColor = backgroundColor
+        label.layer.cornerRadius = 8
+        label.layer.masksToBounds = true
+        return label
+    }
+
+    private func createButton(title: String, backgroundColor: UIColor, action: Selector) -> UIButton {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle(title, for: .normal)
+        button.backgroundColor = backgroundColor
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 8
+        button.addTarget(self, action: action, for: .touchUpInside)
+        return button
+    }
+}
+
+extension CalendarFilterViewController: FSCalendarDelegate {
+    func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+
+        if selectedRange.start == nil {
+            selectedRange.start = date
+            selectedRange.end = nil
+            infoLabel.text = "Start date selected. Select an end date."
+        } else if let start = selectedRange.start, selectedRange.end == nil {
+            if date >= start {
+                selectedRange.end = date
+                selectRange(from: start, to: date)
+                if start == date {
+                    infoLabel.text = "Selected: \(formatter.string(from: date))"
+                } else {
+                    infoLabel.text = "Selected: \(formatter.string(from: start)) → \(formatter.string(from: date))"
+                }
+            } else {
+                calendar.deselect(start)
+                selectedRange.start = date
+                selectedRange.end = nil
+                infoLabel.text = "Start date selected. Select an end date."
+            }
+        } else {
+            calendar.selectedDates.forEach { calendar.deselect($0) }
+            selectedRange = (date, nil)
+            infoLabel.text = "Start date selected. Select an end date."
+        }
+    }
+
+    func calendar(_ calendar: FSCalendar, didDeselect date: Date, at monthPosition: FSCalendarMonthPosition) {
+        selectedRange = (nil, nil)
+        calendar.selectedDates.forEach { calendar.deselect($0) }
+        infoLabel.text = "Select a start date"
+    }
+
+    private func selectRange(from startDate: Date, to endDate: Date) {
+        var currentDate = startDate
+        while currentDate <= endDate {
+            calendar.select(currentDate)
+            currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
+        }
+    }
+}
+
