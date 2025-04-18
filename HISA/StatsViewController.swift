@@ -3,7 +3,7 @@ import FirebaseDatabase
 import Charts
 import SwiftUI
 
-class StatsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate {
+class StatsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate, UIScrollViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchBar: UISearchBar!
@@ -16,7 +16,11 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     var selectedPartsForComparison: [String] = []
     var selectedIndexPaths: Set<IndexPath> = []
     var scanHistory: [(date: String, count: Int)] = []
+    var failureRateHistory: [(date: String, rate: Double)] = []
     let failureRateThreshold: Double = -1.0
+
+    private var buttonStackView: UIStackView!
+    private var bottomConstraint: NSLayoutConstraint!
 
     enum FilterType {
         case none
@@ -55,12 +59,12 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 60
         tableView.register(StatsTableViewCell.self, forCellReuseIdentifier: "StatsCell")
-        tableView.register(ChartTableViewCell.self, forCellReuseIdentifier: "ChartCell")
+        tableView.register(ManagerChartTableViewCell.self, forCellReuseIdentifier: "ChartCell")
 
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
         tableView.addGestureRecognizer(longPressRecognizer)
 
-        setupCompareButton()
+        setupButtons()
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
@@ -73,19 +77,120 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         fetchAllData()
     }
 
-    @objc func setupCompareButton() {
+    @objc func setupButtons() {
+        // Create buttons
         let compareButton = UIButton(type: .system)
         compareButton.setTitle("Compare Selected", for: .normal)
         compareButton.addTarget(self, action: #selector(compareTapped), for: .touchUpInside)
-        compareButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(compareButton)
+
+        let exportSelectedButton = UIButton(type: .system)
+        exportSelectedButton.setTitle("Export Selected", for: .normal)
+        exportSelectedButton.addTarget(self, action: #selector(exportSelectedTapped), for: .touchUpInside)
+
+        let exportAllButton = UIButton(type: .system)
+        exportAllButton.setTitle("Export All", for: .normal)
+        exportAllButton.addTarget(self, action: #selector(exportAllTapped), for: .touchUpInside)
+
+        // Create stack view
+        buttonStackView = UIStackView(arrangedSubviews: [compareButton, exportSelectedButton, exportAllButton])
+        buttonStackView.axis = .horizontal
+        buttonStackView.spacing = 16
+        buttonStackView.distribution = .equalSpacing
+        buttonStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(buttonStackView)
+
+        // Anchor to bottom of safe area
+        bottomConstraint = buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
 
         NSLayoutConstraint.activate([
-            compareButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            compareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            bottomConstraint,
+            buttonStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            buttonStackView.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            buttonStackView.trailingAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
         ])
     }
 
+    @objc func exportSelectedTapped() {
+        guard !selectedPartsForComparison.isEmpty else {
+            let alert = UIAlertController(title: "No Parts Selected",
+                                          message: "Please select at least one part to export.",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
+        }
+
+        // Aggregate data for selected parts by date
+        var dateCounts: [String: (good: Int, bad: Int)] = [:]
+        for partType in selectedPartsForComparison {
+            if let entries = partTypes[partType]?["entries"] as? [[String: Any]] {
+                for entry in entries {
+                    guard let dateStr = entry["date"] as? String else { continue }
+                    let status = entry["status"] as? String ?? ""
+                    var counts = dateCounts[dateStr] ?? (good: 0, bad: 0)
+                    if status == "Good Part" || (status == "" && partTypes[partType]?["good"] as? Int ?? 0 > 0) {
+                        counts.good += 1
+                    } else {
+                        counts.bad += 1
+                    }
+                    dateCounts[dateStr] = counts
+                }
+            }
+        }
+
+        // Convert to CSV format
+        let data = dateCounts.map { (date, counts) in
+            let total = counts.good + counts.bad
+            let failureRate = total > 0 ? (Double(counts.bad) / Double(total)) * 100 : 0.0
+            return (date: date, total: total, good: counts.good, bad: counts.bad, rate: failureRate)
+        }.sorted { $0.date > $1.date } // Sort by date descending
+
+        let csvContent = generateCSV(from: data)
+        shareCSV(content: csvContent, fileName: "SelectedPartsStats.csv")
+    }
+
+    @objc func exportAllTapped() {
+        // Use scanHistory and failureRateHistory for all parts
+        let data = scanHistory.enumerated().map { (index, scan) in
+            let rate = failureRateHistory.first(where: { $0.date == scan.date })?.rate ?? 0.0
+            let bad = Int(round(Double(scan.count) * (rate / 100.0)))
+            let good = scan.count - bad
+            return (date: scan.date, total: scan.count, good: good, bad: bad, rate: rate)
+        }.sorted { $0.date > $1.date } // Sort by date descending
+
+        let csvContent = generateCSV(from: data)
+        shareCSV(content: csvContent, fileName: "AllPartsStats.csv")
+    }
+
+    private func generateCSV(from data: [(date: String, total: Int, good: Int, bad: Int, rate: Double)]) -> String {
+        var csv = "Date,Total Scans,Good Scans,Bad Scans,Failure Rate (%)\n"
+        for item in data {
+            let rateFormatted = String(format: "%.2f", item.rate)
+            csv += "\(item.date),\(item.total),\(item.good),\(item.bad),\(rateFormatted)\n"
+        }
+        return csv
+    }
+
+    private func shareCSV(content: String, fileName: String) {
+        // Write CSV content to a temporary file
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let fileURL = tempDirectory.appendingPathComponent(fileName)
+
+        do {
+            try content.write(to: fileURL, atomically: true, encoding: .utf8)
+            let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+            activityVC.excludedActivityTypes = [.addToReadingList, .assignToContact]
+            present(activityVC, animated: true)
+        } catch {
+            print("Failed to write CSV file: \(error.localizedDescription)")
+            let alert = UIAlertController(title: "Export Failed",
+                                          message: "Unable to generate CSV file. Please try again.",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+    }
+    
     @objc func dismissKeyboard(_ gesture: UITapGestureRecognizer) {
         let touchLocation = gesture.location(in: view)
         if !tableView.frame.contains(touchLocation) {
@@ -214,6 +319,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         partTypeNames.removeAll()
         filteredPartTypeNames.removeAll()
         scanHistory.removeAll()
+        failureRateHistory.removeAll()
 
         let dispatchGroup = DispatchGroup()
 
@@ -223,7 +329,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             dispatchGroup.leave()
         }
 
-        // Fetch scan history
+        // Fetch scan history and failure rates
         dispatchGroup.enter()
         fetchScanHistory { [weak self] in
             dispatchGroup.leave()
@@ -232,7 +338,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         // Update UI after both fetches complete
         dispatchGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            print("All data fetched. Part types: \(self.partTypeNames.count), Scan history: \(self.scanHistory.count)")
+            print("All data fetched. Part types: \(self.partTypeNames.count), Scan history: \(self.scanHistory.count), Failure rate history: \(self.failureRateHistory.count)")
             self.applyCurrentFilter()
             self.tableView.reloadData()
             self.tableView.refreshControl?.endRefreshing()
@@ -259,7 +365,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                             }
                             if let dateStr = imageSnapshot.childSnapshot(forPath: "date").value as? String {
                                 var entries = partTypeEntry["entries"] as? [[String: Any]] ?? []
-                                entries.append(["date": dateStr])
+                                entries.append(["date": dateStr, "status": status])
                                 partTypeEntry["entries"] = entries
                             }
                             localPartTypes[partType] = partTypeEntry
@@ -277,7 +383,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                             }
                             if let dateStr = videoSnapshot.childSnapshot(forPath: "date").value as? String {
                                 var entries = partTypeEntry["entries"] as? [[String: Any]] ?? []
-                                entries.append(["date": dateStr])
+                                entries.append(["date": dateStr, "status": status])
                                 partTypeEntry["entries"] = entries
                             }
                             localPartTypes[partType] = partTypeEntry
@@ -301,6 +407,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     private func fetchScanHistory(completion: @escaping () -> Void) {
         ref.child("users").child("employees").observeSingleEvent(of: .value, with: { snapshot in
             var scanCounts: [String: Int] = [:]
+            var badCounts: [String: Int] = [:]
 
             if snapshot.exists() {
                 for employeeSnapshot in snapshot.children.allObjects as! [DataSnapshot] {
@@ -309,19 +416,30 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                         for mediaSnapshot in mediaRef.children.allObjects as! [DataSnapshot] {
                             if let date = mediaSnapshot.childSnapshot(forPath: "date").value as? String {
                                 scanCounts[date] = (scanCounts[date] ?? 0) + 1
+                                if let status = mediaSnapshot.childSnapshot(forPath: "status").value as? String, status != "Good Part" {
+                                    badCounts[date] = (badCounts[date] ?? 0) + 1
+                                }
                             }
                         }
                     }
                 }
 
+                // Calculate scan history
                 var history = scanCounts.map { (date: $0.key, count: $0.value) }
                     .sorted { $0.date > $1.date }
-
                 if history.count > 30 {
                     history = Array(history[0..<30])
                 }
-
                 self.scanHistory = history
+
+                // Calculate failure rate history
+                var failureRates = scanCounts.map { (date: $0.key, total: $0.value) }
+                    .map { (date: $0.date, rate: Double(badCounts[$0.date] ?? 0) / Double($0.total) * 100) }
+                    .sorted { $0.date > $1.date }
+                if failureRates.count > 30 {
+                    failureRates = Array(failureRates[0..<30])
+                }
+                self.failureRateHistory = failureRates
             }
             completion()
         }) { error in
@@ -406,6 +524,9 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return Section(rawValue: section)?.title
     }
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+            return 44 // Standard header height to prevent overlap
+        }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let rowCount: Int
@@ -419,6 +540,22 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         }
         print("Number of rows in section \(section): \(rowCount)")
         return rowCount
+    }
+
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        if Section(rawValue: section) == .parts {
+            let footerView = UIView()
+            footerView.backgroundColor = .clear
+            return footerView
+        }
+        return nil
+    }
+
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        if Section(rawValue: section) == .parts {
+            return 16 // Add padding between parts and charts sections
+        }
+        return 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -457,7 +594,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             return cell
             
         case .charts:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ChartCell", for: indexPath) as! ChartTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ChartCell", for: indexPath) as! ManagerChartTableViewCell
             
             var partsData: [String: Double] = [:]
             for (partType, counts) in partTypes {
@@ -468,7 +605,8 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             
             cell.configure(
                 partsData: partsData,
-                scanHistoryData: scanHistory.map { ($0.date, $0.count) }
+                scanHistoryData: scanHistory.map { ($0.date, $0.count) },
+                failureRateData: failureRateHistory.map { ($0.date, $0.rate)}
             )
             return cell
             
@@ -479,7 +617,7 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if Section(rawValue: indexPath.section) == .charts {
-            return 520 // Height for the chart cell
+            return 850 // Height for three charts
         }
         return UITableView.automaticDimension
     }
@@ -545,5 +683,127 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
 
     @objc func refreshData() {
         fetchAllData()
+    }
+}
+
+// Update ChartsView to include the new FailureRateChartView and add top padding
+struct ManagerChartsView: View {
+    let partsData: [String: Double]
+    let scanHistoryData: [(String, Int)]
+    let failureRateData: [(String, Double)]
+
+    var body: some View {
+        VStack(spacing: 16) {
+            PartsDistributionChartView(data: partsData)
+            ScanHistoryChartView(data: scanHistoryData)
+            OverallFailureRateChartView(data: failureRateData)
+        }
+        .padding(.top, 30) // Add top padding to prevent overlap with section header
+    }
+}
+
+// FailureRateChartView for displaying failure rate over time
+struct OverallFailureRateChartView: View {
+    let data: [(date: Date, rate: Double)]
+    private let dateFormatter: DateFormatter
+
+    init(data: [(date: String, rate: Double)]) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        self.dateFormatter = formatter
+
+        self.data = data.compactMap { (dateString, rate) in
+            guard let date = formatter.date(from: dateString) else { return nil }
+            return (date: date, rate: rate)
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Failure Rate Over Time (%)")
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            if data.isEmpty {
+                Text("No failure rate data available")
+                    .frame(height: 200)
+            } else {
+                Chart {
+                    ForEach(data, id: \.date) { item in
+                        LineMark(
+                            x: .value("Date", item.date),
+                            y: .value("Failure Rate (%)", item.rate)
+                        )
+                        .interpolationMethod(.linear)
+
+                        PointMark(
+                            x: .value("Date", item.date),
+                            y: .value("Failure Rate (%)", item.rate)
+                        )
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .automatic) { value in
+                        if let date = value.as(Date.self) {
+                            AxisGridLine()
+                            AxisTick()
+                            AxisValueLabel {
+                                Text(date, format: .dateTime.day().month())
+                            }
+                        }
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks(position: .leading)
+                }
+                .chartLegend(position: .bottom, alignment: .center, spacing: 20)
+                .frame(height: 200)
+                .padding()
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(10)
+    }
+}
+
+class ManagerChartTableViewCell: UITableViewCell {
+    private var managerHostingController: UIHostingController<AnyView>?
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        managerHostingController?.view.removeFromSuperview()
+        managerHostingController = nil
+    }
+    
+    func configure(partsData: [String: Double], scanHistoryData: [(String, Int)], failureRateData: [(String, Double)]) {
+        let chartsView = ManagerChartsView(partsData: partsData, scanHistoryData: scanHistoryData, failureRateData: failureRateData)
+        let hostingController = UIHostingController(rootView: AnyView(chartsView))
+
+        guard let hostView = hostingController.view else { return }
+        contentView.addSubview(hostView)
+        hostView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            hostView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            hostView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            hostView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            hostView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+        ])
+
+        hostingController.didMove(toParent: parentViewController)
+    }
+}
+
+extension UIView {
+    var managerParentResponder: UIViewController? {
+        var managerParentResponder: UIResponder? = self
+        while managerParentResponder != nil {
+            managerParentResponder = managerParentResponder?.next
+            if let viewController = managerParentResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
     }
 }
