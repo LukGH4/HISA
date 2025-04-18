@@ -120,12 +120,27 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             return
         }
 
+        // Ensure selected parts are in filteredPartTypeNames
+        let validSelectedParts = selectedPartsForComparison.filter { filteredPartTypeNames.contains($0) }
+        guard !validSelectedParts.isEmpty else {
+            let alert = UIAlertController(title: "No Valid Parts Selected",
+                                          message: "Selected parts do not match the current filter.",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+            return
+        }
+
         // Aggregate data for selected parts by date
         var dateCounts: [String: (good: Int, bad: Int)] = [:]
-        for partType in selectedPartsForComparison {
+        for partType in validSelectedParts {
             if let entries = partTypes[partType]?["entries"] as? [[String: Any]] {
                 for entry in entries {
                     guard let dateStr = entry["date"] as? String else { continue }
+                    if case .dateRange(let start, let end) = currentFilter {
+                        guard let date = dateFormatter.date(from: dateStr),
+                              date >= start && date <= end else { continue }
+                    }
                     let status = entry["status"] as? String ?? ""
                     var counts = dateCounts[dateStr] ?? (good: 0, bad: 0)
                     if status == "Good Part" || (status == "" && partTypes[partType]?["good"] as? Int ?? 0 > 0) {
@@ -148,20 +163,27 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         let csvContent = generateCSV(from: data)
         shareCSV(content: csvContent, fileName: "SelectedPartsStats.csv")
     }
-
+    
     @objc func exportAllTapped() {
-        // Use scanHistory and failureRateHistory for all parts
-        let data = scanHistory.enumerated().map { (index, scan) in
-            let rate = failureRateHistory.first(where: { $0.date == scan.date })?.rate ?? 0.0
-            let bad = Int(round(Double(scan.count) * (rate / 100.0)))
-            let good = scan.count - bad
-            return (date: scan.date, total: scan.count, good: good, bad: bad, rate: rate)
-        }.sorted { $0.date > $1.date } // Sort by date descending
-
+        // Use filtered scan history and failure rate data
+        let scanData = filteredScanHistoryData()
+        let failureData = filteredFailureRateData()
+        
+        // Compute mapped data
+        let mappedData: [(date: String, total: Int, good: Int, bad: Int, rate: Double)] = scanData.map { scan in
+            let rate = failureData.first(where: { $0.0 == scan.0 })?.1 ?? 0.0
+            let bad = Int(round(Double(scan.1) * (rate / 100.0)))
+            let good = scan.1 - bad
+            return (date: scan.0, total: scan.1, good: good, bad: bad, rate: rate)
+        }
+        
+        // Sort data by date descending
+        let data = mappedData.sorted { $0.date > $1.date }
+        
         let csvContent = generateCSV(from: data)
         shareCSV(content: csvContent, fileName: "AllPartsStats.csv")
     }
-
+    
     private func generateCSV(from data: [(date: String, total: Int, good: Int, bad: Int, rate: Double)]) -> String {
         var csv = "Date,Total Scans,Good Scans,Bad Scans,Failure Rate (%)\n"
         for item in data {
@@ -501,6 +523,86 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             }
         }
     }
+    
+    private func filteredPartsData() -> [String: Double] {
+        var partsData: [String: Double] = [:]
+        for partType in filteredPartTypeNames {
+            if let counts = partTypes[partType] {
+                var goodCount = 0
+                var badCount = 0
+                if case .dateRange(let start, let end) = currentFilter,
+                   let entries = counts["entries"] as? [[String: Any]] {
+                    for entry in entries {
+                        if let dateStr = entry["date"] as? String,
+                           let date = dateFormatter.date(from: dateStr),
+                           date >= start && date <= end {
+                            let status = entry["status"] as? String ?? ""
+                            if status == "Good Part" {
+                                goodCount += 1
+                            } else {
+                                badCount += 1
+                            }
+                        }
+                    }
+                } else {
+                    goodCount = counts["good"] as? Int ?? 0
+                    badCount = counts["bad"] as? Int ?? 0
+                }
+                partsData[partType] = Double(goodCount + badCount)
+            }
+        }
+        return partsData
+    }
+
+    private func filteredScanHistoryData() -> [(String, Int)] {
+        var scanCounts: [String: Int] = [:]
+        for partType in filteredPartTypeNames {
+            if let entries = partTypes[partType]?["entries"] as? [[String: Any]] {
+                for entry in entries {
+                    guard let dateStr = entry["date"] as? String else { continue }
+                    if case .dateRange(let start, let end) = currentFilter {
+                        guard let date = dateFormatter.date(from: dateStr),
+                              date >= start && date <= end else { continue }
+                    }
+                    scanCounts[dateStr] = (scanCounts[dateStr] ?? 0) + 1
+                }
+            }
+        }
+        var history = scanCounts.map { (date: $0.key, count: $0.value) }
+            .sorted { $0.date > $1.date }
+        if history.count > 30 {
+            history = Array(history[0..<30])
+        }
+        return history
+    }
+
+    private func filteredFailureRateData() -> [(String, Double)] {
+        var scanCounts: [String: Int] = [:]
+        var badCounts: [String: Int] = [:]
+        for partType in filteredPartTypeNames {
+            if let entries = partTypes[partType]?["entries"] as? [[String: Any]] {
+                for entry in entries {
+                    guard let dateStr = entry["date"] as? String else { continue }
+                    if case .dateRange(let start, let end) = currentFilter {
+                        guard let date = dateFormatter.date(from: dateStr),
+                              date >= start && date <= end else { continue }
+                    }
+                    scanCounts[dateStr] = (scanCounts[dateStr] ?? 0) + 1
+                    let status = entry["status"] as? String ?? ""
+                    if status != "Good Part" {
+                        badCounts[dateStr] = (badCounts[dateStr] ?? 0) + 1
+                    }
+                }
+            }
+        }
+        var failureRates = scanCounts.map { (date: $0.key, total: $0.value) }
+            .map { (date: $0.date, rate: Double(badCounts[$0.date] ?? 0) / Double($0.total) * 100) }
+            .sorted { $0.date > $1.date }
+        if failureRates.count > 30 {
+            failureRates = Array(failureRates[0..<30])
+        }
+        return failureRates
+    }
 
     func fetchThreshold(for partType: String, completion: @escaping (Double?) -> Void) {
         let partsRef = Database.database().reference().child("parts").child(partType)
@@ -574,8 +676,8 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                         if let dateStr = entry["date"] as? String,
                            let date = dateFormatter.date(from: dateStr),
                            date >= start && date <= end {
-                            let status = statusCounts["status"] as? String ?? ""
-                            if status == "Good Part" || (status == "" && statusCounts["good"] as? Int ?? 0 > 0) {
+                            let status = entry["status"] as? String ?? ""
+                            if status == "Good Part" {
                                 goodCount += 1
                             } else {
                                 badCount += 1
@@ -596,17 +698,10 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         case .charts:
             let cell = tableView.dequeueReusableCell(withIdentifier: "ChartCell", for: indexPath) as! ManagerChartTableViewCell
             
-            var partsData: [String: Double] = [:]
-            for (partType, counts) in partTypes {
-                if let good = counts["good"] as? Int, let bad = counts["bad"] as? Int {
-                    partsData[partType] = Double(good) + Double(bad)
-                }
-            }
-            
             cell.configure(
-                partsData: partsData,
-                scanHistoryData: scanHistory.map { ($0.date, $0.count) },
-                failureRateData: failureRateHistory.map { ($0.date, $0.rate)}
+                partsData: filteredPartsData(),
+                scanHistoryData: filteredScanHistoryData(),
+                failureRateData: filteredFailureRateData()
             )
             return cell
             
