@@ -19,9 +19,11 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     var scanHistory: [(date: String, count: Int)] = []
     var failureRateHistory: [(date: String, rate: Double)] = []
     let failureRateThreshold: Double = -1.0
+    var searchText: String = ""
 
     private var buttonStackView: UIStackView!
     private var bottomConstraint: NSLayoutConstraint!
+    
 
     enum FilterType {
         case none
@@ -107,6 +109,11 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             buttonStackView.trailingAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
         ])
     }
+    
+    enum ExportFormat {
+        case csv
+        case pdf
+    }
 
     @objc func exportSelectedTapped() {
         guard !selectedPartsForComparison.isEmpty else {
@@ -118,6 +125,62 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             return
         }
 
+        let exportOptions = UIAlertController(title: "Export Selected", message: "Choose file format:", preferredStyle: .actionSheet)
+        exportOptions.addAction(UIAlertAction(title: "CSV", style: .default, handler: { _ in
+            self.exportSelected(as: .csv)
+        }))
+        exportOptions.addAction(UIAlertAction(title: "PDF", style: .default, handler: { _ in
+            self.exportSelected(as: .pdf)
+        }))
+        exportOptions.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        present(exportOptions, animated: true)
+    }
+
+    @objc func exportAllTapped() {
+        let exportOptions = UIAlertController(title: "Export All", message: "Choose file format:", preferredStyle: .actionSheet)
+        exportOptions.addAction(UIAlertAction(title: "CSV", style: .default, handler: { _ in
+            self.exportAll(as: .csv)
+        }))
+        exportOptions.addAction(UIAlertAction(title: "PDF", style: .default, handler: { _ in
+            self.exportAll(as: .pdf)
+        }))
+        exportOptions.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        present(exportOptions, animated: true)
+    }
+
+    
+    private func generateCSV(from data: [(date: String, total: Int, good: Int, bad: Int, rate: Double)]) -> String {
+        var csv = "Date,Total Scans,Good Scans,Bad Scans,Failure Rate (%)\n"
+        for item in data {
+            let rateFormatted = String(format: "%.2f", item.rate)
+            csv += "\(item.date),\(item.total),\(item.good),\(item.bad),\(rateFormatted)\n"
+        }
+        return csv
+    }
+
+    private func shareCSV(content: String, fileName: String) {
+        let tempDirectory = FileManager.default.temporaryDirectory
+        let fileURL = tempDirectory.appendingPathComponent(fileName)
+
+        do {
+            try content.write(to: fileURL, atomically: true, encoding: .utf8)
+            let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+            activityVC.excludedActivityTypes = [.addToReadingList, .assignToContact]
+            present(activityVC, animated: true)
+        } catch {
+            print("Failed to write CSV file: \(error.localizedDescription)")
+            let alert = UIAlertController(title: "Export Failed",
+                                          message: "Unable to generate CSV file. Please try again.",
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+    }
+    
+
+    private func exportSelected(as format: ExportFormat) {
         let validSelectedParts = selectedPartsForComparison.filter { filteredPartTypeNames.contains($0) }
         guard !validSelectedParts.isEmpty else {
             let alert = UIAlertController(title: "No Valid Parts Selected",
@@ -154,55 +217,67 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
             let failureRate = total > 0 ? (Double(counts.bad) / Double(total)) * 100 : 0.0
             return (date: date, total: total, good: counts.good, bad: counts.bad, rate: failureRate)
         }.sorted { $0.date > $1.date }
-        
-        let csvContent = generateCSV(from: data)
-        shareCSV(content: csvContent, fileName: "SelectedPartsStats.csv")
+
+        share(data: data, format: format, fileName: "SelectedPartsStats")
     }
-    
-    @objc func exportAllTapped() {
+
+    private func exportAll(as format: ExportFormat) {
         let scanData = filteredScanHistoryData()
         let failureData = filteredFailureRateData()
-        
+
         let mappedData: [(date: String, total: Int, good: Int, bad: Int, rate: Double)] = scanData.map { scan in
             let rate = failureData.first(where: { $0.0 == scan.0 })?.1 ?? 0.0
             let bad = Int(round(Double(scan.1) * (rate / 100.0)))
             let good = scan.1 - bad
             return (date: scan.0, total: scan.1, good: good, bad: bad, rate: rate)
         }
-        
+
         let data = mappedData.sorted { $0.date > $1.date }
-        
-        let csvContent = generateCSV(from: data)
-        shareCSV(content: csvContent, fileName: "AllPartsStats.csv")
-    }
-    
-    private func generateCSV(from data: [(date: String, total: Int, good: Int, bad: Int, rate: Double)]) -> String {
-        var csv = "Date,Total Scans,Good Scans,Bad Scans,Failure Rate (%)\n"
-        for item in data {
-            let rateFormatted = String(format: "%.2f", item.rate)
-            csv += "\(item.date),\(item.total),\(item.good),\(item.bad),\(rateFormatted)\n"
-        }
-        return csv
+        share(data: data, format: format, fileName: "AllPartsStats")
     }
 
-    private func shareCSV(content: String, fileName: String) {
+    private func share(data: [(date: String, total: Int, good: Int, bad: Int, rate: Double)], format: ExportFormat, fileName: String) {
         let tempDirectory = FileManager.default.temporaryDirectory
-        let fileURL = tempDirectory.appendingPathComponent(fileName)
+        let fileURL: URL
 
-        do {
-            try content.write(to: fileURL, atomically: true, encoding: .utf8)
-            let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
-            activityVC.excludedActivityTypes = [.addToReadingList, .assignToContact]
-            present(activityVC, animated: true)
-        } catch {
-            print("Failed to write CSV file: \(error.localizedDescription)")
-            let alert = UIAlertController(title: "Export Failed",
-                                          message: "Unable to generate CSV file. Please try again.",
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            present(alert, animated: true)
+        switch format {
+        case .csv:
+            let content = generateCSV(from: data)
+            fileURL = tempDirectory.appendingPathComponent("\(fileName).csv")
+            try? content.write(to: fileURL, atomically: true, encoding: .utf8)
+        case .pdf:
+            let content = generateCSV(from: data) // Reuse CSV string for simplicity
+            fileURL = tempDirectory.appendingPathComponent("\(fileName).pdf")
+            let pdfData = createSimplePDF(from: content)
+            try? pdfData.write(to: fileURL)
         }
+
+        let activityVC = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+        activityVC.excludedActivityTypes = [.addToReadingList, .assignToContact]
+        present(activityVC, animated: true)
     }
+
+    private func createSimplePDF(from text: String) -> Data {
+        let pdfMetaData = [
+            kCGPDFContextCreator: "Stats Export",
+            kCGPDFContextAuthor: "Your App Name"
+        ]
+        let format = UIGraphicsPDFRendererFormat()
+        format.documentInfo = pdfMetaData as [String: Any]
+
+        let pageWidth = 8.5 * 72.0
+        let pageHeight = 11 * 72.0
+        let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+
+        let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
+        let data = renderer.pdfData { ctx in
+            ctx.beginPage()
+            let textRect = CGRect(x: 20, y: 20, width: pageRect.width - 40, height: pageRect.height - 40)
+            text.draw(in: textRect, withAttributes: [.font: UIFont.systemFont(ofSize: 12)])
+        }
+        return data
+    }
+
     
     @objc func dismissKeyboard(_ gesture: UITapGestureRecognizer) {
         let touchLocation = gesture.location(in: view)
@@ -214,6 +289,25 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
     @IBAction func filterButtonTapped(_ sender: UIButton) {
         showFilterOptions()
     }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.searchText = searchText
+        applyCurrentFilter()
+        tableView.reloadData()
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchText = ""
+        applyCurrentFilter()
+        tableView.reloadData()
+        searchBar.resignFirstResponder()
+    }
+
 
     @objc func presentCalendarPicker() {
         let calendarVC = CalendarFilterViewController()
@@ -231,6 +325,17 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
         
         calendarVC.modalPresentationStyle = .popover
         present(calendarVC, animated: true)
+    }
+    
+    private func updateFilterButtonAppearance() {
+        switch currentFilter {
+        case .none:
+            filterButton.tintColor = .systemBlue
+            filterButton.setTitleColor(.systemBlue, for: .normal)
+        default:
+            filterButton.tintColor = .systemOrange
+            filterButton.setTitleColor(.systemOrange, for: .normal)
+        }
     }
 
     func applyCurrentFilter() {
@@ -263,8 +368,15 @@ class StatsViewController: UIViewController, UITableViewDataSource, UITableViewD
                 })
             }
         }
+        
         filteredPartTypeNames.sort { $0.lowercased() < $1.lowercased() }
         print("Filtered part types count changed from \(previousRowCount) to \(filteredPartTypeNames.count)")
+        
+        if !searchText.isEmpty {
+            filteredPartTypeNames = filteredPartTypeNames.filter { $0.lowercased().contains(searchText.lowercased()) }
+        }
+        
+        updateFilterButtonAppearance()
     }
 
     private func updateCharts() {
