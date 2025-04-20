@@ -8,6 +8,7 @@ class EmployeePartDetailsController: UIViewController {
     var partType: String!
     var userId: String!
     var partData: [(date: String, failureRate: Double, confidence: Double, classification: String)] = []
+    var overallPartData: [(date: String, failureRate: Double, confidence: Double, classification: String)] = []
     var classifyData: [String: Int] = [:]
     var ref: DatabaseReference!
     
@@ -22,6 +23,7 @@ class EmployeePartDetailsController: UIViewController {
         ref = Database.database().reference()
         setupScrollView()
         fetchPartData()
+        fetchOverallPartData()
     }
     
     private func setupScrollView() {
@@ -105,35 +107,113 @@ class EmployeePartDetailsController: UIViewController {
         container.backgroundColor = .secondarySystemBackground
         container.layer.cornerRadius = 12
         
-        let failureRate = calculateAverageFailureRate()
-        let avgConfidence = calculateAverageConfidence()
-        let totalScans = partData.count
+        let myFailureRate = calculateAverageFailureRate(from: partData)
+        let myConfidence = calculateAverageConfidence(from: partData)
+        let myTotalScans = partData.count
         
-        let statsStack = UIStackView()
-        statsStack.axis = .horizontal
-        statsStack.distribution = .fillEqually
-        statsStack.spacing = 8
-        statsStack.translatesAutoresizingMaskIntoConstraints = false
+        let overallFailureRate = calculateAverageFailureRate(from: overallPartData)
+        let overallConfidence = calculateAverageConfidence(from: overallPartData)
+        let overallTotalScans = overallPartData.count
         
-        let failureStat = createStatView(value: String(format: "%.1f%%", failureRate), label: "Failure Rate")
-        let confidenceStat = createStatView(value: String(format: "%.1f%%", avgConfidence), label: "Avg Confidence")
-        let totalStat = createStatView(value: "\(totalScans)", label: "Total Scans")
+        let mainStack = UIStackView()
+        mainStack.axis = .vertical
+        mainStack.spacing = 24
+        mainStack.translatesAutoresizingMaskIntoConstraints = false
         
-        statsStack.addArrangedSubview(failureStat)
-        statsStack.addArrangedSubview(confidenceStat)
-        statsStack.addArrangedSubview(totalStat)
+        let myStatsStack = createStatsRow(
+            title: "Your Stats",
+            failureRate: myFailureRate,
+            confidence: myConfidence,
+            totalScans: myTotalScans
+        )
         
-        container.addSubview(statsStack)
+        let overallStatsStack = createStatsRow(
+            title: "Overall Stats",
+            failureRate: overallFailureRate,
+            confidence: overallConfidence,
+            totalScans: overallTotalScans
+        )
+        
+        mainStack.addArrangedSubview(myStatsStack)
+        mainStack.addArrangedSubview(overallStatsStack)
+        
+        container.addSubview(mainStack)
         
         NSLayoutConstraint.activate([
-            statsStack.topAnchor.constraint(equalTo: container.topAnchor, constant: 25),
-            statsStack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 25),
-            statsStack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -25),
-            statsStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -25)
+            mainStack.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            mainStack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            mainStack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            mainStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -20)
         ])
         
         return container
     }
+    
+    private func createStatsRow(title: String, failureRate: Double, confidence: Double, totalScans: Int) -> UIView {
+        let container = UIView()
+
+        let sectionTitle = UILabel()
+        sectionTitle.text = title
+        sectionTitle.font = .systemFont(ofSize: 16, weight: .semibold)
+        sectionTitle.textAlignment = .center
+        sectionTitle.textColor = .secondaryLabel
+        sectionTitle.translatesAutoresizingMaskIntoConstraints = false
+
+
+        let titleContainer = UIView()
+        titleContainer.translatesAutoresizingMaskIntoConstraints = false
+        titleContainer.addSubview(sectionTitle)
+
+        NSLayoutConstraint.activate([
+            sectionTitle.topAnchor.constraint(equalTo: titleContainer.topAnchor),
+            sectionTitle.centerXAnchor.constraint(equalTo: titleContainer.centerXAnchor),
+            sectionTitle.bottomAnchor.constraint(equalTo: titleContainer.bottomAnchor, constant: -24)
+        ])
+
+        let statsStack = UIStackView()
+        statsStack.axis = .horizontal
+        statsStack.distribution = .fillEqually
+        statsStack.spacing = 16
+        statsStack.translatesAutoresizingMaskIntoConstraints = false
+
+        let failureStat = createStatView(value: String(format: "%.1f%%", failureRate), label: "Failure Rate")
+        let confidenceStat = createStatView(value: String(format: "%.1f%%", confidence), label: "Avg Confidence")
+        let totalStat = createStatView(value: "\(totalScans)", label: "Total Scans")
+
+        statsStack.addArrangedSubview(failureStat)
+        statsStack.addArrangedSubview(confidenceStat)
+        statsStack.addArrangedSubview(totalStat)
+
+        let verticalStack = UIStackView(arrangedSubviews: [titleContainer, statsStack])
+        verticalStack.axis = .vertical
+        verticalStack.spacing = 0
+        verticalStack.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(verticalStack)
+
+        NSLayoutConstraint.activate([
+            verticalStack.topAnchor.constraint(equalTo: container.topAnchor),
+            verticalStack.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            verticalStack.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            verticalStack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -16)
+        ])
+
+        return container
+    }
+
+    private func calculateAverageFailureRate(from data: [(date: String, failureRate: Double, confidence: Double, classification: String)]) -> Double {
+        guard !data.isEmpty else { return 0 }
+        let totalFailures = data.reduce(0) { $0 + $1.failureRate }
+        return totalFailures / Double(data.count)
+    }
+
+    private func calculateAverageConfidence(from data: [(date: String, failureRate: Double, confidence: Double, classification: String)]) -> Double {
+        guard !data.isEmpty else { return 0 }
+        let totalConfidence = data.reduce(0) { $0 + $1.confidence }
+        return (totalConfidence / Double(data.count)) * 100
+    }
+
+
     
     private func createStatView(value: String, label: String) -> UIView {
         let container = UIView()
@@ -231,6 +311,47 @@ class EmployeePartDetailsController: UIViewController {
             }
         }
     }
+    
+    private func fetchOverallPartData() {
+        let employeesRef = ref.child("users").child("employees")
+        
+        employeesRef.observeSingleEvent(of: .value) { snapshot in
+            guard snapshot.exists() else {
+                print("No data found for employees")
+                return
+            }
+            
+            var newOverallData: [(date: String, failureRate: Double, confidence: Double, classification: String)] = []
+            
+            for case let employeeSnapshot as DataSnapshot in snapshot.children {
+                for mediaType in ["images", "videos"] {
+                    let mediaRef = employeeSnapshot.childSnapshot(forPath: mediaType)
+                    for case let mediaSnapshot as DataSnapshot in mediaRef.children {
+                        if let partType = mediaSnapshot.childSnapshot(forPath: "part_type").value as? String,
+                           partType.contains(self.partType),
+                           let status = mediaSnapshot.childSnapshot(forPath: "status").value as? String,
+                           let classification = mediaSnapshot.childSnapshot(forPath: "classification").value as? String,
+                           let confidence = mediaSnapshot.childSnapshot(forPath: "confidence").value as? String,
+                           let date = mediaSnapshot.childSnapshot(forPath: "date").value as? String {
+                            
+                            let failureRate = (status == "Good Part") ? 0.0 : 100.0
+                            
+                            newOverallData.append((date: date,
+                                                   failureRate: failureRate,
+                                                   confidence: Double(confidence)!,
+                                                   classification: classification))
+                        }
+                    }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.overallPartData = newOverallData.sorted { $0.date < $1.date }
+                self.setupViews()
+            }
+        }
+    }
+
     
     private func processMediaSnapshot(_ snapshot: DataSnapshot,
                                     into data: inout [(date: String, failureRate: Double, confidence: Double, classification: String)],
