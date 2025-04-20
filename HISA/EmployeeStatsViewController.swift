@@ -12,6 +12,8 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
     var partTypes: [String: [String: Any]] = [:]
     var partTypeNames: [String] = []
     var scanHistory: [(date: String, count: Int)] = []
+    var overallScanHistory: [(date: String, count: Int)] = []
+
     
     let userId = Auth.auth().currentUser?.uid ?? "unknown_user"
     let failureRateThreshold: Double = -1.0
@@ -59,7 +61,9 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
     private func fetchEmployeeData() {
         fetchEmployeeParts()
         fetchScanHistory()
+        fetchOverallScanHistory()
     }
+
     
     private func fetchEmployeeParts() {
         let employeeRef = ref.child("users").child("employees").child(userId)
@@ -94,6 +98,42 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
             print("Error retrieving employee data: \(error.localizedDescription)")
         }
     }
+    
+    private func fetchOverallScanHistory() {
+        let employeesRef = ref.child("users").child("employees")
+        
+        employeesRef.observeSingleEvent(of: .value, with: { snapshot in
+            var scanCounts: [String: Int] = [:]
+            
+            if snapshot.exists() {
+                for employeeSnapshot in snapshot.children.allObjects as! [DataSnapshot] {
+                    ["images", "videos"].forEach { mediaType in
+                        let mediaRef = employeeSnapshot.childSnapshot(forPath: mediaType)
+                        for mediaSnapshot in mediaRef.children.allObjects as! [DataSnapshot] {
+                            if let date = mediaSnapshot.childSnapshot(forPath: "date").value as? String {
+                                scanCounts[date] = (scanCounts[date] ?? 0) + 1
+                            }
+                        }
+                    }
+                }
+                
+                var history = scanCounts.map { (date: $0.key, count: $0.value) }
+                    .sorted { $0.date > $1.date }
+                
+                if history.count > 30 {
+                    history = Array(history[0..<30])
+                }
+                
+                DispatchQueue.main.async {
+                    self.overallScanHistory = history
+                    self.updateCharts()
+                }
+            }
+        }) { error in
+            print("Error retrieving overall scan history: \(error.localizedDescription)")
+        }
+    }
+
     
     private func processMediaSnapshot(_ snapshot: DataSnapshot, into partTypes: inout [String: [String: Any]]) {
         if let partType = snapshot.childSnapshot(forPath: "part_type").value as? String,
@@ -182,8 +222,10 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
             
             cell.configure(
                 partsData: partsData,
-                scanHistoryData: scanHistory.map { ($0.date, $0.count) }
+                scanHistoryData: scanHistory.map { ($0.date, $0.count) },
+                overallScanHistoryData: overallScanHistory.map { ($0.date, $0.count) }
             )
+
             return cell
             
         default:
@@ -193,7 +235,7 @@ class EmployeeStatsViewController: UIViewController, UITableViewDataSource, UITa
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         if Section(rawValue: indexPath.section) == .charts {
-            return 520 // Height for the chart cell
+            return 610 // Height for the chart cell
         }
         return UITableView.automaticDimension
     }
@@ -236,23 +278,28 @@ class ChartTableViewCell: UITableViewCell {
         hostingController = nil
     }
     
-    func configure(partsData: [String: Double], scanHistoryData: [(String, Int)]) {
-        let chartsView = ChartsView(partsData: partsData, scanHistoryData: scanHistoryData)
+    func configure(partsData: [String: Double], scanHistoryData: [(String, Int)], overallScanHistoryData: [(String, Int)]) {
+        let chartsView = ChartsView(
+            partsData: partsData,
+            scanHistoryData: scanHistoryData,
+            overallScanHistoryData: overallScanHistoryData
+        )
         hostingController = UIHostingController(rootView: AnyView(chartsView))
-        
+
         guard let hostView = hostingController?.view else { return }
         contentView.addSubview(hostView)
         hostView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         NSLayoutConstraint.activate([
             hostView.topAnchor.constraint(equalTo: contentView.topAnchor),
             hostView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             hostView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             hostView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
         ])
-        
+
         hostingController?.didMove(toParent: self.parentViewController)
     }
+
 }
 
 extension UIView {
@@ -272,14 +319,16 @@ extension UIView {
 struct ChartsView: View {
     let partsData: [String: Double]
     let scanHistoryData: [(String, Int)]
+    let overallScanHistoryData: [(String, Int)] // ➡️ New
     
     var body: some View {
         VStack(spacing: 16) {
             PartsDistributionChartView(data: partsData)
-            ScanHistoryChartView(data: scanHistoryData)
+            ScanHistoryChartView(data: scanHistoryData, overallData: overallScanHistoryData) // ➡️ Pass it
         }
     }
 }
+
 
 // Parts Distribution Chart View
 struct PartsDistributionChartView: View {
@@ -333,45 +382,94 @@ struct PartsDistributionChartView: View {
     }
 }
 
+struct ScanEntry: Identifiable {
+    let id = UUID()
+    let date: Date
+    let count: Int
+    let series: String
+}
+
 // Scan History Chart View
 struct ScanHistoryChartView: View {
-    let data: [(date: Date, count: Int)]  // Changed to Date type
+    let myData: [(date: Date, count: Int)]
+    let overallData: [(date: Date, count: Int)]
+    @State private var showOverallScans = true
+
     private let dateFormatter: DateFormatter
-    
-    init(data: [(date: String, count: Int)]) {
+
+    init(data: [(date: String, count: Int)], overallData: [(date: String, count: Int)]) {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd" // Adjust this to match your date string format
+        formatter.dateFormat = "yyyy-MM-dd"
         self.dateFormatter = formatter
-        
-        // Convert string dates to Date objects
-        self.data = data.compactMap { (dateString, count) in
+
+        self.myData = data.compactMap { (dateString, count) in
+            guard let date = formatter.date(from: dateString) else { return nil }
+            return (date: date, count: count)
+        }
+
+        self.overallData = overallData.compactMap { (dateString, count) in
             guard let date = formatter.date(from: dateString) else { return nil }
             return (date: date, count: count)
         }
     }
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Scan History")
-                .font(.headline)
-                .foregroundColor(.primary)
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Scan History")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                Spacer()
+                VStack(spacing: 2) { // 🔥 toggle and label stacked vertically
+                    Toggle("", isOn: $showOverallScans.animation(.easeInOut))
+                        .labelsHidden()
+                        .toggleStyle(SwitchToggleStyle(tint: .blue))
+                        .scaleEffect(0.7) // 🔥 make toggle smaller
+                    
+                    Text("Compare to Overall")
+                        .font(.caption2) // 🔥 smaller font
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.horizontal)
             
-            if data.isEmpty {
+            if myData.isEmpty {
                 Text("No scan history available")
                     .frame(height: 200)
             } else {
                 Chart {
-                    ForEach(data, id: \.date) { item in
+                    ForEach(myData, id: \.date) { item in
                         LineMark(
                             x: .value("Date", item.date),
-                            y: .value("Count", item.count)
+                            y: .value("Scans", item.count)
                         )
-                        .interpolationMethod(.linear)
+                        .foregroundStyle(by: .value("Series", "My Scans"))
+                        .lineStyle(StrokeStyle(lineWidth: 3))
                         
                         PointMark(
                             x: .value("Date", item.date),
-                            y: .value("Count", item.count)
+                            y: .value("Scans", item.count)
                         )
+                        .foregroundStyle(by: .value("Series", "My Scans"))
+                        .symbolSize(30)
+                    }
+                    
+                    if showOverallScans {
+                        ForEach(overallData, id: \.date) { item in
+                            LineMark(
+                                x: .value("Date", item.date),
+                                y: .value("Scans", item.count)
+                            )
+                            .foregroundStyle(by: .value("Series", "Overall Scans"))
+                            .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
+                            
+                            PointMark(
+                                x: .value("Date", item.date),
+                                y: .value("Scans", item.count)
+                            )
+                            .foregroundStyle(by: .value("Series", "Overall Scans"))
+                            .symbolSize(20)
+                        }
                     }
                 }
                 .chartXAxis {
@@ -388,13 +486,11 @@ struct ScanHistoryChartView: View {
                 .chartYAxis {
                     AxisMarks(position: .leading)
                 }
-                .chartLegend(position: .bottom, alignment: .center, spacing: 20)
-                .frame(height: 200)
+                .chartLegend(position: .bottom, alignment: .center, spacing: 16)
+                .frame(height: 220)
                 .padding()
             }
         }
-        .padding()
         .background(Color(.secondarySystemBackground))
-        .cornerRadius(10)
     }
 }

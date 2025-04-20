@@ -883,7 +883,7 @@ struct ManagerChartsView: View {
     var body: some View {
         VStack(spacing: 16) {
             PartsDistributionChartView(data: partsData)
-            ScanHistoryChartView(data: scanHistoryData)
+            ManagerScanHistoryChartView(data: scanHistoryData)
             OverallFailureRateChartView(data: failureRateData)
         }
         .padding(.top, 30)
@@ -1157,3 +1157,67 @@ extension CalendarFilterViewController: FSCalendarDelegate {
     }
 }
 
+struct ManagerScanHistoryChartView: View {
+    let data: [(date: Date, count: Int)]  // Changed to Date type
+    private let dateFormatter: DateFormatter
+    
+    init(data: [(date: String, count: Int)]) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd" // Adjust this to match your date string format
+        self.dateFormatter = formatter
+        
+        // Convert string dates to Date objects
+        self.data = data.compactMap { (dateString, count) in
+            guard let date = formatter.date(from: dateString) else { return nil }
+            return (date: date, count: count)
+        }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Scan History")
+                .font(.headline)
+                .foregroundColor(.primary)
+            
+            if data.isEmpty {
+                Text("No scan history available")
+                    .frame(height: 200)
+            } else {
+                Chart {
+                    ForEach(data, id: \.date) { item in
+                        LineMark(
+                            x: .value("Date", item.date),
+                            y: .value("Count", item.count)
+                        )
+                        .interpolationMethod(.linear)
+                        
+                        PointMark(
+                            x: .value("Date", item.date),
+                            y: .value("Count", item.count)
+                        )
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .automatic) { value in
+                        if let date = value.as(Date.self) {
+                            AxisGridLine()
+                            AxisTick()
+                            AxisValueLabel {
+                                Text(date, format: .dateTime.day().month())
+                            }
+                        }
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks(position: .leading)
+                }
+                .chartLegend(position: .bottom, alignment: .center, spacing: 20)
+                .frame(height: 200)
+                .padding()
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(10)
+    }
+}
