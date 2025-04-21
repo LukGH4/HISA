@@ -10,11 +10,7 @@ Ensure the following software and hardware are available:
 - **Xcode 15+** ([Download Xcode](https://developer.apple.com/xcode/))
 - **Python 3.9+** ([Download Python](https://www.python.org/downloads/))
 - **Firebase Project** set up ([Firebase Console](https://console.firebase.google.com/))
-- **Apple Developer Program Membership** ([Join here](https://developer.apple.com/programs/))
-
-Optional (if testing backend deployment):
-- **ngrok** (for exposing localhost if needed) ([Download ngrok](https://ngrok.com/))
-
+- **Apple Developer Program Membership** ([Join here](https://developer.apple.com/programs/)) 
 ---
 
 ## Firebase Setup
@@ -53,7 +49,7 @@ Example Development Rules:
 }
 ```
 
-> ⚠️ Update rules to more secure settings before production!
+> ⚠️ Note: Update rules to more secure settings if making a production build!
 
 ---
 
@@ -88,9 +84,8 @@ Add Firebase to your iOS project through Swift Package Manager:
 
 - Clone this repository:
 ```bash
-git clone https://github.com/your-org/photo-classification-app.git
+git clone https://github.com/LukGH4/JIB-4338-HISA.git
 ```
-- Alternatively, download as a ZIP file from GitHub.
 
 ---
 
@@ -155,11 +150,6 @@ python app.py
 ```
 Server should start at `http://0.0.0.0:3333/`.
 
-Optional: If you want to test from your iPhone without deploying:
-```bash
-ngrok http 3333
-```
-Use the ngrok HTTPS URL in the iOS app.
 
 ### iOS App
 - Select a device and **Run** in Xcode.
@@ -172,16 +162,14 @@ Use the ngrok HTTPS URL in the iOS app.
 
 | Issue | Solution |
 | :---- | :------- |
-| Flask server error about SSL/TLS | Use HTTPS (ngrok) for real device testing or production deploy |
 | YOLO model not found | Ensure `yolov8n_trained.pt` is in backend root |
 | Firebase connection errors | Confirm `serviceAccountKey.json` is correct and database/storage rules are permissive |
-| Email sending errors | Ensure SMTP credentials are correctly filled, allow App Password access if Gmail is used |
-| App build fails | Check Firebase SDK is properly linked, fix bundle IDs |
+| App build fails | Check Firebase SDK is properly linked, and make sure to check if the bundle ID is correct |
 | iOS app cannot access Photos or Camera | Ensure proper permissions in `Info.plist` |
 
 ---
 
-## Publishing the iOS App
+## Publishing the iOS App (If needed)
 
 ### 1. Set Up App Store Connect
 - Create a new app in [App Store Connect](https://appstoreconnect.apple.com/).
@@ -193,10 +181,6 @@ Use the ngrok HTTPS URL in the iOS app.
 - Use **Product > Archive** to create a build.
 - Validate and Upload to App Store Connect.
 
-### 3. TestFlight Beta Testing (Recommended)
-- Enable TestFlight.
-- Invite internal or external testers.
-
 ### 4. Submit for Review
 - Complete App Store Review submission.
 - Respond to any issues flagged by Apple.
@@ -204,10 +188,3 @@ Use the ngrok HTTPS URL in the iOS app.
 
 > ⚡ **Note:**
 > Apps using Firebase/Auth must have a proper Privacy Policy linked in App Store metadata.
-
----
-
-# End of Install Guide
-
----
-
