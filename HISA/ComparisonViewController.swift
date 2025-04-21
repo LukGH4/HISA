@@ -13,15 +13,9 @@ class ComparisonViewController: UIViewController {
     private var loadingIndicator: UIActivityIndicatorView!
     private var hostingController: UIHostingController<ComparisonChartView>?
     private var headerView: UIView!
-    private var exportButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.navigationItem.title = "Part Comparison"
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
-        
-        addExportButton()
         
         view.backgroundColor = .systemBackground
         title = "Part Comparison"
@@ -111,17 +105,6 @@ class ComparisonViewController: UIViewController {
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
-    }
-    
-    private func shareFile(filePath: URL) {
-        let activityVC = UIActivityViewController(activityItems: [filePath], applicationActivities: nil)
-        activityVC.popoverPresentationController?.sourceView = self.view
-        present(activityVC, animated: true)
-    }
-    
-    @objc func exportButtonTapped() {
-        print("Export button tapped ✅")
-        showExportComparisonOptions()
     }
 
     private func fetchDataForPart(_ partName: String, completion: @escaping ([(date: Date, goodCount: Int, badCount: Int, confidence: Double)]) -> Void) {
@@ -347,66 +330,5 @@ struct ComparisonChartView: View {
             .padding(.vertical, 20)
         }
         .scrollIndicators(.hidden)
-    }
-}
-
-extension ComparisonViewController {
-
-    private func exportComparisonData(as format: String) {
-        var exportText = "Part Type,Date,Good Count,Bad Count,Failure Rate (%),Confidence (%)\n"
-
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-
-        for partName in selectedParts {
-            if let dataPoints = partsData[partName] {
-                for data in dataPoints {
-                    let dateString = dateFormatter.string(from: data.date)
-                    let failureRate = data.goodCount + data.badCount > 0 ? (Double(data.badCount) / Double(data.goodCount + data.badCount)) * 100 : 0
-                    let confidence = data.confidence * 100
-                    exportText += "\(partName),\(dateString),\(data.goodCount),\(data.badCount),\(String(format: "%.2f", failureRate)),\(String(format: "%.2f", confidence))\n"
-                }
-            }
-        }
-
-        let fileName = "Comparison_Data.\(format)"
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let filePath = documentsDirectory.appendingPathComponent(fileName)
-
-        switch format {
-        case "csv":
-            try? exportText.write(to: filePath, atomically: true, encoding: .utf8)
-        default:
-            return
-        }
-
-        shareFile(filePath: filePath)
-    }
-
-    private func showExportComparisonOptions() {
-        let alert = UIAlertController(title: "Export Comparison Data", message: "Choose a format", preferredStyle: .actionSheet)
-
-        alert.addAction(UIAlertAction(title: "Export as CSV", style: .default, handler: { _ in
-            self.exportComparisonData(as: "csv")
-        }))
-
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-
-        present(alert, animated: true)
-    }
-
-    private func addExportButton() {
-        exportButton = UIButton(type: .system)
-        exportButton.setTitle("Export", for: .normal)
-        exportButton.titleLabel?.font = .boldSystemFont(ofSize: 16)
-        exportButton.addTarget(self, action: #selector(exportButtonTapped), for: .touchUpInside)
-        exportButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(exportButton)
-
-        NSLayoutConstraint.activate([
-            exportButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            exportButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            exportButton.heightAnchor.constraint(equalToConstant: 30)
-        ])
     }
 }
