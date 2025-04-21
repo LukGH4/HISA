@@ -1,5 +1,7 @@
 # Honeywell ML Part Intake Scanning App
 
+## Version 1.0 Release
+
 ## Overview
 
 ### Problem Statement  
