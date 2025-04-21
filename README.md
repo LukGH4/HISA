@@ -1,82 +1,84 @@
 # Honeywell ML Part Intake Scanning App
 
-## Project Overview
+## Overview
 
-### Problem
-At Maintenance Repair & Overhaul centers, determining if a part is good or bad during intake is currently dependent on individual judgment, which are prone to human error, time-consuming, and inconsistent. Industries such as aerospace and construction require automated solutions for higher accuracy and efficiency.
+### Problem Statement  
+At Maintenance Repair & Overhaul (MRO) centers, the process of determining whether a part is in good condition or defective is currently reliant on manual human inspection. This results in inconsistencies, inefficiencies, and higher error rates, which are especially problematic in industries like aerospace and construction.
 
-### Solution
-Our AI-powered computer vision model scans and evaluates parts in real-time, enabling technicians to scan parts on intake and automatically classify them as "Good" or "Bad" as well as detect defects with high accuracy.
+### Solution  
+The Honeywell ML Part Intake Scanning App provides an AI-powered solution to automate part evaluation. By leveraging image classification through a YOLOv8-based machine learning model, the mobile app can classify parts in real-time as either **Good** or **Bad** directly during intake. The system also identifies specific defect types, aiding technicians and decision-makers in immediate analysis. This can integrate seamlessly into an industrial workflow and provide a solution for automating part intake scanning.
 
 ---
 
-## Key Features
+## Features
 
-### Machine Learning Integration
-- Real-time classification using a trained `YOLOv8` model.
-- Binary part status prediction: Good or Bad.
-- Defect detection performed through image classification
+### ML-Powered Real-Time Scanning
+- On-device part classification using a trained `YOLOv8` image classification model.
+- Binary evaluation: classifies parts as **Good** or **Bad**.
+- Defect detection via bounding box classification with confidence scoring.
 
-### Statistics & Insights
-- **Individual Part Statistics**
-  - View historical performance metrics, confidence scores, and failure distributions per part.
-  - Compare two or more parts graphically.
-- **Employee Scan Statistics**
-  - Each employee can access and analyze their own scan history.
-  - Managers view global trends, failure rates, and scan distributions across all employees.
+### Analytics & Statistics Dashboard
+- **Part Statistics:**
+  - Historical data tracking per part.
+  - Failure rate trends, confidence metrics, and defect breakdowns visualized in charts.
+  - Compare two or more parts side-by-side with visual data overlays.
+- **Employee Statistics:**
+  - Personal scan history and defect distribution insights.
+  - Global manager view with company-wide scan trends and failure rates.
+  - Filtering by name, part type, and date range.
 
 ### Alert System
-- Managers can define failure rate thresholds for parts.
-- Receive in-app and email notifications when thresholds are exceeded.
+- Threshold-based alerts for part failure rates.
+- Configurable warning thresholds set by managers.
+- Notifications via in-app banners and automated email alerts.
 
-### Manager & Employee Dashboards
-- Real-time scan activity feeds.
-- Enhanced account control, including permission and profile management.
-- Part type categorization and color-coded status indicators.
+### Role-Based Dashboards
+- **Manager Dashboard:**
+  - Live activity feed of employee scans and actions.
+  - Access to individual and aggregate performance insights.
+  - View and manage employee profiles and permissions.
+- **Employee Dashboard:**
+  - View personal scan history and profile.
+  - Track individual accuracy and scan patterns over time.
 
-### Data Exportation
-- Export scan history and statistics in CSV or PDF format.
-
-### UI Improvements
-- Organized containers for better navigation.
-- Color-coded failure indicators.
-- Employee and manager profile image support.
-- Fully styled and consistent user experience with `SwiftUI`.
+### Export & Reporting Tools
+- Export scan history and statistics in `.CSV` and `.PDF` formats.
+- Manager-level export options for internal reporting or audits.
 
 ---
 
 ## Known Issues
-- **UI Inconsistencies**: Minor layout bugs exist across devices.
-- **ML Accuracy Improvements**: Ongoing work needed to improve classification accuracy.
+
+- **UI Inconsistencies**: Some minor layout bugs persist across different screen sizes and iOS versions. These will be addressed in future UI polish updates.
+- **Model Accuracy**: While the YOLOv8 model performs well in controlled environments, further data is needed for robust performance across edge cases.
+- **Data Access Permissions**: Fine-grained access control is not yet fully implemented, but the framework is in place.
 
 ---
 
-## Documentation
+## Documentation & Resources
 
-### [Installation Guide](https://github.com/LukGH4/JIB-4338-HISA/blob/main/Installation%20Guide/Installation%20Guide.md)
+-  **[Installation Guide (Hosted on GitHub)](https://github.com/LukGH4/JIB-4338-HISA/blob/main/Installation%20Guide/Installation%20Guide.md)**  
+  Step-by-step guide for setting up and running the app on a supported iOS device.
 
-Step-by-step instructions to install and set up the app.
+-  **[Detailed Design Document (PDF)](https://github.com/LukGH4/JIB-4338-HISA/blob/main/Design%20Document/Design%20Document.pdf)**  
+  Architecture, feature breakdown, design rationale, and technical stack description.
 
-### [Detailed Design Document (PDF)](https://github.com/LukGH4/JIB-4338-HISA/blob/main/Design%20Document/Design%20Document.pdf)
+-  **Source Code Repository**  
+  Browse the full codebase, including ML model integration, frontend components, and backend API:  
+  [GitHub Repository](https://github.com/LukGH4/JIB-4338-HISA)
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Platform**: iOS (Tested on iOS 18.1)
-- **Languages**: Swift
-- **Frontend Frameworks**: `UIKit`, `SwiftUI`, `AVFoundation`
-- **ML Stack**: YOLOv8, Vision Framework
-- **Backend**: Flask API, Firebase Realtime DB & Firebase Storage
-
----
-
-## 🔮 Future Development
-
-- Full integration of CoreML and on-device model updates.
-- Enhanced feedback loop for model retraining.
-- Expand to Android for cross-platform support.
-- Advanced analytics dashboard for business insights.
-- Role-based access control and permissions refinement.
+- **Programming Language**: Swift
+- **Frontend Frameworks**: `SwiftUI`, `UIKit`, `AVFoundation`
+- **Machine Learning Stack**:
+  - `YOLOv8` (Ultralytics) for object detection and classification
+  - `CoreML` & `Vision Framework` for on-device inference (planned)
+- **Backend**:
+  - `Flask API` for image processing and ML model inference
+  - `Firebase Realtime Database` and `Firebase Storage` for scan storage and metadata
 
 ---
