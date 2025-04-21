@@ -1,4 +1,4 @@
-# Install Guide for Photo/Video Classification App
+# Install Guide for Intake Scanning App
 
 ---
 
