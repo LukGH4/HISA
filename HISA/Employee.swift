@@ -28,6 +28,17 @@ struct Employee {
     var videoScans: [Scan] {
         return scanHistory.filter { $0.url.contains("/videos/") }
     }
+    
+    var failureRate: Double {
+        let totalScans = scanHistory.count
+        guard totalScans > 0 else { return 0.0 } // assume 0% failure if no scans
+        
+        let failedScans = scanHistory.filter {
+            ($0.status?.lowercased() ?? "") == "bad part"
+        }.count
+        
+        return Double(failedScans) / Double(totalScans)
+    }
 
     init?(id: String, data: [String: Any]) {
         guard let name = data["name"] as? String,

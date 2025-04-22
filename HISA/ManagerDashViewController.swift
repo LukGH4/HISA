@@ -19,6 +19,7 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
     var filteredEmployees: [Employee] = []
     let databaseRef = Database.database().reference().child("users/employees")
     let imageCache = NSCache<NSString, UIImage>()
+    var activeFilter: String? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,6 +41,7 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
         view.bringSubviewToFront(filterButton)
 
         fetchEmployees()
+        updateFilterButtonAppearance()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
@@ -57,10 +59,15 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
             self.sortEmployees(by: "scans")
         }))
         
+        alert.addAction(UIAlertAction(title: "Sort by Failure Rate", style: .default, handler: { _ in
+            self.sortEmployees(by: "failureRate")
+        }))
+        
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
         present(alert, animated: true, completion: nil)
     }
+
 
     private func fetchEmployees() {
         databaseRef.observeSingleEvent(of: .value) { snapshot in
@@ -75,13 +82,35 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
     }
 
     private func sortEmployees(by criteria: String) {
+        activeFilter = criteria
+        updateFilterButtonAppearance()
         if criteria == "name" {
             filteredEmployees.sort { $0.name.lowercased() < $1.name.lowercased() }
         } else if criteria == "scans" {
             filteredEmployees.sort { $0.scans > $1.scans }
+        } else if criteria == "failureRate" {
+            filteredEmployees.sort {
+                ($0.failureRate) > ($1.failureRate)
+            }
         }
         tableView.reloadData()
     }
+    
+    private func updateFilterButtonAppearance() {
+        if activeFilter == nil || activeFilter == "name" {
+            // Default filter: Name -> no highlight
+            filterButton.tintColor = .systemBlue
+            filterButton.setTitleColor(.systemBlue, for: .normal)
+        } else {
+            // Other filters -> highlight orange
+            filterButton.tintColor = .systemOrange
+            filterButton.setTitleColor(.systemOrange, for: .normal)
+        }
+        
+        filterButton.setTitleColor(.white, for: .normal)
+        filterButton.layer.cornerRadius = 8
+    }
+
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
@@ -112,14 +141,19 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let employee = filteredEmployees[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "EmployeeCell", for: indexPath) as! EmployeeTableViewCell
+        
         cell.nameLabel.text = employee.name
         cell.scansLabel.text = "Number of scans: \(employee.scans)"
+        
+        // New line for failure rate
+        let failurePercentage = Int(employee.failureRate * 100)
+        cell.failureRateLabel.text = "Failure: \(failurePercentage)%"
+        
         cell.profileImageView.image = UIImage(named: "defaultProfileImage")
 
         if let profileImageUrl = employee.profileImageUrl, let url = URL(string: profileImageUrl) {
             let cacheKey = NSString(string: profileImageUrl)
             
-            // Image caching
             if let cachedImage = imageCache.object(forKey: cacheKey) {
                 cell.profileImageView.image = cachedImage
             } else {
@@ -135,8 +169,10 @@ class ManagerDashViewController: UIViewController, UITableViewDataSource, UITabl
                 }.resume()
             }
         }
+        
         return cell
     }
+
 
 
 
