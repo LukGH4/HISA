@@ -188,7 +188,7 @@ class ScanViewController: UIViewController, AVCapturePhotoCaptureDelegate, AVCap
         
         if !isRecording {
             startRecording()
-            let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .regular)
+            let config = UIImage.SymbolConfiguration(pointSize: 25, weight: .regular)
             let stopImage = UIImage(systemName: "stop.circle", withConfiguration: config)
             recordButton.setImage(stopImage, for: .normal)
             recordToggleButton.isHidden = true

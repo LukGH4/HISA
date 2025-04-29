@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Scan list.png",
+      "filename" : "4781852_burger_line_list_menu_nav_icon.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "4781852_burger_line_list_menu_nav_icon (1).png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "4781852_burger_line_list_menu_nav_icon (2).png",
       "idiom" : "universal",
       "scale" : "3x"
     }
