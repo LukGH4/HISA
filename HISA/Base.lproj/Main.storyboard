@@ -127,7 +127,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qqm-4D-b62">
-                                <rect key="frame" x="164" y="592" width="62" height="44"/>
+                                <rect key="frame" x="165" y="592" width="62" height="44"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="record.circle" catalog="system">
@@ -139,7 +139,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3bG-HF-D6t">
-                                <rect key="frame" x="161" y="591" width="69" height="43"/>
+                                <rect key="frame" x="162" y="591" width="69" height="43"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="camera" catalog="system">
@@ -1346,9 +1346,9 @@
     </inferredMetricsTieBreakers>
     <color key="tintColor" systemColor="tintColor"/>
     <resources>
-        <image name="Capture Button" width="64" height="64"/>
-        <image name="Record Button" width="64" height="64"/>
-        <image name="Scan list" width="48" height="48"/>
+        <image name="Capture Button" width="42.666667938232422" height="42.666667938232422"/>
+        <image name="Record Button" width="42.666667938232422" height="42.666667938232422"/>
+        <image name="Scan list" width="42.666667938232422" height="42.666667938232422"/>
         <image name="arrowgrey" width="512" height="512"/>
         <image name="camera" catalog="system" width="128" height="93"/>
         <image name="checkmark.circle.fill" catalog="system" width="128" height="123"/>
@@ -1362,7 +1362,7 @@
         <image name="play.circle" catalog="system" width="128" height="123"/>
         <image name="record.circle" catalog="system" width="128" height="123"/>
         <image name="refre" width="128" height="128"/>
-        <image name="return arrow" width="48" height="48"/>
+        <image name="return arrow" width="42.666667938232422" height="42.666667938232422"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

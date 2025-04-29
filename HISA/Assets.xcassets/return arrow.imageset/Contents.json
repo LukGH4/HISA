@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "return arrow.png",
+      "filename" : "11685651_return_arrow_ui_back_left_icon.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "11685651_return_arrow_ui_back_left_icon (1).png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "11685651_return_arrow_ui_back_left_icon (2).png",
       "idiom" : "universal",
       "scale" : "3x"
     }
