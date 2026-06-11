@@ -5,7 +5,10 @@
 *.xcuserstate
 *.xcuserdata/
 
-*./HISA/GoogleService-Info.plist
+GoogleService-Info.plist
+mapping.json
+HISA.xcodeproj/xcuserdata/
+backend/jib-4338-hisa-firebase-adminsdk-c9uu0-6b2a83c10a.json
 
 HISA.xcodeproj/project.xcworkspace/xcuserdata/lukehammond.xcuserdatad
 MLTraining

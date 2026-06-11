@@ -1,4 +1,4 @@
-# Honeywell ML Part Intake Scanning App
+# ML Part Intake Scanning App
 
 ## Version 1.0 Release
 
@@ -8,7 +8,7 @@
 At Maintenance Repair & Overhaul (MRO) centers, the process of determining whether a part is in good condition or defective is currently reliant on manual human inspection. This results in inconsistencies, inefficiencies, and higher error rates, which are especially problematic in industries like aerospace and construction.
 
 ### Solution  
-The Honeywell ML Part Intake Scanning App provides an AI-powered solution to automate part evaluation. By leveraging image classification through a YOLOv8-based machine learning model, the mobile app can classify parts in real-time as either **Good** or **Bad** directly during intake. The system also identifies specific defect types, aiding technicians and decision-makers in immediate analysis. This can integrate seamlessly into an industrial workflow and provide a solution for automating part intake scanning.
+The ML Part Intake Scanning App provides an AI-powered solution to automate part evaluation. By leveraging image classification through a YOLOv8-based machine learning model, the mobile app can classify parts in real-time as either **Good** or **Bad** directly during intake. The system also identifies specific defect types, aiding technicians and decision-makers in immediate analysis. This can integrate seamlessly into an industrial workflow and provide a solution for automating part intake scanning.
 
 ---
 
@@ -59,10 +59,10 @@ The Honeywell ML Part Intake Scanning App provides an AI-powered solution to aut
 
 ## Documentation & Resources
 
--  **[Installation Guide (Hosted on GitHub)](https://github.com/LukGH4/JIB-4338-HISA/blob/main/Installation%20Guide/Installation%20Guide.md)**  
+-  **[Installation Guide (Hosted on GitHub)](https://github.com/LukGH4/HISA/blob/main/Installation%20Guide/Installation%20Guide.md)**  
   Step-by-step guide for setting up and running the app on a supported iOS device.
 
--  **[Detailed Design Document (PDF)](https://github.com/LukGH4/JIB-4338-HISA/blob/main/Design%20Document/Design%20Document.pdf)**  
+-  **[Detailed Design Document (PDF)](https://github.com/LukGH4/HISA/blob/main/Design%20Document/Design%20Document.pdf)**  
   Architecture, feature breakdown, design rationale, and technical stack description.
 
 -  **Source Code Repository**  

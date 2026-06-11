@@ -19,8 +19,8 @@ app = Flask(__name__)
 
 cred = credentials.Certificate("jib-4338-hisa-firebase-adminsdk-c9uu0-6b2a83c10a.json")
 firebase_admin.initialize_app(cred, {
-    'storageBucket': 'jib-4338-hisa.firebasestorage.app',
-    'databaseURL': 'https://jib-4338-hisa-default-rtdb.firebaseio.com/'
+    'storageBucket': 'temp.firebasestorage.app',
+    'databaseURL': 'https://temp-default-rtdb.firebaseio.com/'
 })
 
 UPLOAD_FOLDER = "uploads"
@@ -89,7 +89,7 @@ def upload_file():
     blob = bucket.blob(storage_path)
     blob.upload_from_filename(file_path)
 
-    firebase_url = f"https://firebasestorage.googleapis.com/v0/b/jib-4338-hisa.firebasestorage.app/o/{storage_path.replace('/', '%2F')}?alt=media"
+    firebase_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{storage_path.replace('/', '%2F')}?alt=media"
 
     save_to_firebase(user_id, filename, firebase_url, status, classification, confidence, part_type)
     os.remove(file_path)
