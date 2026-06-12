@@ -67,7 +67,7 @@ The ML Part Intake Scanning App provides an AI-powered solution to automate part
 
 -  **Source Code Repository**  
   Browse the full codebase, including ML model integration, frontend components, and backend API:  
-  [GitHub Repository](https://github.com/LukGH4/JIB-4338-HISA)
+  [GitHub Repository](https://github.com/LukGH4/HISA)
 
 ---
 
